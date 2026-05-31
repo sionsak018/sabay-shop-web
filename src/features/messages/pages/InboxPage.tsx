@@ -4,6 +4,7 @@ import { useAuth } from '../../auth/hooks/useAuth';
 import { messageApi } from '../services/messageApi';
 import { type Message } from '../types/message.types';
 import { Link, useNavigate } from 'react-router-dom';
+import { getImageUrl } from '../../../utils/imageUrl';
 
 export const InboxPage = () => {
   const { user } = useAuth();
@@ -52,7 +53,7 @@ export const InboxPage = () => {
     if (Notification.permission === 'granted') {
       new Notification(`New message from ${msg.from_user.name}`, {
         body: msg.message,
-        icon: msg.from_user.avatar ? `http://127.0.0.1:8000/storage/${msg.from_user.avatar}` : '/favicon.ico'
+        icon: getImageUrl(msg.from_user.avatar, '/favicon.ico')
       });
     }
   };
@@ -268,7 +269,7 @@ export const InboxPage = () => {
                   <div className="relative shrink-0">
                     <div className={`w-14 h-14 rounded-full flex items-center justify-center text-xl font-black shadow-inner border-2 ${isActive ? 'bg-blue-500 border-blue-400 text-white' : 'bg-gray-100 border-white text-blue-600'}`}>
                        {partner.avatar ? (
-                         <img src={`http://127.0.0.1:8000/storage/${partner.avatar}`} className="w-full h-full object-cover rounded-full" />
+                         <img src={getImageUrl(partner.avatar)} className="w-full h-full object-cover rounded-full" />
                        ) : partner.name.charAt(0).toUpperCase()}
                     </div>
                     <div className={`absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full border-2 border-white bg-green-500 ${isActive ? 'border-blue-600' : ''}`} />
@@ -314,7 +315,7 @@ export const InboxPage = () => {
                   <div className="relative cursor-pointer" onClick={() => navigate(`/u/${selectedConversation.partner.id}`)}>
                     <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-black text-sm border-2 border-white shadow-sm overflow-hidden">
                        {selectedConversation.partner.avatar ? (
-                         <img src={`http://127.0.0.1:8000/storage/${selectedConversation.partner.avatar}`} className="w-full h-full object-cover" />
+                         <img src={getImageUrl(selectedConversation.partner.avatar)} className="w-full h-full object-cover" />
                        ) : selectedConversation.partner.name.charAt(0).toUpperCase()}
                     </div>
                     <div className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-green-500 border-2 border-white" />
@@ -379,13 +380,13 @@ export const InboxPage = () => {
                           }`}>
                             {msg.type === 'text' && msg.message}
                             {msg.type === 'image' && (
-                                <img src={`http://127.0.0.1:8000/storage/${msg.file_path}`} className="max-w-full rounded-lg mb-1" />
+                                <img src={getImageUrl(msg.file_path)} className="max-w-full rounded-lg mb-1" />
                             )}
                             {msg.type === 'audio' && (
-                                <audio controls src={`http://127.0.0.1:8000/storage/${msg.file_path}`} className="max-w-full mb-1 h-10" />
+                                <audio controls src={getImageUrl(msg.file_path)} className="max-w-full mb-1 h-10" />
                             )}
                             {msg.type === 'file' && (
-                                <a href={`http://127.0.0.1:8000/storage/${msg.file_path}`} target="_blank" className="flex items-center gap-2 bg-black/5 p-2 rounded-lg hover:bg-black/10 transition-colors">
+                                <a href={getImageUrl(msg.file_path)} target="_blank" className="flex items-center gap-2 bg-black/5 p-2 rounded-lg hover:bg-black/10 transition-colors">
                                     <svg className="w-8 h-8 text-blue-500" fill="currentColor" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6zM6 20V4h7v5h7v11H6z"/></svg>
                                     <span className="truncate text-xs font-bold underline">{msg.message}</span>
                                 </a>

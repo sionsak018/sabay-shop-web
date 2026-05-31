@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import { profileApi } from '../../profile/services/profileApi';
 import { useAuth } from '../../auth/hooks/useAuth';
 
+import { getImageUrl } from '../../../utils/imageUrl';
+
 interface ProductCardProps {
   product: Product;
   onToggleFavorite?: (id: number) => void;
@@ -23,9 +25,7 @@ export const ProductCard = ({ product, onToggleFavorite, isFavorited: initialFav
     }
   }, [product.is_favorited, initialFavorited]);
 
-  const coverImage = product.images?.[0]?.image_url
-    ? `http://127.0.0.1:8000/storage/${product.images[0].image_url}`
-    : 'https://via.placeholder.com/400x300?text=No+Image';
+  const coverImage = getImageUrl(product.images?.[0]?.image_url);
 
   const price = typeof product.price === 'number' 
     ? product.price.toFixed(0)

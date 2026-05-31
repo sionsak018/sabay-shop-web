@@ -6,6 +6,7 @@ import { type Product } from '../../products/types/product.types';
 import { ProductCard } from '../../products/components/ProductCard';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import api from '../../../services/api';
+import { getImageUrl } from '../../../utils/imageUrl';
 
 export const ProfilePage = () => {
   const { user, updateUser, logout } = useAuth();
@@ -185,7 +186,7 @@ export const ProfilePage = () => {
         {/* Cover Photo */}
         <div className="relative h-48 md:h-64 bg-gray-100 group">
           <img
-            src={user.cover_photo ? `http://127.0.0.1:8000/storage/${user.cover_photo}` : 'https://images.unsplash.com/photo-1557683316-973673baf926?q=80&w=2000'}
+            src={getImageUrl(user.cover_photo, 'https://images.unsplash.com/photo-1557683316-973673baf926?q=80&w=2000')}
             className="w-full h-full object-cover"
             alt="Cover"
           />
@@ -206,7 +207,7 @@ export const ProfilePage = () => {
             <div className="relative group">
               <div className="w-32 h-32 md:w-36 md:h-36 rounded-full bg-blue-600 flex items-center justify-center text-white text-5xl font-black border-[6px] border-white shadow-xl overflow-hidden relative">
                 {user.avatar ? (
-                  <img src={`http://127.0.0.1:8000/storage/${user.avatar}`} className="w-full h-full object-cover" />
+                  <img src={getImageUrl(user.avatar)} className="w-full h-full object-cover" />
                 ) : (
                   user.name.charAt(0).toUpperCase()
                 )}
@@ -435,7 +436,7 @@ export const ProfilePage = () => {
                     <div key={p.id} className="p-4 md:p-5 flex flex-col sm:flex-row gap-4 items-center hover:bg-gray-50/50 transition-colors group">
                        <div className="w-20 h-20 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0 border border-gray-200 shadow-sm relative">
                             <img
-                                src={p.images && p.images.length > 0 ? `http://127.0.0.1:8000/storage/${p.images[0].image_url}` : 'https://via.placeholder.com/100?text=No+Image'}
+                                src={getImageUrl(p.images?.[0]?.image_url)}
                                 className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                                 alt={p.title}
                             />
@@ -566,7 +567,7 @@ export const ProfilePage = () => {
                                 <div key={u.id} className="p-4 flex items-center justify-between hover:bg-gray-50 transition-colors cursor-pointer" onClick={() => navigate(`/u/${u.id}`)}>
                                     <div className="flex items-center gap-4">
                                         <div className="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center text-white font-black overflow-hidden border border-gray-100">
-                                            {u.avatar ? <img src={`http://127.0.0.1:8000/storage/${u.avatar}`} className="w-full h-full object-cover" /> : u.name.charAt(0).toUpperCase()}
+                                            {u.avatar ? <img src={getImageUrl(u.avatar)} className="w-full h-full object-cover" /> : u.name.charAt(0).toUpperCase()}
                                         </div>
                                         <div>
                                             <p className="font-bold text-gray-800 text-sm">{u.name}</p>

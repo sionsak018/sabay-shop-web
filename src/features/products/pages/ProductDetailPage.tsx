@@ -7,6 +7,8 @@ import { type Product } from '../types/product.types';
 import { useAuth } from '../../auth/context/AuthContext';
 import { MapView } from '../../../components/common/MapView';
 
+import { getImageUrl } from '../../../utils/imageUrl';
+
 // Toast UI Viewer
 import '@toast-ui/editor/dist/toastui-editor-viewer.css';
 import { Viewer } from '@toast-ui/react-editor';
@@ -107,7 +109,7 @@ export const ProductDetailPage = () => {
   }
 
   const images = product.images?.length > 0
-    ? product.images.map((img: any) => `http://127.0.0.1:8000/storage/${img.image_url}`)
+    ? product.images.map((img: any) => getImageUrl(img.image_url))
     : ['https://via.placeholder.com/800x600?text=No+Image'];
 
   const mainCategory = product.category?.parent || product.category;
@@ -333,7 +335,7 @@ export const ProductDetailPage = () => {
                 <div className="flex items-center gap-4 mb-6">
                   <Link to={`/u/${product.seller?.id}`} className="w-16 h-16 rounded-full bg-blue-600 flex items-center justify-center text-white text-2xl font-black border-4 border-[#f1f2f6] shadow-inner overflow-hidden flex-shrink-0">
                     {product.seller?.avatar ? (
-                        <img src={`http://127.0.0.1:8000/storage/${product.seller.avatar}`} className="w-full h-full object-cover" />
+                        <img src={getImageUrl(product.seller.avatar)} className="w-full h-full object-cover" />
                     ) : (
                         (product.poster_name || product.seller?.name || '?').charAt(0).toUpperCase()
                     )}

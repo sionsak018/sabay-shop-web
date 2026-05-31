@@ -5,6 +5,7 @@ import { ProductCard } from '../components/ProductCard';
 import { categoryApi } from '../../categories/services/categoryApi';
 import { type Category } from '../../categories/types/category.types';
 import api from '../../../services/api';
+import { getImageUrl } from '../../../utils/imageUrl';
 
 interface LocalFilters {
   min_price: string;
@@ -15,7 +16,7 @@ interface LocalFilters {
 
 const CategoryIcon = ({ cat, className = "" }: { cat: Category, className?: string }) => {
   if (cat.image_url) {
-    return <img src={`http://127.0.0.1:8000/storage/${cat.image_url}`} className={`object-contain ${className}`} alt={cat.name} />;
+    return <img src={getImageUrl(cat.image_url)} className={`object-contain ${className}`} alt={cat.name} />;
   }
   return (
     <div className={className}>
