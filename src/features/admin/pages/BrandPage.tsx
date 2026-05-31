@@ -41,7 +41,7 @@ export const BrandPage = () => {
         slug: brand.slug,
         category_id: String(brand.category_id || '')
       });
-      setImagePreview(brand.image_url ? getImageUrl(brand.image_url) : null);
+      setImagePreview(brand.image_url ? `http://127.0.0.1:8000/storage/${brand.image_url}` : null);
     } else {
       setEditingBrand(null);
       setFormData({ name: '', slug: '', category_id: '' });
@@ -117,7 +117,7 @@ export const BrandPage = () => {
                 <td className="px-6 py-4">
                   <div className="w-10 h-10 rounded bg-gray-100 overflow-hidden">
                     {brand.image_url ? (
-                      <img src={getImageUrl(brand.image_url)} className="w-full h-full object-cover" />
+                      <img src={`http://127.0.0.1:8000/storage/${brand.image_url}`} className="w-full h-full object-cover" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-gray-400 text-[10px]">No img</div>
                     )}

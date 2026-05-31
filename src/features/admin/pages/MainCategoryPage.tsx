@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
 import { categoryApi } from '../../categories/services/categoryApi';
 import { type Category } from '../../categories/types/category.types';
+import { getImageUrl } from '../../../utils/imageUrl';
 
 export const MainCategoryPage = () => {
   const [categories, setCategories] = useState<Category[]>([]);
@@ -41,7 +41,7 @@ export const MainCategoryPage = () => {
     if (category) {
       setEditingCategory(category);
       setFormData({ name: category.name, slug: category.slug });
-      setImagePreview(category.image_url ? `http://127.0.0.1:8000/storage/${category.image_url}` : null);
+      setImagePreview(category.image_url ? getImageUrl(category.image_url) : null);
     } else {
       setEditingCategory(null);
       setFormData({ name: '', slug: '' });
@@ -128,7 +128,7 @@ export const MainCategoryPage = () => {
                 <td className="px-6 py-4">
                   <div className="w-10 h-10 rounded bg-gray-100 overflow-hidden">
                     {cat.image_url ? (
-                      <img src={`http://127.0.0.1:8000/storage/${cat.image_url}`} className="w-full h-full object-cover" />
+                      <img src={getImageUrl(cat.image_url)} className="w-full h-full object-cover" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs">No img</div>
                     )}

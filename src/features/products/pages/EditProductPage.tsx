@@ -7,6 +7,7 @@ import api from '../../../services/api';
 import { MapPickerModal } from '../../../components/common/MapPickerModal';
 import { LocationPickerModal } from '../../../components/common/LocationPickerModal';
 import { MapView } from '../../../components/common/MapView';
+import { getImageUrl } from '../../../utils/imageUrl';
 
 // Toast UI Editor
 import '@toast-ui/editor/dist/toastui-editor.css';
@@ -276,7 +277,7 @@ export const EditProductPage = () => {
               <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-4">
                 {existingImages.map((img, idx) => (
                   <div key={`exist-${idx}`} className="relative aspect-square rounded-xl overflow-hidden border-2 border-gray-100 group shadow-sm opacity-80">
-                    <img src={`http://127.0.0.1:8000/storage/${img.image_url}`} className="w-full h-full object-cover" />
+                    <img src={getImageUrl(img.image_url)} className="w-full h-full object-cover" />
                   </div>
                 ))}
                 {previews.map((src, idx) => (

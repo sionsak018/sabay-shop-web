@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
 import { productSpecApi, type BodyType } from '../services/productSpecApi';
+import { getImageUrl } from '../../../utils/imageUrl';
 
 export const BodyTypePage = () => {
   const [bodyTypes, setBodyTypes] = useState<BodyType[]>([]);
@@ -29,7 +29,7 @@ export const BodyTypePage = () => {
     if (bt) {
       setEditingBodyType(bt);
       setFormData({ name: bt.name, slug: bt.slug });
-      setImagePreview(bt.image_url ? `http://127.0.0.1:8000/storage/${bt.image_url}` : null);
+      setImagePreview(bt.image_url ? getImageUrl(bt.image_url) : null);
     } else {
       setEditingBodyType(null);
       setFormData({ name: '', slug: '' });
@@ -104,7 +104,7 @@ export const BodyTypePage = () => {
                 <td className="px-6 py-4">
                   <div className="w-10 h-10 rounded bg-gray-100 overflow-hidden">
                     {bt.image_url ? (
-                      <img src={`http://127.0.0.1:8000/storage/${bt.image_url}`} className="w-full h-full object-cover" />
+                      <img src={getImageUrl(bt.image_url)} className="w-full h-full object-cover" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-gray-400 text-[10px]">No img</div>
                     )}
