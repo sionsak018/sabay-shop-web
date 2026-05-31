@@ -198,9 +198,12 @@ export const CreateProductPage = () => {
     submitForm.set('description', description);
     submitForm.append('attributes', JSON.stringify(attributeValues));
 
-    images.forEach((img) => {
-      submitForm.append('images[]', img);
-    });
+    // Fix: Explicitly append each image to 'images[]'
+    if (images.length > 0) {
+      images.forEach((img) => {
+        submitForm.append('images[]', img);
+      });
+    }
 
     try {
       await productApi.create(submitForm);
