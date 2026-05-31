@@ -1,0 +1,224 @@
+import React, { useState, useEffect } from 'react';
+import api from '../../../services/api';
+import { AdminPagination } from '../components/AdminPagination';
+
+export const CommunePage = () => {
+  const [communes, setCommunes] = useState<any[]>([]);
+  const [provinces, setProvinces] = useState<any[]>([]);
+  const [districts, setDistricts] = useState<any[]>([]); // Current filtered or fetched districts
+  const [allDistricts, setAllDistricts] = useState<any[]>([]); // For table display lookup
+  const [loading, setLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingCommune, setEditingCommune] = useState<any | null>(null);
+  const [formData, setFormData] = useState({ name: '', code: '', district_id: '', province_id: '' });
+
+  // Pagination & Search
+  const [pagination, setPagination] = useState({ currentPage: 1, lastPage: 1, total: 0 });
+  const [searchTerm, setSearchTerm] = useState('');
+
+  const fetchData = async (page = 1, search = '') => {
+    setLoading(true);
+    try {
+      const [comRes, distRes, provRes] = await Promise.all([
+        api.get(`/admin/communes?page=${page}&search=${search}`),
+        api.get('/admin/districts?per_page=1000'),
+        api.get('/admin/provinces?per_page=100')
+      ]);
+
+      const comData = comRes.data;
+      setCommunes(comData.data || []);
+      setPagination({
+        currentPage: comData.current_page,
+        lastPage: comData.last_page,
+        total: comData.total
+      });
+
+      setAllDistricts(distRes.data.data || distRes.data || []);
+      setProvinces(provRes.data.data || provRes.data || []);
+    } catch (error) {
+      console.error('Failed to fetch commune data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    fetchData(1, searchTerm);
+  };
+
+  const handlePageChange = (page: number) => {
+    fetchData(page, searchTerm);
+  };
+
+  // Sync districts dropdown when province changes
+  useEffect(() => {
+    if (formData.province_id) {
+      const filtered = allDistricts.filter(d => String(d.province_id) === String(formData.province_id));
+      setDistricts(filtered);
+    } else {
+      setDistricts([]);
+    }
+  }, [formData.province_id, allDistricts]);
+
+  const handleOpenModal = (commune: any | null = null) => {
+    if (commune) {
+      const district = allDistricts.find(d => String(d.id) === String(commune.district_id));
+      setEditingCommune(commune);
+      setFormData({
+        name: commune.name,
+        code: commune.code,
+        district_id: String(commune.district_id),
+        province_id: String(district?.province_id || '')
+      });
+    } else {
+      setEditingCommune(null);
+      setFormData({
+        name: '',
+        code: '',
+        district_id: '',
+        province_id: ''
+      });
+    }
+    setIsModalOpen(true);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      if (editingCommune) {
+        await api.put(`/admin/communes/${editingCommune.id}`, formData);
+      } else {
+        await api.post('/admin/communes', formData);
+      }
+      setIsModalOpen(false);
+      fetchData(pagination.currentPage, searchTerm);
+    } catch (error) {
+      alert('Failed to save commune');
+    }
+  };
+
+  const handleDelete = async (id: number) => {
+    if (window.confirm('Are you sure?')) {
+      try {
+        await api.delete(`/admin/communes/${id}`);
+        fetchData(pagination.currentPage, searchTerm);
+      } catch (error) {
+        alert('Failed to delete');
+      }
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+            <h1 className="text-2xl font-bold text-gray-800 tracking-tight">Commune Management</h1>
+            <p className="text-sm text-gray-500 font-bold uppercase tracking-widest mt-1">Found {pagination.total} Communes</p>
+        </div>
+        <div className="flex items-center gap-3">
+            <form onSubmit={handleSearch} className="relative group">
+                <input
+                    type="text"
+                    placeholder="Search commune..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="bg-white border border-gray-200 px-10 py-2 rounded-lg text-sm font-bold outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all w-64 shadow-sm"
+                />
+                <svg className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+            </form>
+            <button onClick={() => handleOpenModal()} className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg font-black text-xs shadow-lg shadow-blue-600/20 flex items-center gap-2 transition active:scale-95 uppercase tracking-widest">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4"/></svg>
+                Add Commune
+            </button>
+        </div>
+      </div>
+
+      <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden flex flex-col">
+        <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+            <thead className="bg-gray-50 border-b border-gray-100">
+                <tr>
+                <th className="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Name</th>
+                <th className="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">District</th>
+                <th className="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Province</th>
+                <th className="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">Actions</th>
+                </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-50">
+                {loading ? (
+                <tr><td colSpan={4} className="px-6 py-12 text-center text-gray-400 font-bold uppercase animate-pulse">Loading...</td></tr>
+                ) : communes.length === 0 ? (
+                <tr><td colSpan={4} className="px-6 py-12 text-center text-gray-400 font-bold uppercase">No communes found</td></tr>
+                ) : communes.map((c) => {
+                const district = allDistricts.find(d => String(d.id) === String(c.district_id));
+                const province = provinces.find(p => String(p.id) === String(district?.province_id));
+
+                return (
+                    <tr key={c.id} className="hover:bg-gray-50 transition-colors">
+                    <td className="px-6 py-4 text-sm font-black text-gray-800">{c.name}</td>
+                    <td className="px-6 py-4 text-sm text-gray-500 font-bold">{district?.name || 'N/A'}</td>
+                    <td className="px-6 py-4"><span className="px-2.5 py-1 bg-blue-50 text-blue-600 rounded text-[10px] font-black uppercase tracking-tight border border-blue-100">{province?.name || 'N/A'}</span></td>
+                    <td className="px-6 py-4 text-right space-x-2">
+                        <button onClick={() => handleOpenModal(c)} className="p-2 text-blue-600 hover:bg-blue-50 rounded-md transition"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-5M18.364 5.364a2.121 2.121 0 013 3L12 18l-4 1 1-4 9.364-9.364z"/></svg></button>
+                        <button onClick={() => handleDelete(c.id)} className="p-2 text-red-600 hover:bg-red-50 rounded-md transition"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>
+                    </td>
+                    </tr>
+                );
+                })}
+            </tbody>
+            </table>
+        </div>
+        <AdminPagination
+            currentPage={pagination.currentPage}
+            lastPage={pagination.lastPage}
+            total={pagination.total}
+            onPageChange={handlePageChange}
+        />
+      </div>
+
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
+            <div className="bg-gray-50 px-6 py-4 border-b flex justify-between items-center">
+              <h2 className="text-sm font-bold text-gray-800 uppercase tracking-widest">{editingCommune ? 'Edit Commune' : 'New Commune'}</h2>
+              <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-gray-600"><svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12"/></svg></button>
+            </div>
+            <form onSubmit={handleSubmit} className="p-6 space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Province</label>
+                <select required value={formData.province_id} onChange={(e) => setFormData({ ...formData, province_id: e.target.value, district_id: '' })} className="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm font-bold outline-none bg-white">
+                  <option value="">Select Province</option>
+                  {provinces.map(p => <option key={p.id} value={String(p.id)}>{p.name}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-gray-400 uppercase mb-1">District</label>
+                <select required value={formData.district_id} onChange={(e) => setFormData({ ...formData, district_id: e.target.value })} className="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm font-bold outline-none bg-white">
+                  <option value="">Select District</option>
+                  {districts.map(d => <option key={d.id} value={String(d.id)}>{d.name}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Commune Name</label>
+                <input type="text" required value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm font-bold outline-none focus:border-blue-500" placeholder="e.g. Boeng Keng Kang I" />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Code</label>
+                <input type="text" required value={formData.code} onChange={(e) => setFormData({ ...formData, code: e.target.value })} className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm font-medium outline-none focus:border-blue-500" placeholder="e.g. BKK1" />
+              </div>
+              <div className="pt-4 flex gap-3">
+                <button type="button" onClick={() => setIsModalOpen(false)} className="flex-1 px-4 py-2.5 bg-gray-100 text-gray-600 rounded-lg font-bold text-sm">Cancel</button>
+                <button type="submit" className="flex-1 px-4 py-2.5 bg-blue-600 text-white rounded-lg font-bold text-sm shadow-lg shadow-blue-600/20">{editingCommune ? 'Update' : 'Create'}</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};

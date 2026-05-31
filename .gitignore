@@ -1,0 +1,20 @@
+# Redundant safety for Frontend
+node_modules
+dist
+dist-ssr
+build
+.vite
+.cache
+.eslintcache
+*.log
+
+# Secrets
+.env
+.env.*
+!.env.example
+*.local
+
+# IDE
+.idea
+.vscode
+.DS_Store

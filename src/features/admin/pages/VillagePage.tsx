@@ -1,0 +1,248 @@
+import React, { useState, useEffect } from 'react';
+import api from '../../../services/api';
+import { AdminPagination } from '../components/AdminPagination';
+
+export const VillagePage = () => {
+  const [villages, setVillages] = useState<any[]>([]);
+  const [provinces, setProvinces] = useState<any[]>([]);
+  const [allDistricts, setAllDistricts] = useState<any[]>([]);
+  const [allCommunes, setAllCommunes] = useState<any[]>([]);
+
+  const [districts, setDistricts] = useState<any[]>([]);
+  const [communes, setCommunes] = useState<any[]>([]);
+
+  const [loading, setLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingVillage, setEditingVillage] = useState<any | null>(null);
+  const [formData, setFormData] = useState({ name: '', code: '', commune_id: '', district_id: '', province_id: '' });
+
+  // Pagination & Search
+  const [pagination, setPagination] = useState({ currentPage: 1, lastPage: 1, total: 0 });
+  const [searchTerm, setSearchTerm] = useState('');
+
+  const fetchData = async (page = 1, search = '') => {
+    setLoading(true);
+    try {
+      const [vilRes, comRes, distRes, provRes] = await Promise.all([
+        api.get(`/admin/villages?page=${page}&search=${search}`),
+        api.get('/admin/communes?per_page=1000'), // Get all for dropdowns
+        api.get('/admin/districts?per_page=1000'),
+        api.get('/admin/provinces?per_page=100')
+      ]);
+
+      const vilData = vilRes.data;
+      setVillages(vilData.data || []);
+      setPagination({
+        currentPage: vilData.current_page,
+        lastPage: vilData.last_page,
+        total: vilData.total
+      });
+
+      setAllCommunes(comRes.data.data || comRes.data || []);
+      setAllDistricts(distRes.data.data || distRes.data || []);
+      setProvinces(provRes.data.data || provRes.data || []);
+    } catch (error) {
+      console.error('Failed to fetch village data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    fetchData(1, searchTerm);
+  };
+
+  const handlePageChange = (page: number) => {
+    fetchData(page, searchTerm);
+  };
+
+  // Sync districts when province changes
+  useEffect(() => {
+    if (formData.province_id) {
+      setDistricts(allDistricts.filter(d => String(d.province_id) === String(formData.province_id)));
+    } else {
+      setDistricts([]);
+    }
+  }, [formData.province_id, allDistricts]);
+
+  // Sync communes when district changes
+  useEffect(() => {
+    if (formData.district_id) {
+      setCommunes(allCommunes.filter(c => String(c.district_id) === String(formData.district_id)));
+    } else {
+      setCommunes([]);
+    }
+  }, [formData.district_id, allCommunes]);
+
+  const handleOpenModal = (village: any | null = null) => {
+    if (village) {
+      const commune = allCommunes.find(c => String(c.id) === String(village.commune_id));
+      const district = allDistricts.find(d => String(d.id) === String(commune?.district_id));
+
+      setEditingVillage(village);
+      setFormData({
+        name: village.name,
+        code: village.code,
+        commune_id: String(village.commune_id),
+        district_id: String(commune?.district_id || ''),
+        province_id: String(district?.province_id || '')
+      });
+    } else {
+      setEditingVillage(null);
+      setFormData({ name: '', code: '', commune_id: '', district_id: '', province_id: '' });
+    }
+    setIsModalOpen(true);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      if (editingVillage) {
+        await api.put(`/admin/villages/${editingVillage.id}`, formData);
+      } else {
+        await api.post('/admin/villages', formData);
+      }
+      setIsModalOpen(false);
+      fetchData(pagination.currentPage, searchTerm);
+    } catch (error) {
+      alert('Failed to save village');
+    }
+  };
+
+  const handleDelete = async (id: number) => {
+    if (window.confirm('Are you sure?')) {
+      try {
+        await api.delete(`/admin/villages/${id}`);
+        fetchData(pagination.currentPage, searchTerm);
+      } catch (error) {
+        alert('Failed to delete');
+      }
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+            <h1 className="text-2xl font-bold text-gray-800 tracking-tight">Village Management</h1>
+            <p className="text-sm text-gray-500 font-bold uppercase tracking-widest mt-1">Found {pagination.total} Villages</p>
+        </div>
+        <div className="flex items-center gap-3">
+            <form onSubmit={handleSearch} className="relative group">
+                <input
+                    type="text"
+                    placeholder="Search village..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="bg-white border border-gray-200 px-10 py-2 rounded-lg text-sm font-bold outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all w-64 shadow-sm"
+                />
+                <svg className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+            </form>
+            <button onClick={() => handleOpenModal()} className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg font-black text-xs shadow-lg shadow-blue-600/20 flex items-center gap-2 transition active:scale-95 uppercase tracking-widest">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M12 4v16m8-8H4"/></svg>
+                New Village
+            </button>
+        </div>
+      </div>
+
+      <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden flex flex-col">
+        <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+            <thead className="bg-gray-50 border-b border-gray-100">
+                <tr>
+                <th className="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Village Name</th>
+                <th className="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Commune</th>
+                <th className="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">District</th>
+                <th className="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Province</th>
+                <th className="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">Actions</th>
+                </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-50">
+                {loading ? (
+                <tr><td colSpan={5} className="px-6 py-12 text-center text-gray-400 font-bold uppercase animate-pulse">Loading data...</td></tr>
+                ) : villages.length === 0 ? (
+                <tr><td colSpan={5} className="px-6 py-12 text-center text-gray-400 font-bold uppercase">No villages found</td></tr>
+                ) : villages.map((v) => {
+                const commune = allCommunes.find(c => String(c.id) === String(v.commune_id));
+                const district = allDistricts.find(d => String(d.id) === String(commune?.district_id));
+                const province = provinces.find(p => String(p.id) === String(district?.province_id));
+
+                return (
+                    <tr key={v.id} className="hover:bg-gray-50 transition-colors">
+                    <td className="px-6 py-4 text-sm font-black text-gray-800">{v.name}</td>
+                    <td className="px-6 py-4 text-sm text-gray-500 font-bold">{commune?.name || 'N/A'}</td>
+                    <td className="px-6 py-4 text-sm text-gray-500 font-bold">{district?.name || 'N/A'}</td>
+                    <td className="px-6 py-4"><span className="px-2.5 py-1 bg-blue-50 text-blue-600 rounded text-[10px] font-black uppercase tracking-tight border border-blue-100">{province?.name || 'N/A'}</span></td>
+                    <td className="px-6 py-4 text-right space-x-2">
+                        <button onClick={() => handleOpenModal(v)} className="p-2 text-blue-600 hover:bg-blue-50 rounded-md transition"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-5M18.364 5.364a2.121 2.121 0 013 3L12 18l-4 1 1-4 9.364-9.364z"/></svg></button>
+                        <button onClick={() => handleDelete(v.id)} className="p-2 text-red-600 hover:bg-red-50 rounded-md transition"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>
+                    </td>
+                    </tr>
+                );
+                })}
+            </tbody>
+            </table>
+        </div>
+        <AdminPagination
+            currentPage={pagination.currentPage}
+            lastPage={pagination.lastPage}
+            total={pagination.total}
+            onPageChange={handlePageChange}
+        />
+      </div>
+
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-md max-h-[90vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-200">
+            <div className="bg-gray-50 px-6 py-4 border-b flex justify-between items-center flex-shrink-0">
+              <h2 className="text-sm font-bold text-gray-800 uppercase tracking-widest">{editingVillage ? 'Edit Village' : 'New Village'}</h2>
+              <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-gray-600"><svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12"/></svg></button>
+            </div>
+            <div className="overflow-y-auto flex-1 custom-scrollbar">
+                <form onSubmit={handleSubmit} className="p-6 space-y-4">
+                <div>
+                    <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Province</label>
+                    <select required value={formData.province_id} onChange={(e) => setFormData({ ...formData, province_id: e.target.value, district_id: '', commune_id: '' })} className="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm font-bold outline-none bg-white">
+                    <option value="">Select Province</option>
+                    {provinces.map(p => <option key={p.id} value={String(p.id)}>{p.name}</option>)}
+                    </select>
+                </div>
+                <div>
+                    <label className="block text-xs font-bold text-gray-400 uppercase mb-1">District</label>
+                    <select required value={formData.district_id} onChange={(e) => setFormData({ ...formData, district_id: e.target.value, commune_id: '' })} className="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm font-bold outline-none bg-white">
+                    <option value="">Select District</option>
+                    {districts.map(d => <option key={d.id} value={String(d.id)}>{d.name}</option>)}
+                    </select>
+                </div>
+                <div>
+                    <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Commune</label>
+                    <select required value={formData.commune_id} onChange={(e) => setFormData({ ...formData, commune_id: e.target.value })} className="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm font-bold outline-none bg-white">
+                    <option value="">Select Commune</option>
+                    {communes.map(c => <option key={c.id} value={String(c.id)}>{c.name}</option>)}
+                    </select>
+                </div>
+                <div>
+                    <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Village Name</label>
+                    <input type="text" required value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm font-bold outline-none focus:border-blue-500" placeholder="e.g. Village 1" />
+                </div>
+                <div>
+                    <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Code</label>
+                    <input type="text" required value={formData.code} onChange={(e) => setFormData({ ...formData, code: e.target.value })} className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm font-medium outline-none focus:border-blue-500" placeholder="e.g. VIL1" />
+                </div>
+                </form>
+            </div>
+            <div className="p-6 bg-gray-50 border-t flex gap-3 flex-shrink-0">
+                <button type="button" onClick={() => setIsModalOpen(false)} className="flex-1 px-4 py-2.5 bg-white border border-gray-200 text-gray-600 rounded-lg font-bold text-sm">Cancel</button>
+                <button onClick={(e: any) => e.currentTarget.closest('.bg-white').querySelector('form').requestSubmit()} className="flex-1 px-4 py-2.5 bg-blue-600 text-white rounded-lg font-bold text-sm shadow-lg shadow-blue-600/20">{editingVillage ? 'Update' : 'Create'}</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
