@@ -390,7 +390,7 @@ export const CreateProductPage = () => {
         )}
 
         {step === 2 && (
-          <form onSubmit={handleSubmit} className="animate-in fade-in duration-500">
+          <form onSubmit={handleSubmit} noValidate className="animate-in fade-in duration-500">
 
             <div className="flex items-center justify-between mb-8">
                 <button type="button" onClick={() => setStep(1)} className="text-xs font-black text-blue-600 hover:underline flex items-center gap-1 uppercase tracking-widest">
@@ -461,7 +461,6 @@ export const CreateProductPage = () => {
                                 </label>
                                 {attr.type === 'select' ? (
                                     <select
-                                    required={!!attr.pivot.is_required}
                                     value={attributeValues[attr.id] || ''}
                                     onChange={e => {
                                         setAttributeValues({ ...attributeValues, [attr.id]: e.target.value });
@@ -475,7 +474,6 @@ export const CreateProductPage = () => {
                             ) : (
                                 <input
                                     type={attr.type === 'number' ? 'number' : 'text'}
-                                    required={!!attr.pivot.is_required}
                                     value={attributeValues[attr.id] || ''}
                                     autoComplete="off"
                                     onChange={e => {
@@ -691,7 +689,7 @@ export const CreateProductPage = () => {
                                                 <svg className={`w-4 h-4 ${idx === 0 && errors.phone ? 'text-red-400' : 'text-gray-400'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
                                                 <span className={`text-[10px] font-black ${idx === 0 && errors.phone ? 'text-red-400' : 'text-gray-400'}`}>{idx + 1}</span>
                                             </div>
-                                            <input type="tel" required={idx === 0} placeholder="012 345 678" value={phone} onChange={e => handlePhoneValueChange(idx, e.target.value)} className={`w-full pl-16 pr-4 py-4 border rounded-2xl focus:bg-white outline-none transition font-bold text-gray-800 shadow-sm ${idx === 0 && errors.phone ? 'border-red-300' : 'border-gray-200 focus:border-blue-500'}`} />
+                                            <input type="tel" placeholder="012 345 678" value={phone} onChange={e => handlePhoneValueChange(idx, e.target.value)} className={`w-full pl-16 pr-4 py-4 border rounded-2xl focus:bg-white outline-none transition font-bold text-gray-800 shadow-sm ${idx === 0 && errors.phone ? 'border-red-300' : 'border-gray-200 focus:border-blue-500'}`} />
                                         </div>
                                         {phones.length > 1 && (
                                             <button type="button" onClick={() => removePhoneField(idx)} className="p-4 text-gray-400 hover:text-red-500 transition-colors">

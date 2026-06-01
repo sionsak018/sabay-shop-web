@@ -264,7 +264,7 @@ export const EditProductPage = () => {
       </div>
 
       <div className="container mx-auto px-4 max-w-5xl">
-        <form onSubmit={handleSubmit} className="space-y-8 animate-in fade-in duration-500">
+        <form onSubmit={handleSubmit} noValidate className="space-y-8 animate-in fade-in duration-500">
           {error && <div className="bg-red-50 border border-red-100 text-red-600 px-6 py-4 rounded-xl text-sm font-bold shadow-sm">{error}</div>}
 
           {/* Photos */}
@@ -330,7 +330,6 @@ export const EditProductPage = () => {
                     </label>
                     {attr.type === 'select' ? (
                       <select
-                        required={!!attr.pivot.is_required}
                         value={attributeValues[attr.id] || ''}
                         onChange={e => setAttributeValues({ ...attributeValues, [attr.id]: e.target.value })}
                         className="w-full px-5 py-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:border-blue-500 outline-none transition font-bold text-gray-800 shadow-inner"
@@ -341,7 +340,6 @@ export const EditProductPage = () => {
                     ) : (
                       <input
                         type={attr.type === 'number' ? 'number' : 'text'}
-                        required={!!attr.pivot.is_required}
                         value={attributeValues[attr.id] || ''}
                         autoComplete="off"
                         onChange={e => {
@@ -368,14 +366,14 @@ export const EditProductPage = () => {
             <div className="p-8 space-y-8">
               <div>
                 <label className="block text-[11px] font-black text-gray-400 uppercase mb-3 tracking-widest">Ad Title</label>
-                <input type="text" required placeholder="e.g. iPhone 15 Pro Max 256GB Gold" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:border-blue-500 outline-none transition font-bold text-gray-800" />
+                <input type="text" placeholder="e.g. iPhone 15 Pro Max 256GB Gold" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:border-blue-500 outline-none transition font-bold text-gray-800" />
               </div>
 
               <div>
                 <label className="block text-[11px] font-black text-gray-400 uppercase mb-3 tracking-widest">Price ($)</label>
                 <div className="relative">
                   <span className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400 font-black text-lg">$</span>
-                  <input type="number" required placeholder="0.00" value={formData.price} onChange={e => setFormData({...formData, price: e.target.value})} className="w-full pl-10 pr-5 py-4 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:border-blue-500 outline-none transition font-black text-gray-800 text-lg shadow-inner" />
+                  <input type="number" placeholder="0.00" value={formData.price} onChange={e => setFormData({...formData, price: e.target.value})} className="w-full pl-10 pr-5 py-4 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:border-blue-500 outline-none transition font-black text-gray-800 text-lg shadow-inner" />
                 </div>
               </div>
 
@@ -496,7 +494,7 @@ export const EditProductPage = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div>
                             <label className="block text-[11px] font-black text-gray-400 uppercase mb-3 tracking-widest">Poster Name</label>
-                            <input type="text" required placeholder="Enter your name" value={formData.poster_name} onChange={e => setFormData({...formData, poster_name: e.target.value})} className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:border-blue-500 outline-none transition font-bold text-gray-800 shadow-inner" />
+                            <input type="text" placeholder="Enter your name" value={formData.poster_name} onChange={e => setFormData({...formData, poster_name: e.target.value})} className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:border-blue-500 outline-none transition font-bold text-gray-800 shadow-inner" />
                         </div>
                         <div>
                             <label className="block text-[11px] font-black text-gray-400 uppercase mb-3 tracking-widest">Email Address</label>
@@ -528,7 +526,6 @@ export const EditProductPage = () => {
                                         </div>
                                         <input
                                             type="tel"
-                                            required={idx === 0}
                                             placeholder="012 345 678"
                                             value={phone}
                                             onChange={e => handlePhoneValueChange(idx, e.target.value)}
