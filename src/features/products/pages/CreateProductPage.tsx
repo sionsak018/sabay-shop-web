@@ -55,6 +55,7 @@ export const CreateProductPage = () => {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isMapModalOpen, setIsMapModalOpen] = useState(false);
   const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [limitInfo, setLimitInfo] = useState<any>(null);
 
   useEffect(() => {
@@ -181,6 +182,14 @@ export const CreateProductPage = () => {
     if (!formData.district_id) newErrors.district_id = Msg;
     if (!formData.poster_name.trim()) newErrors.poster_name = Msg;
     if (!phones[0]?.trim()) newErrors.phone = Msg;
+
+    if (formData.poster_email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.poster_email)) {
+        newErrors.poster_email = 'អាសយដ្ឋានអ៊ីមែលមិនត្រឹមត្រូវ';
+    }
+
+    if (!formData.address.trim()) newErrors.address = Msg;
+    if (!formData.lat || !formData.lng) newErrors.lat = Msg;
+    if (!agreedToTerms) newErrors.terms = Msg;
 
     const description = editorRef.current?.getInstance().getMarkdown();
     if (!description || description.trim().length < 5) {
@@ -609,16 +618,26 @@ export const CreateProductPage = () => {
                         </div>
 
                         <div>
-                            <label className="block text-[11px] font-black text-gray-400 uppercase mb-3 tracking-widest ml-1">Detail Address</label>
-                            <input type="text" placeholder="House number, Street name, or Landmarks..." value={formData.address} onChange={e => setFormData({...formData, address: e.target.value})} className="w-full px-6 py-4 border border-gray-200 rounded-2xl focus:bg-white focus:border-blue-500 outline-none transition font-bold text-gray-800 shadow-sm" />
+                            <label className="block text-[11px] font-black text-gray-400 uppercase mb-3 tracking-widest ml-1">Detail Address <span className="text-red-500">*</span></label>
+                            <input
+                                type="text"
+                                placeholder="House number, Street name, or Landmarks..."
+                                value={formData.address}
+                                onChange={e => {
+                                    setFormData({...formData, address: e.target.value});
+                                    if (errors.address) setErrors(prev => ({ ...prev, address: '' }));
+                                }}
+                                className={`w-full px-6 py-4 border rounded-2xl focus:bg-white outline-none transition font-bold text-gray-800 shadow-sm ${errors.address ? 'border-red-300' : 'border-gray-200 focus:border-blue-500'}`}
+                            />
+                            {errors.address && <p className="text-red-500 text-[10px] font-bold mt-2 ml-1">{errors.address}</p>}
                         </div>
 
                         <div>
-                            <label className="block text-[11px] font-black text-gray-400 uppercase mb-3 tracking-widest ml-1">Location on Map</label>
+                            <label className="block text-[11px] font-black text-gray-400 uppercase mb-3 tracking-widest ml-1">Location on Map <span className="text-red-500">*</span></label>
                             <button
                                 type="button"
                                 onClick={() => setIsMapModalOpen(true)}
-                                className="w-full h-48 bg-gray-50 border border-gray-200 rounded-2xl overflow-hidden relative group hover:border-blue-400 transition-all shadow-sm"
+                                className={`w-full h-48 bg-gray-50 border rounded-2xl overflow-hidden relative group transition-all shadow-sm ${errors.lat ? 'border-red-300' : 'border-gray-200 hover:border-blue-400'}`}
                             >
                                 <div className="absolute inset-0 pointer-events-none opacity-50 group-hover:opacity-100 transition-opacity">
                                     <MapView lat={formData.lat} lng={formData.lng} />
@@ -632,6 +651,7 @@ export const CreateProductPage = () => {
                                     </span>
                                 </div>
                             </button>
+                            {errors.lat && <p className="text-red-500 text-[10px] font-bold mt-2 ml-1">{errors.lat}</p>}
                             <MapPickerModal
                                 isOpen={isMapModalOpen}
                                 onClose={() => setIsMapModalOpen(false)}
@@ -667,7 +687,17 @@ export const CreateProductPage = () => {
                             </div>
                             <div>
                                 <label className="block text-[11px] font-black text-gray-400 uppercase mb-3 tracking-widest ml-1">Email Address</label>
-                                <input type="email" placeholder="email@example.com" value={formData.poster_email} onChange={e => setFormData({...formData, poster_email: e.target.value})} className="w-full px-6 py-4 border border-gray-200 rounded-2xl focus:bg-white focus:border-blue-500 outline-none transition font-bold text-gray-800 shadow-sm" />
+                                <input
+                                    type="email"
+                                    placeholder="email@example.com"
+                                    value={formData.poster_email}
+                                    onChange={e => {
+                                        setFormData({...formData, poster_email: e.target.value});
+                                        if (errors.poster_email) setErrors(prev => ({ ...prev, poster_email: '' }));
+                                    }}
+                                    className={`w-full px-6 py-4 border rounded-2xl focus:bg-white outline-none transition font-bold text-gray-800 shadow-sm ${errors.poster_email ? 'border-red-300' : 'border-gray-200 focus:border-blue-500'}`}
+                                />
+                                {errors.poster_email && <p className="text-red-500 text-[10px] font-bold mt-2 ml-1">{errors.poster_email}</p>}
                             </div>
                         </div>
 
@@ -704,7 +734,17 @@ export const CreateProductPage = () => {
 
                         <div>
                             <label className="block text-[11px] font-black text-gray-400 uppercase mb-3 tracking-widest ml-1">Business/Company Name (Optional)</label>
-                            <input type="text" placeholder="Enter company name if applicable" value={formData.company_name} onChange={e => setFormData({...formData, company_name: e.target.value})} className="w-full px-6 py-4 border border-gray-200 rounded-2xl focus:bg-white focus:border-blue-500 outline-none transition font-bold text-gray-800 shadow-sm" />
+                            <input
+                                type="text"
+                                placeholder="Enter company name if applicable"
+                                value={formData.company_name}
+                                onChange={e => {
+                                    setFormData({...formData, company_name: e.target.value});
+                                    if (errors.company_name) setErrors(prev => ({ ...prev, company_name: '' }));
+                                }}
+                                className={`w-full px-6 py-4 border rounded-2xl focus:bg-white outline-none transition font-bold text-gray-800 shadow-sm ${errors.company_name ? 'border-red-300' : 'border-gray-200 focus:border-blue-500'}`}
+                            />
+                            {errors.company_name && <p className="text-red-500 text-[10px] font-bold mt-2 ml-1">{errors.company_name}</p>}
                         </div>
                     </div>
                 </div>
@@ -712,11 +752,22 @@ export const CreateProductPage = () => {
             </div>
 
             <div className="flex flex-col sm:flex-row items-center justify-between gap-8 pt-12 mt-12 border-t border-gray-100">
-              <div className="flex items-start gap-3 max-w-md">
-                 <input type="checkbox"  className="mt-1 w-4 h-4 rounded text-blue-600 focus:ring-blue-500" />
-                 <p className="text-[11px] text-gray-500 leading-relaxed font-bold uppercase tracking-tight">
-                   I agree to the <span className="text-blue-600 hover:underline cursor-pointer">Terms and Conditions</span> and <span className="text-blue-600 hover:underline cursor-pointer">Safety Guidelines</span> of Sabay Shop.
-                 </p>
+              <div className="flex flex-col gap-2 max-w-md">
+                <div className="flex items-start gap-3">
+                    <input
+                        type="checkbox"
+                        checked={agreedToTerms}
+                        onChange={e => {
+                            setAgreedToTerms(e.target.checked);
+                            if (errors.terms) setErrors(prev => ({ ...prev, terms: '' }));
+                        }}
+                        className={`mt-1 w-4 h-4 rounded text-blue-600 focus:ring-blue-500 ${errors.terms ? 'border-red-300' : 'border-gray-300'}`}
+                    />
+                    <p className={`text-[11px] leading-relaxed font-bold uppercase tracking-tight ${errors.terms ? 'text-red-500' : 'text-gray-500'}`}>
+                    I agree to the <span className="text-blue-600 hover:underline cursor-pointer">Terms and Conditions</span> and <span className="text-blue-600 hover:underline cursor-pointer">Safety Guidelines</span> of Sabay Shop.
+                    </p>
+                </div>
+                {errors.terms && <p className="text-red-500 text-[10px] font-bold ml-7">{errors.terms}</p>}
               </div>
               <button
                 type="submit"
