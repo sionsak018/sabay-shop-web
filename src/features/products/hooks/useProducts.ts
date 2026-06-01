@@ -27,10 +27,13 @@ export const useProducts = (filters: ProductFilters = {}) => {
   });
 
   // Create a stable, serializable key from filters to detect actual changes
+  // This ensures that when any filter property changes, the fetch is triggered.
   const filtersKey = useMemo(() => {
     const { page, ...rest } = filters;
     return JSON.stringify(rest);
-  }, [filters.keyword, filters.category_id, filters.min_price, filters.max_price, filters.location]);
+  }, [filters]);
+  // Dependency on 'filters' object is safe because ProductListPage
+  // creates a new object on every render based on searchParams.
 
   // Separate page from the rest – changing page should also trigger fetch
   const page = filters.page || 1;

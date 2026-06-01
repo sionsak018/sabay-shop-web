@@ -119,6 +119,8 @@ export const LocationPickerModal: React.FC<LocationPickerModalProps> = ({ isOpen
         setSelectedProvince(null);
         setSelectedDistrict(null);
         setSelectedCommune(null);
+        onSelect({ province_id: '', district_id: '', commune_id: '', village_id: '', locationName: 'All Cambodia' });
+        onClose();
     };
 
     if (!isOpen) return null;
@@ -201,6 +203,15 @@ export const LocationPickerModal: React.FC<LocationPickerModalProps> = ({ isOpen
                         </div>
                     ) : (
                         <ul className="divide-y divide-gray-100">
+                            {step === 1 && (
+                                <li
+                                    onClick={handleClear}
+                                    className="flex items-center justify-between px-6 py-4 hover:bg-blue-50 cursor-pointer transition-colors group"
+                                >
+                                    <span className="text-sm font-black text-blue-600 uppercase tracking-widest">All Cambodia</span>
+                                    <svg className="w-4 h-4 text-blue-400 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 5l7 7-7 7"/></svg>
+                                </li>
+                            )}
                             {step === 1 && provinces.map(p => (
                                 <li key={p.id} onClick={() => handleSelectProvince(p)} className="flex items-center justify-between px-6 py-4 hover:bg-gray-50 cursor-pointer transition-colors group">
                                     <span className="text-sm font-bold text-gray-700 group-hover:text-blue-600">{p.name}</span>
