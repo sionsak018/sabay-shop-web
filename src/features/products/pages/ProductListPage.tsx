@@ -436,11 +436,6 @@ export const ProductListPage = () => {
                                             key={opt.id}
                                             onClick={() => {
                                                 applyFilters({ [`attr_${attr.id}`]: isActive ? '' : opt.value });
-                                                // Auto-scroll to results
-                                                setTimeout(() => {
-                                                    const el = document.getElementById('results-count');
-                                                    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                                                }, 100);
                                             }}
                                             className="group flex flex-col items-center gap-2 transition-all active:scale-95"
                                         >
