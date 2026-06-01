@@ -264,26 +264,65 @@ export const ProductListPage = () => {
                 </div>
             </div>
 
-        {/* Subcategories Bar (Browse By Category Style) */}
-        {subCategories.length > 0 && (
-            <div className="bg-white border border-gray-200 rounded mb-4 shadow-sm overflow-hidden">
-                <ul className="flex overflow-x-auto scrollbar-hide py-3 px-2">
-                    {subCategories.map((sub) => (
-                        <li key={sub.id} className="shrink-0 w-[95px] sm:w-[110px]">
-                            <button
-                                onClick={() => setCategory(String(sub.id))}
-                                className="block w-full group transition-all"
-                            >
-                                <div className={`mx-auto rounded-full size-11 sm:size-14 flex items-center justify-center p-2 mb-1.5 transition-all ${categoryId === String(sub.id) ? 'bg-blue-50 ring-2 ring-blue-500' : 'bg-[#f1f2f6] group-hover:bg-[#e9ecef]'}`}>
-                                    <CategoryIcon cat={sub} className="w-full h-full object-contain" />
-                                </div>
-                                <p className={`text-[10px] sm:text-[11.5px] font-bold text-center px-1 truncate ${categoryId === String(sub.id) ? 'text-blue-600' : 'text-gray-700 group-hover:text-blue-600'}`}>
-                                    {sub.name}
-                                </p>
-                            </button>
-                        </li>
-                    ))}
-                </ul>
+        {/* Subcategories & Dynamic Attributes Bar */}
+        {(subCategories.length > 0 || dynamicAttributes.length > 0) && (
+            <div className="bg-white border border-gray-200 rounded mb-4 shadow-sm overflow-hidden divide-y divide-gray-100">
+                {/* Subcategories (if any) */}
+                {subCategories.length > 0 && (
+                    <ul className="flex overflow-x-auto scrollbar-hide py-3 px-2">
+                        {subCategories.map((sub) => (
+                            <li key={sub.id} className="shrink-0 w-[95px] sm:w-[110px]">
+                                <button
+                                    onClick={() => setCategory(String(sub.id))}
+                                    className="block w-full group transition-all"
+                                >
+                                    <div className={`mx-auto rounded-full size-11 sm:size-14 flex items-center justify-center p-2 mb-1.5 transition-all ${categoryId === String(sub.id) ? 'bg-blue-50 ring-2 ring-blue-500' : 'bg-[#f1f2f6] group-hover:bg-[#e9ecef]'}`}>
+                                        <CategoryIcon cat={sub} className="w-full h-full object-contain" />
+                                    </div>
+                                    <p className={`text-[10px] sm:text-[11.5px] font-bold text-center px-1 truncate ${categoryId === String(sub.id) ? 'text-blue-600' : 'text-gray-700 group-hover:text-blue-600'}`}>
+                                        {sub.name}
+                                    </p>
+                                </button>
+                            </li>
+                        ))}
+                    </ul>
+                )}
+
+                {/* Dynamic Attributes (if any) */}
+                {dynamicAttributes.length > 0 && (
+                    <div className="flex overflow-x-auto scrollbar-hide py-3 px-4 gap-3 bg-gray-50/50">
+                        {dynamicAttributes.map((attr) => (
+                            <div key={attr.id} className="shrink-0 flex flex-col gap-1.5 min-w-[140px]">
+                                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">{attr.name}</label>
+                                {attr.type === 'select' ? (
+                                    <select
+                                        value={localFilters[`attr_${attr.id}`] || ''}
+                                        onChange={(e) => applyFilters({ [`attr_${attr.id}`]: e.target.value })}
+                                        className="w-full bg-white border border-gray-200 rounded px-3 py-1.5 text-xs font-bold text-gray-700 outline-none focus:border-blue-500 transition shadow-sm"
+                                    >
+                                        <option value="">All {attr.name}</option>
+                                        {attr.options?.map((opt: any) => (
+                                            <option key={opt.id} value={opt.value}>{opt.value}</option>
+                                        ))}
+                                    </select>
+                                ) : (
+                                    <input
+                                        type="text"
+                                        placeholder={`Filter ${attr.name}`}
+                                        value={localFilters[`attr_${attr.id}`] || ''}
+                                        className="w-full bg-white border border-gray-200 rounded px-3 py-1.5 text-xs font-bold text-gray-700 outline-none focus:border-blue-500 transition shadow-sm"
+                                        onKeyDown={(e) => {
+                                            if (e.key === 'Enter') {
+                                                applyFilters({ [`attr_${attr.id}`]: (e.target as HTMLInputElement).value });
+                                            }
+                                        }}
+                                        onChange={(e) => setLocalFilters(prev => ({ ...prev, [`attr_${attr.id}`]: e.target.value }))}
+                                    />
+                                )}
+                            </div>
+                        ))}
+                    </div>
+                )}
             </div>
         )}
 
