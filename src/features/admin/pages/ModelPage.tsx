@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { productSpecApi, type BrandModel, type Brand } from '../services/productSpecApi';
+import { useAlert } from '../../../context/AlertContext';
 
 export const ModelPage = () => {
+  const { showAlert } = useAlert();
   const [models, setModels] = useState<BrandModel[]>([]);
   const [brands, setBrands] = useState<Brand[]>([]);
   const [loading, setLoading] = useState(true);
@@ -63,13 +65,15 @@ export const ModelPage = () => {
       const data = { ...formData, brand_id: Number(formData.brand_id) };
       if (editingModel) {
         await productSpecApi.updateModel(editingModel.id, data);
+        showAlert({ title: 'Success!', message: 'Model updated successfully.', type: 'success' });
       } else {
         await productSpecApi.createModel(data);
+        showAlert({ title: 'Success!', message: 'Model created successfully.', type: 'success' });
       }
       setIsModalOpen(false);
       fetchData();
     } catch (error: any) {
-      alert(error.response?.data?.message || 'Failed to save model');
+      showAlert({ title: 'Error!', message: error.response?.data?.message || 'Failed to save model', type: 'error' });
     }
   };
 
@@ -77,9 +81,10 @@ export const ModelPage = () => {
     if (window.confirm('Are you sure?')) {
       try {
         await productSpecApi.deleteModel(id);
+        showAlert({ title: 'Deleted!', message: 'Model removed.', type: 'success' });
         fetchData();
       } catch (error) {
-        alert('Failed to delete model');
+        showAlert({ title: 'Error!', message: 'Failed to delete model', type: 'error' });
       }
     }
   };

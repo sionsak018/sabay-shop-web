@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { sliderApi, type Slider } from '../services/sliderApi';
 import { getImageUrl } from '../../../utils/imageUrl';
+import { useAlert } from '../../../context/AlertContext';
 
 export const SliderPage = () => {
+  const { showAlert } = useAlert();
   const [sliders, setSliders] = useState<Slider[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -76,14 +78,15 @@ export const SliderPage = () => {
     try {
       if (editingSlider) {
         await sliderApi.update(editingSlider.id, data);
+        showAlert({ title: 'Success!', message: 'Slider updated successfully.', type: 'success' });
       } else {
-        if (!imageFile) return alert('Please select an image');
         await sliderApi.create(data);
+        showAlert({ title: 'Success!', message: 'Slider created successfully.', type: 'success' });
       }
       setIsModalOpen(false);
       fetchSliders();
     } catch (error: any) {
-      alert(error.response?.data?.message || 'Failed to save slider');
+      showAlert({ title: 'Error!', message: error.response?.data?.message || 'Failed to save slider', type: 'error' });
     }
   };
 
@@ -91,9 +94,10 @@ export const SliderPage = () => {
     if (window.confirm('Delete this slider?')) {
       try {
         await sliderApi.delete(id);
+        showAlert({ title: 'Deleted!', message: 'Slider has been removed.', type: 'success' });
         fetchSliders();
       } catch (error) {
-        alert('Failed to delete slider');
+        showAlert({ title: 'Error!', message: 'Failed to delete slider', type: 'error' });
       }
     }
   };

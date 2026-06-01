@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../../services/api';
 import { AdminPagination } from '../components/AdminPagination';
+import { useAlert } from '../../../context/AlertContext';
 
 export const CommunePage = () => {
+  const { showAlert } = useAlert();
   const [communes, setCommunes] = useState<any[]>([]);
   const [provinces, setProvinces] = useState<any[]>([]);
   const [districts, setDistricts] = useState<any[]>([]); // Current filtered or fetched districts
@@ -107,13 +109,15 @@ export const CommunePage = () => {
     try {
       if (editingCommune) {
         await api.put(`/admin/communes/${editingCommune.id}`, formData);
+        showAlert({ title: 'Success!', message: 'Commune updated successfully.', type: 'success' });
       } else {
         await api.post('/admin/communes', formData);
+        showAlert({ title: 'Success!', message: 'Commune created successfully.', type: 'success' });
       }
       setIsModalOpen(false);
       fetchData(pagination.currentPage, searchTerm);
     } catch (error) {
-      alert('Failed to save commune');
+      showAlert({ title: 'Error!', message: 'Failed to save commune', type: 'error' });
     }
   };
 
@@ -121,9 +125,10 @@ export const CommunePage = () => {
     if (window.confirm('Are you sure?')) {
       try {
         await api.delete(`/admin/communes/${id}`);
+        showAlert({ title: 'Deleted!', message: 'Commune removed.', type: 'success' });
         fetchData(pagination.currentPage, searchTerm);
       } catch (error) {
-        alert('Failed to delete');
+        showAlert({ title: 'Error!', message: 'Failed to delete', type: 'error' });
       }
     }
   };

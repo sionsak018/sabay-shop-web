@@ -8,6 +8,7 @@ import { MapPickerModal } from '../../../components/common/MapPickerModal';
 import { LocationPickerModal } from '../../../components/common/LocationPickerModal';
 import { MapView } from '../../../components/common/MapView';
 import { getImageUrl } from '../../../utils/imageUrl';
+import { useAlert } from '../../../context/AlertContext';
 
 // Toast UI Editor
 import '@toast-ui/editor/dist/toastui-editor.css';
@@ -15,6 +16,7 @@ import { Editor } from '@toast-ui/react-editor';
 
 export const CreateProductPage = () => {
   const navigate = useNavigate();
+  const { showAlert } = useAlert();
   const editorRef = useRef<any>(null);
 
   const [step, setStep] = useState(1); // 1: Category, 2: Information
@@ -247,9 +249,19 @@ export const CreateProductPage = () => {
 
     try {
       await productApi.create(submitForm);
-      navigate('/', { replace: true });
+      showAlert({
+        title: 'ជោគជ័យ!',
+        message: 'ការផ្សព្វផ្សាយរបស់អ្នកត្រូវបានដាក់បញ្ជូនដោយជោគជ័យ។',
+        type: 'success',
+        onClose: () => navigate('/', { replace: true })
+      });
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to post ad. Please try again.');
+      showAlert({
+        title: 'មានបញ្ហា!',
+        message: err.response?.data?.message || 'មិនអាចដាក់បញ្ជូនការផ្សព្វផ្សាយបានទេ សូមព្យាយាមម្តងទៀត។',
+        type: 'error'
+      });
     } finally {
       setLoading(false);
     }

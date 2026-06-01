@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { productSpecApi } from '../services/productSpecApi';
 import api from '../../../services/api';
 import { getImageUrl } from '../../../utils/imageUrl';
+import { useAlert } from '../../../context/AlertContext';
 
 interface OptionItem {
   value: string;
@@ -10,6 +11,7 @@ interface OptionItem {
 }
 
 export const AttributePage = () => {
+  const { showAlert } = useAlert();
   const [attributes, setAttributes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -113,16 +115,17 @@ export const AttributePage = () => {
       }
 
       if (editingAttr) {
-        // Laravel workaround for PUT with files: use POST and _method=PUT
         submitData.append('_method', 'PUT');
         await api.post(`/admin/attributes/${editingAttr.id}`, submitData);
+        showAlert({ title: 'Success!', message: 'Field updated successfully.', type: 'success' });
       } else {
         await api.post('/admin/attributes', submitData);
+        showAlert({ title: 'Success!', message: 'Field created successfully.', type: 'success' });
       }
       setIsModalOpen(false);
       fetchAttributes();
     } catch (error) {
-      alert('Failed to save attribute');
+      showAlert({ title: 'Error!', message: 'Failed to save field.', type: 'error' });
     }
   };
 
@@ -130,9 +133,10 @@ export const AttributePage = () => {
     if (window.confirm('Delete this field? Items using it will lose this data.')) {
       try {
         await api.delete(`/admin/attributes/${id}`);
+        showAlert({ title: 'Deleted!', message: 'Field removed.', type: 'success' });
         fetchAttributes();
       } catch (error) {
-        alert('Failed to delete');
+        showAlert({ title: 'Error!', message: 'Failed to delete.', type: 'error' });
       }
     }
   };

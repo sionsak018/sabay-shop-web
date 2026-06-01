@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../../services/api';
 import { AdminPagination } from '../components/AdminPagination';
+import { useAlert } from '../../../context/AlertContext';
 
 export const VillagePage = () => {
+  const { showAlert } = useAlert();
   const [villages, setVillages] = useState<any[]>([]);
   const [provinces, setProvinces] = useState<any[]>([]);
   const [allDistricts, setAllDistricts] = useState<any[]>([]);
@@ -120,13 +122,15 @@ export const VillagePage = () => {
     try {
       if (editingVillage) {
         await api.put(`/admin/villages/${editingVillage.id}`, formData);
+        showAlert({ title: 'Success!', message: 'Village updated successfully.', type: 'success' });
       } else {
         await api.post('/admin/villages', formData);
+        showAlert({ title: 'Success!', message: 'Village created successfully.', type: 'success' });
       }
       setIsModalOpen(false);
       fetchData(pagination.currentPage, searchTerm);
     } catch (error) {
-      alert('Failed to save village');
+      showAlert({ title: 'Error!', message: 'Failed to save village', type: 'error' });
     }
   };
 
@@ -134,9 +138,10 @@ export const VillagePage = () => {
     if (window.confirm('Are you sure?')) {
       try {
         await api.delete(`/admin/villages/${id}`);
+        showAlert({ title: 'Deleted!', message: 'Village removed.', type: 'success' });
         fetchData(pagination.currentPage, searchTerm);
       } catch (error) {
-        alert('Failed to delete');
+        showAlert({ title: 'Error!', message: 'Failed to delete', type: 'error' });
       }
     }
   };

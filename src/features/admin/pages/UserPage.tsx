@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../../services/api';
 import { AdminPagination } from '../components/AdminPagination';
+import { useAlert } from '../../../context/AlertContext';
 
 export const UserPage = () => {
+  const { showAlert } = useAlert();
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [pagination, setPagination] = useState({ currentPage: 1, lastPage: 1, total: 0 });
@@ -70,10 +72,11 @@ export const UserPage = () => {
 
     try {
       await api.put(`/admin/users/${editingUser.id}`, formData);
+      showAlert({ title: 'Success!', message: 'User updated successfully.', type: 'success' });
       setIsModalOpen(false);
       fetchData(pagination.currentPage, searchTerm);
     } catch (error) {
-      alert('Failed to update user');
+      showAlert({ title: 'Error!', message: 'Failed to update user.', type: 'error' });
     }
   };
 
@@ -81,9 +84,10 @@ export const UserPage = () => {
     if (window.confirm('Delete this user?')) {
       try {
         await api.delete(`/admin/users/${id}`);
+        showAlert({ title: 'Deleted!', message: 'User removed.', type: 'success' });
         fetchData(pagination.currentPage, searchTerm);
       } catch (error) {
-        alert('Failed to delete user');
+        showAlert({ title: 'Error!', message: 'Failed to delete user.', type: 'error' });
       }
     }
   };

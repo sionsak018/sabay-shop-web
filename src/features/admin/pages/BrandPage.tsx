@@ -3,8 +3,10 @@ import { productSpecApi, type Brand } from '../services/productSpecApi';
 import { categoryApi } from '../../categories/services/categoryApi';
 import { type Category } from '../../categories/types/category.types';
 import { getImageUrl } from '../../../utils/imageUrl';
+import { useAlert } from '../../../context/AlertContext';
 
 export const BrandPage = () => {
+  const { showAlert } = useAlert();
   const [brands, setBrands] = useState<Brand[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
@@ -83,13 +85,15 @@ export const BrandPage = () => {
     try {
       if (editingBrand) {
         await productSpecApi.updateBrand(editingBrand.id, data);
+        showAlert({ title: 'Success!', message: 'Brand updated successfully.', type: 'success' });
       } else {
         await productSpecApi.createBrand(data);
+        showAlert({ title: 'Success!', message: 'Brand created successfully.', type: 'success' });
       }
       setIsModalOpen(false);
       fetchData();
     } catch (error: any) {
-      alert(error.response?.data?.message || 'Failed to save brand');
+      showAlert({ title: 'Error!', message: error.response?.data?.message || 'Failed to save brand', type: 'error' });
     }
   };
 
@@ -97,9 +101,10 @@ export const BrandPage = () => {
     if (window.confirm('Are you sure?')) {
       try {
         await productSpecApi.deleteBrand(id);
+        showAlert({ title: 'Deleted!', message: 'Brand removed.', type: 'success' });
         fetchData();
       } catch (error) {
-        alert('Failed to delete brand');
+        showAlert({ title: 'Error!', message: 'Failed to delete brand', type: 'error' });
       }
     }
   };

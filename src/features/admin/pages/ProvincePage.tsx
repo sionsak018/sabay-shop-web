@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../../services/api';
 import { AdminPagination } from '../components/AdminPagination';
+import { useAlert } from '../../../context/AlertContext';
 
 export const ProvincePage = () => {
+  const { showAlert } = useAlert();
   const [provinces, setProvinces] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -73,13 +75,15 @@ export const ProvincePage = () => {
     try {
       if (editingProv) {
         await api.put(`/admin/provinces/${editingProv.id}`, formData);
+        showAlert({ title: 'Success!', message: 'Province updated.', type: 'success' });
       } else {
         await api.post('/admin/provinces', formData);
+        showAlert({ title: 'Success!', message: 'Province created.', type: 'success' });
       }
       setIsModalOpen(false);
       fetchProvinces(pagination.currentPage, searchTerm);
     } catch (error) {
-      alert('Failed to save province');
+      showAlert({ title: 'Error!', message: 'Failed to save province.', type: 'error' });
     }
   };
 
@@ -87,9 +91,10 @@ export const ProvincePage = () => {
     if (window.confirm('Are you sure?')) {
       try {
         await api.delete(`/admin/provinces/${id}`);
+        showAlert({ title: 'Deleted!', message: 'Province removed.', type: 'success' });
         fetchProvinces(pagination.currentPage, searchTerm);
       } catch (error) {
-        alert('Failed to delete');
+        showAlert({ title: 'Error!', message: 'Failed to delete.', type: 'error' });
       }
     }
   };

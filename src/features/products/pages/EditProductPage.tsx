@@ -8,6 +8,7 @@ import { MapPickerModal } from '../../../components/common/MapPickerModal';
 import { LocationPickerModal } from '../../../components/common/LocationPickerModal';
 import { MapView } from '../../../components/common/MapView';
 import { getImageUrl } from '../../../utils/imageUrl';
+import { useAlert } from '../../../context/AlertContext';
 
 // Toast UI Editor
 import '@toast-ui/editor/dist/toastui-editor.css';
@@ -16,6 +17,7 @@ import { Editor } from '@toast-ui/react-editor';
 export const EditProductPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { showAlert } = useAlert();
   const editorRef = useRef<any>(null);
 
   const [categories, setCategories] = useState<Category[]>([]);
@@ -281,9 +283,19 @@ export const EditProductPage = () => {
 
     try {
       await productApi.update(Number(id), submitForm);
-      navigate('/profile', { replace: true });
+      showAlert({
+        title: 'ជោគជ័យ!',
+        message: 'ការកែសម្រួលការផ្សព្វផ្សាយរបស់អ្នកត្រូវបានរក្សាទុក។',
+        type: 'success',
+        onClose: () => navigate('/profile', { replace: true })
+      });
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to update ad');
+      showAlert({
+        title: 'មានបញ្ហា!',
+        message: err.response?.data?.message || 'មិនអាចរក្សាទុកការកែសម្រួលបានទេ សូមព្យាយាមម្តងទៀត។',
+        type: 'error'
+      });
     } finally {
       setSaving(false);
     }

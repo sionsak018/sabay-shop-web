@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { categoryApi } from '../../categories/services/categoryApi';
 import { type Category } from '../../categories/types/category.types';
 import { getImageUrl } from '../../../utils/imageUrl';
+import { useAlert } from '../../../context/AlertContext';
 
 export const SubCategoryPage = () => {
+  const { showAlert } = useAlert();
   const [categories, setCategories] = useState<Category[]>([]);
   const [mainCategories, setMainCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
@@ -96,13 +98,15 @@ export const SubCategoryPage = () => {
     try {
       if (editingCategory) {
         await categoryApi.adminUpdate(editingCategory.id, data);
+        showAlert({ title: 'Success!', message: 'Sub-category updated.', type: 'success' });
       } else {
         await categoryApi.adminCreate(data);
+        showAlert({ title: 'Success!', message: 'Sub-category created.', type: 'success' });
       }
       setIsModalOpen(false);
       fetchCategories();
     } catch (error: any) {
-      alert(error.response?.data?.message || 'Failed to save category');
+      showAlert({ title: 'Error!', message: error.response?.data?.message || 'Failed to save category', type: 'error' });
     }
   };
 
@@ -110,9 +114,10 @@ export const SubCategoryPage = () => {
     if (window.confirm('Are you sure?')) {
       try {
         await categoryApi.adminDelete(id);
+        showAlert({ title: 'Deleted!', message: 'Sub-category removed.', type: 'success' });
         fetchCategories();
       } catch (error) {
-        alert('Failed to delete category');
+        showAlert({ title: 'Error!', message: 'Failed to delete sub-category', type: 'error' });
       }
     }
   };

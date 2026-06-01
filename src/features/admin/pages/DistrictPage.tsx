@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../../services/api';
 import { AdminPagination } from '../components/AdminPagination';
+import { useAlert } from '../../../context/AlertContext';
 
 export const DistrictPage = () => {
+  const { showAlert } = useAlert();
   const [districts, setDistricts] = useState<any[]>([]);
   const [provinces, setProvinces] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -79,13 +81,15 @@ export const DistrictPage = () => {
     try {
       if (editingDist) {
         await api.put(`/admin/districts/${editingDist.id}`, formData);
+        showAlert({ title: 'Success!', message: 'District updated.', type: 'success' });
       } else {
         await api.post('/admin/districts', formData);
+        showAlert({ title: 'Success!', message: 'District created.', type: 'success' });
       }
       setIsModalOpen(false);
       fetchData(pagination.currentPage, searchTerm);
     } catch (error) {
-      alert('Failed to save district');
+      showAlert({ title: 'Error!', message: 'Failed to save district.', type: 'error' });
     }
   };
 
@@ -93,9 +97,10 @@ export const DistrictPage = () => {
     if (window.confirm('Are you sure?')) {
       try {
         await api.delete(`/admin/districts/${id}`);
+        showAlert({ title: 'Deleted!', message: 'District removed.', type: 'success' });
         fetchData(pagination.currentPage, searchTerm);
       } catch (error) {
-        alert('Failed to delete');
+        showAlert({ title: 'Error!', message: 'Failed to delete.', type: 'error' });
       }
     }
   };

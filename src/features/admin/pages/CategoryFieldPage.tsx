@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { categoryApi } from '../../categories/services/categoryApi';
 import { productSpecApi } from '../services/productSpecApi';
 import api from '../../../services/api';
+import { useAlert } from '../../../context/AlertContext';
 
 export const CategoryFieldPage = () => {
+  const { showAlert } = useAlert();
   const [categories, setCategories] = useState<any[]>([]);
   const [attributes, setAttributes] = useState<any[]>([]);
   const [selectedCatId, setSelectedCatId] = useState<string>('');
@@ -49,9 +51,9 @@ export const CategoryFieldPage = () => {
   const handleSave = async () => {
     try {
       await api.post(`/admin/category-attributes/${selectedCatId}`, { fields: mappedFields });
-      alert('Mapping saved successfully');
+      showAlert({ title: 'Success!', message: 'Fields mapped successfully.', type: 'success' });
     } catch (error) {
-      alert('Failed to save mapping');
+      showAlert({ title: 'Error!', message: 'Failed to save mapping.', type: 'error' });
     }
   };
 

@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { productSpecApi, type BodyType } from '../services/productSpecApi';
 import { getImageUrl } from '../../../utils/imageUrl';
+import { useAlert } from '../../../context/AlertContext';
 
 export const BodyTypePage = () => {
+  const { showAlert } = useAlert();
   const [bodyTypes, setBodyTypes] = useState<BodyType[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -71,13 +73,15 @@ export const BodyTypePage = () => {
     try {
       if (editingBodyType) {
         await productSpecApi.updateBodyType(editingBodyType.id, data);
+        showAlert({ title: 'Success!', message: 'Body type updated successfully.', type: 'success' });
       } else {
         await productSpecApi.createBodyType(data);
+        showAlert({ title: 'Success!', message: 'Body type created successfully.', type: 'success' });
       }
       setIsModalOpen(false);
       fetchData();
     } catch (error: any) {
-      alert(error.response?.data?.message || 'Failed to save body type');
+      showAlert({ title: 'Error!', message: error.response?.data?.message || 'Failed to save body type', type: 'error' });
     }
   };
 
@@ -85,9 +89,10 @@ export const BodyTypePage = () => {
     if (window.confirm('Are you sure?')) {
       try {
         await productSpecApi.deleteBodyType(id);
+        showAlert({ title: 'Deleted!', message: 'Body type removed.', type: 'success' });
         fetchData();
       } catch (error) {
-        alert('Failed to delete body type');
+        showAlert({ title: 'Error!', message: 'Failed to delete body type', type: 'error' });
       }
     }
   };
