@@ -87,16 +87,21 @@ export const ProvincePage = () => {
     }
   };
 
-  const handleDelete = async (id: number) => {
-    if (window.confirm('Are you sure?')) {
-      try {
-        await api.delete(`/admin/provinces/${id}`);
-        showAlert({ title: 'Deleted!', message: 'Province removed.', type: 'success' });
-        fetchProvinces(pagination.currentPage, searchTerm);
-      } catch (error) {
-        showAlert({ title: 'Error!', message: 'Failed to delete.', type: 'error' });
+  const handleDelete = (id: number) => {
+    showAlert({
+      title: 'Are you sure?',
+      message: 'Delete this province?',
+      type: 'confirm',
+      onConfirm: async () => {
+        try {
+          await api.delete(`/admin/provinces/${id}`);
+          showAlert({ title: 'Deleted!', message: 'Province removed.', type: 'success' });
+          fetchProvinces(pagination.currentPage, searchTerm);
+        } catch (error) {
+          showAlert({ title: 'Error!', message: 'Failed to delete.', type: 'error' });
+        }
       }
-    }
+    });
   };
 
   return (

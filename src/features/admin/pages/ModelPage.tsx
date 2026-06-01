@@ -77,16 +77,21 @@ export const ModelPage = () => {
     }
   };
 
-  const handleDelete = async (id: number) => {
-    if (window.confirm('Are you sure?')) {
-      try {
-        await productSpecApi.deleteModel(id);
-        showAlert({ title: 'Deleted!', message: 'Model removed.', type: 'success' });
-        fetchData();
-      } catch (error) {
-        showAlert({ title: 'Error!', message: 'Failed to delete model', type: 'error' });
+  const handleDelete = (id: number) => {
+    showAlert({
+      title: 'Are you sure?',
+      message: 'Delete this model?',
+      type: 'confirm',
+      onConfirm: async () => {
+        try {
+          await productSpecApi.deleteModel(id);
+          showAlert({ title: 'Deleted!', message: 'Model removed.', type: 'success' });
+          fetchData();
+        } catch (error) {
+          showAlert({ title: 'Error!', message: 'Failed to delete model', type: 'error' });
+        }
       }
-    }
+    });
   };
 
   return (

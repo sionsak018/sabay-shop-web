@@ -80,16 +80,21 @@ export const UserPage = () => {
     }
   };
 
-  const handleDelete = async (id: number) => {
-    if (window.confirm('Delete this user?')) {
-      try {
-        await api.delete(`/admin/users/${id}`);
-        showAlert({ title: 'Deleted!', message: 'User removed.', type: 'success' });
-        fetchData(pagination.currentPage, searchTerm);
-      } catch (error) {
-        showAlert({ title: 'Error!', message: 'Failed to delete user.', type: 'error' });
+  const handleDelete = (id: number) => {
+    showAlert({
+      title: 'Are you sure?',
+      message: 'Delete this user?',
+      type: 'confirm',
+      onConfirm: async () => {
+        try {
+          await api.delete(`/admin/users/${id}`);
+          showAlert({ title: 'Deleted!', message: 'User removed.', type: 'success' });
+          fetchData(pagination.currentPage, searchTerm);
+        } catch (error) {
+          showAlert({ title: 'Error!', message: 'Failed to delete user.', type: 'error' });
+        }
       }
-    }
+    });
   };
 
   return (

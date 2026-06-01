@@ -85,16 +85,21 @@ export const BodyTypePage = () => {
     }
   };
 
-  const handleDelete = async (id: number) => {
-    if (window.confirm('Are you sure?')) {
-      try {
-        await productSpecApi.deleteBodyType(id);
-        showAlert({ title: 'Deleted!', message: 'Body type removed.', type: 'success' });
-        fetchData();
-      } catch (error) {
-        showAlert({ title: 'Error!', message: 'Failed to delete body type', type: 'error' });
+  const handleDelete = (id: number) => {
+    showAlert({
+      title: 'Are you sure?',
+      message: 'Delete this body type?',
+      type: 'confirm',
+      onConfirm: async () => {
+        try {
+          await productSpecApi.deleteBodyType(id);
+          showAlert({ title: 'Deleted!', message: 'Body type removed.', type: 'success' });
+          fetchData();
+        } catch (error) {
+          showAlert({ title: 'Error!', message: 'Failed to delete body type', type: 'error' });
+        }
       }
-    }
+    });
   };
 
   return (

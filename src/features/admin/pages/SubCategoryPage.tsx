@@ -110,16 +110,23 @@ export const SubCategoryPage = () => {
     }
   };
 
-  const handleDelete = async (id: number) => {
-    if (window.confirm('Are you sure?')) {
-      try {
-        await categoryApi.adminDelete(id);
-        showAlert({ title: 'Deleted!', message: 'Sub-category removed.', type: 'success' });
-        fetchCategories();
-      } catch (error) {
-        showAlert({ title: 'Error!', message: 'Failed to delete sub-category', type: 'error' });
+  const handleDelete = (id: number) => {
+    showAlert({
+      title: 'Are you sure?',
+      message: 'Delete this sub-category?',
+      type: 'confirm',
+      confirmText: 'Yes, Delete',
+      cancelText: 'No',
+      onConfirm: async () => {
+        try {
+          await categoryApi.adminDelete(id);
+          showAlert({ title: 'Deleted!', message: 'Sub-category removed.', type: 'success' });
+          fetchCategories();
+        } catch (error) {
+          showAlert({ title: 'Error!', message: 'Failed to delete sub-category', type: 'error' });
+        }
       }
-    }
+    });
   };
 
   return (

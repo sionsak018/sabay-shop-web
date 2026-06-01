@@ -129,16 +129,21 @@ export const AttributePage = () => {
     }
   };
 
-  const handleDelete = async (id: number) => {
-    if (window.confirm('Delete this field? Items using it will lose this data.')) {
-      try {
-        await api.delete(`/admin/attributes/${id}`);
-        showAlert({ title: 'Deleted!', message: 'Field removed.', type: 'success' });
-        fetchAttributes();
-      } catch (error) {
-        showAlert({ title: 'Error!', message: 'Failed to delete.', type: 'error' });
+  const handleDelete = (id: number) => {
+    showAlert({
+      title: 'Are you sure?',
+      message: 'Delete this field? Items using it will lose this data.',
+      type: 'confirm',
+      onConfirm: async () => {
+        try {
+          await api.delete(`/admin/attributes/${id}`);
+          showAlert({ title: 'Deleted!', message: 'Field removed.', type: 'success' });
+          fetchAttributes();
+        } catch (error) {
+          showAlert({ title: 'Error!', message: 'Failed to delete.', type: 'error' });
+        }
       }
-    }
+    });
   };
 
   return (

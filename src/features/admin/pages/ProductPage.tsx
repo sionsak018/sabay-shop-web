@@ -50,16 +50,21 @@ export const ProductPage = () => {
     }
   };
 
-  const handleDelete = async (id: number) => {
-    if (window.confirm('Delete this product?')) {
-      try {
-        await api.delete(`/admin/products/${id}`);
-        showAlert({ title: 'Deleted!', message: 'Product has been removed.', type: 'success' });
-        fetchData(pagination.currentPage, searchTerm);
-      } catch (error) {
-        showAlert({ title: 'Error!', message: 'Failed to delete product.', type: 'error' });
+  const handleDelete = (id: number) => {
+    showAlert({
+      title: 'Are you sure?',
+      message: 'Delete this product?',
+      type: 'confirm',
+      onConfirm: async () => {
+        try {
+          await api.delete(`/admin/products/${id}`);
+          showAlert({ title: 'Deleted!', message: 'Product has been removed.', type: 'success' });
+          fetchData(pagination.currentPage, searchTerm);
+        } catch (error) {
+          showAlert({ title: 'Error!', message: 'Failed to delete product.', type: 'error' });
+        }
       }
-    }
+    });
   };
 
   return (

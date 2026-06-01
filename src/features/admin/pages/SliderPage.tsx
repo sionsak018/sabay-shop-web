@@ -90,16 +90,21 @@ export const SliderPage = () => {
     }
   };
 
-  const handleDelete = async (id: number) => {
-    if (window.confirm('Delete this slider?')) {
-      try {
-        await sliderApi.delete(id);
-        showAlert({ title: 'Deleted!', message: 'Slider has been removed.', type: 'success' });
-        fetchSliders();
-      } catch (error) {
-        showAlert({ title: 'Error!', message: 'Failed to delete slider', type: 'error' });
+  const handleDelete = (id: number) => {
+    showAlert({
+      title: 'Are you sure?',
+      message: 'Delete this slider?',
+      type: 'confirm',
+      onConfirm: async () => {
+        try {
+          await sliderApi.delete(id);
+          showAlert({ title: 'Deleted!', message: 'Slider has been removed.', type: 'success' });
+          fetchSliders();
+        } catch (error) {
+          showAlert({ title: 'Error!', message: 'Failed to delete slider', type: 'error' });
+        }
       }
-    }
+    });
   };
 
   return (

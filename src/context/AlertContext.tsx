@@ -4,7 +4,10 @@ import { AlertModal } from '../components/common/AlertModal';
 interface AlertOptions {
   title: string;
   message: string;
-  type?: 'success' | 'error' | 'warning';
+  type?: 'success' | 'error' | 'warning' | 'confirm';
+  confirmText?: string;
+  cancelText?: string;
+  onConfirm?: () => void;
   onClose?: () => void;
 }
 
@@ -30,15 +33,25 @@ export const AlertProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     }
   };
 
+  const handleConfirm = () => {
+    setIsOpen(false);
+    if (options.onConfirm) {
+      options.onConfirm();
+    }
+  };
+
   return (
     <AlertContext.Provider value={{ showAlert }}>
       {children}
       <AlertModal
         isOpen={isOpen}
         onClose={handleClose}
+        onConfirm={handleConfirm}
         title={options.title}
         message={options.message}
         type={options.type}
+        confirmText={options.confirmText}
+        cancelText={options.cancelText}
       />
     </AlertContext.Provider>
   );

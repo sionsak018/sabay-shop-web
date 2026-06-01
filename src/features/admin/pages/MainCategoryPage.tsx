@@ -97,16 +97,23 @@ export const MainCategoryPage = () => {
     }
   };
 
-  const handleDelete = async (id: number) => {
-    if (window.confirm('Are you sure?')) {
-      try {
-        await categoryApi.adminDelete(id);
-        showAlert({ title: 'Deleted!', message: 'Category has been removed.', type: 'success' });
-        fetchCategories();
-      } catch (error) {
-        showAlert({ title: 'Error!', message: 'Failed to delete category', type: 'error' });
+  const handleDelete = (id: number) => {
+    showAlert({
+      title: 'Are you sure?',
+      message: 'You are about to delete this category. This action cannot be undone.',
+      type: 'confirm',
+      confirmText: 'Yes, Delete',
+      cancelText: 'No, Cancel',
+      onConfirm: async () => {
+        try {
+          await categoryApi.adminDelete(id);
+          showAlert({ title: 'Deleted!', message: 'Category has been removed.', type: 'success' });
+          fetchCategories();
+        } catch (error) {
+          showAlert({ title: 'Error!', message: 'Failed to delete category', type: 'error' });
+        }
       }
-    }
+    });
   };
 
   return (

@@ -97,16 +97,21 @@ export const BrandPage = () => {
     }
   };
 
-  const handleDelete = async (id: number) => {
-    if (window.confirm('Are you sure?')) {
-      try {
-        await productSpecApi.deleteBrand(id);
-        showAlert({ title: 'Deleted!', message: 'Brand removed.', type: 'success' });
-        fetchData();
-      } catch (error) {
-        showAlert({ title: 'Error!', message: 'Failed to delete brand', type: 'error' });
+  const handleDelete = (id: number) => {
+    showAlert({
+      title: 'Are you sure?',
+      message: 'Delete this brand?',
+      type: 'confirm',
+      onConfirm: async () => {
+        try {
+          await productSpecApi.deleteBrand(id);
+          showAlert({ title: 'Deleted!', message: 'Brand removed.', type: 'success' });
+          fetchData();
+        } catch (error) {
+          showAlert({ title: 'Error!', message: 'Failed to delete brand', type: 'error' });
+        }
       }
-    }
+    });
   };
 
   return (

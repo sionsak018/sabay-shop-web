@@ -121,16 +121,21 @@ export const CommunePage = () => {
     }
   };
 
-  const handleDelete = async (id: number) => {
-    if (window.confirm('Are you sure?')) {
-      try {
-        await api.delete(`/admin/communes/${id}`);
-        showAlert({ title: 'Deleted!', message: 'Commune removed.', type: 'success' });
-        fetchData(pagination.currentPage, searchTerm);
-      } catch (error) {
-        showAlert({ title: 'Error!', message: 'Failed to delete', type: 'error' });
+  const handleDelete = (id: number) => {
+    showAlert({
+      title: 'Are you sure?',
+      message: 'Delete this commune?',
+      type: 'confirm',
+      onConfirm: async () => {
+        try {
+          await api.delete(`/admin/communes/${id}`);
+          showAlert({ title: 'Deleted!', message: 'Commune removed.', type: 'success' });
+          fetchData(pagination.currentPage, searchTerm);
+        } catch (error) {
+          showAlert({ title: 'Error!', message: 'Failed to delete', type: 'error' });
+        }
       }
-    }
+    });
   };
 
   return (

@@ -93,16 +93,21 @@ export const DistrictPage = () => {
     }
   };
 
-  const handleDelete = async (id: number) => {
-    if (window.confirm('Are you sure?')) {
-      try {
-        await api.delete(`/admin/districts/${id}`);
-        showAlert({ title: 'Deleted!', message: 'District removed.', type: 'success' });
-        fetchData(pagination.currentPage, searchTerm);
-      } catch (error) {
-        showAlert({ title: 'Error!', message: 'Failed to delete.', type: 'error' });
+  const handleDelete = (id: number) => {
+    showAlert({
+      title: 'Are you sure?',
+      message: 'Delete this district?',
+      type: 'confirm',
+      onConfirm: async () => {
+        try {
+          await api.delete(`/admin/districts/${id}`);
+          showAlert({ title: 'Deleted!', message: 'District removed.', type: 'success' });
+          fetchData(pagination.currentPage, searchTerm);
+        } catch (error) {
+          showAlert({ title: 'Error!', message: 'Failed to delete.', type: 'error' });
+        }
       }
-    }
+    });
   };
 
   return (

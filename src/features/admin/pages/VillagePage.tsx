@@ -134,16 +134,21 @@ export const VillagePage = () => {
     }
   };
 
-  const handleDelete = async (id: number) => {
-    if (window.confirm('Are you sure?')) {
-      try {
-        await api.delete(`/admin/villages/${id}`);
-        showAlert({ title: 'Deleted!', message: 'Village removed.', type: 'success' });
-        fetchData(pagination.currentPage, searchTerm);
-      } catch (error) {
-        showAlert({ title: 'Error!', message: 'Failed to delete', type: 'error' });
+  const handleDelete = (id: number) => {
+    showAlert({
+      title: 'Are you sure?',
+      message: 'Delete this village?',
+      type: 'confirm',
+      onConfirm: async () => {
+        try {
+          await api.delete(`/admin/villages/${id}`);
+          showAlert({ title: 'Deleted!', message: 'Village removed.', type: 'success' });
+          fetchData(pagination.currentPage, searchTerm);
+        } catch (error) {
+          showAlert({ title: 'Error!', message: 'Failed to delete', type: 'error' });
+        }
       }
-    }
+    });
   };
 
   return (
