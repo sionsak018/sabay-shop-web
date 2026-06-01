@@ -189,15 +189,63 @@ export const ProductListPage = () => {
             {mainCategory && (
               <>
                 <svg className="w-2.5 h-2.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M9 5l7 7-7 7"/></svg>
-                <button onClick={() => setCategory(String(mainCategory.id))} className="hover:text-blue-600 truncate max-w-[120px] shrink-0">{mainCategory.name}</button>
+                <button
+                    onClick={() => {
+                        const params = new URLSearchParams(searchParams);
+                        params.set('category_id', String(mainCategory.id));
+                        // Clear all attributes when going back to main category
+                        Array.from(params.keys()).forEach(key => {
+                            if (key.startsWith('attr_')) params.delete(key);
+                        });
+                        setSearchParams(params);
+                    }}
+                    className="hover:text-blue-600 truncate max-w-[120px] shrink-0 font-bold"
+                >
+                    {mainCategory.name}
+                </button>
               </>
             )}
             {selectedCategory && selectedCategory.parent_id && (
               <>
                 <svg className="w-2.5 h-2.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M9 5l7 7-7 7"/></svg>
-                <span className="text-blue-600 truncate max-w-[120px] shrink-0">{selectedCategory.name}</span>
+                <button
+                    onClick={() => {
+                        const params = new URLSearchParams(searchParams);
+                        // Reset to just the subcategory (clear attributes)
+                        Array.from(params.keys()).forEach(key => {
+                            if (key.startsWith('attr_')) params.delete(key);
+                        });
+                        setSearchParams(params);
+                    }}
+                    className="hover:text-blue-600 truncate max-w-[120px] shrink-0 font-bold"
+                >
+                    {selectedCategory.name}
+                </button>
               </>
             )}
+            {/* Khmer24 Style Attribute Breadcrumbs */}
+            {dynamicAttributes.map((attr, idx) => {
+                const val = localFilters[`attr_${attr.id}`];
+                if (!val) return null;
+                return (
+                    <div key={attr.id} className="flex items-center gap-1.5 shrink-0">
+                        <svg className="w-2.5 h-2.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M9 5l7 7-7 7"/></svg>
+                        <button
+                            onClick={() => {
+                                const params = new URLSearchParams(searchParams);
+                                // Khmer24 reset logic: remove this and all subsequent attributes in the order
+                                for (let i = idx; i < dynamicAttributes.length; i++) {
+                                    params.delete(`attr_${dynamicAttributes[i].id}`);
+                                }
+                                setSearchParams(params);
+                            }}
+                            className="text-blue-600 font-bold hover:underline"
+                        >
+                            {val}
+                        </button>
+                    </div>
+                );
+            })}
             <svg className="w-2.5 h-2.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M9 5l7 7-7 7"/></svg>
             <span className="text-gray-500 shrink-0">in {fullLocationName}</span>
           </nav>
@@ -265,8 +313,8 @@ export const ProductListPage = () => {
                 </div>
             </div>
 
-        {/* Subcategories Bar */}
-        {subCategories.length > 0 && (
+        {/* Subcategories Bar - Only show when no subcategory is selected (Khmer24 flow) */}
+        {subCategories.length > 0 && !categoryId.split(',').some(id => categories.find(c => String(c.id) === id)?.parent_id) && !selectedCategory?.parent_id && (
             <div className="bg-white border border-gray-200 rounded mb-3 shadow-sm overflow-hidden">
                 <ul className="flex overflow-x-auto scrollbar-hide py-3 px-2">
                     {subCategories.map((sub) => (
@@ -288,57 +336,57 @@ export const ProductListPage = () => {
             </div>
         )}
 
-        {/* Visual Dynamic Attributes (Brand, Body Type, etc.) */}
-        {dynamicAttributes.filter(a => a.type === 'select').map(attr => {
-            const isExpanded = expandedAttrs[attr.id] || false;
-            const options = attr.options || [];
+        {/* Khmer24 Step-by-Step Selection UI */}
+        {(() => {
+            // Find the first attribute that has no value selected yet
+            const activeAttr = dynamicAttributes.find(a => a.type === 'select' && !localFilters[`attr_${a.id}`]);
+            if (!activeAttr) return null;
+
+            const isExpanded = expandedAttrs[activeAttr.id] || false;
+            const options = activeAttr.options || [];
             const visibleOptions = isExpanded ? options : options.slice(0, 12);
             const hasMore = options.length > 12;
 
-            // Determine UI style based on attribute name (Screen short reference)
-            const isCircleStyle = ['Brand', 'Body Type', 'Make'].includes(attr.name);
+            const isCircleStyle = ['Brand', 'Body Type', 'Make'].includes(activeAttr.name);
 
             return (
-                <div key={attr.id} className="bg-white border border-gray-200 rounded mb-3 shadow-sm">
+                <div key={activeAttr.id} className="bg-white border border-gray-200 rounded mb-3 shadow-sm animate-in fade-in slide-in-from-top-2 duration-500">
                     <div className="px-4 py-3 border-b border-gray-50 flex items-center justify-between">
-                        <h2 className="text-sm font-bold text-gray-800 uppercase tracking-tight">{attr.name}</h2>
+                        <h2 className="text-sm font-bold text-gray-800 uppercase tracking-tight">{activeAttr.name}</h2>
                     </div>
                     <div className="p-4">
                         <div className={`grid gap-x-2 gap-y-4 ${isCircleStyle ? 'grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10' : 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6'}`}>
-                            {visibleOptions.map((opt: any) => {
-                                const isActive = localFilters[`attr_${attr.id}`] === opt.value;
-                                return (
-                                    <button
-                                        key={opt.id}
-                                        onClick={() => applyFilters({ [`attr_${attr.id}`]: isActive ? '' : opt.value })}
-                                        className="group flex flex-col items-center gap-2 transition-all active:scale-95"
-                                    >
-                                        {isCircleStyle ? (
-                                            <div className={`size-12 sm:size-14 rounded-full flex items-center justify-center p-2.5 border transition-all ${isActive ? 'bg-blue-50 border-blue-500 ring-2 ring-blue-500/20' : 'bg-white border-gray-100 group-hover:border-blue-200'}`}>
-                                                {opt.image_url ? (
-                                                    <img src={getImageUrl(opt.image_url)} className="w-full h-full object-contain" alt={opt.value} />
-                                                ) : (
-                                                    <div className="text-[10px] font-black text-gray-300 uppercase truncate px-1">{opt.value.substring(0, 3)}</div>
-                                                )}
-                                            </div>
-                                        ) : (
-                                            <div className={`w-full py-2.5 px-3 rounded border text-center transition-all ${isActive ? 'bg-blue-50 border-blue-500 text-blue-600 font-bold' : 'bg-gray-50 border-gray-100 text-gray-700 hover:bg-gray-100'}`}>
-                                                <span className="text-[11px] truncate block">{opt.value}</span>
-                                            </div>
-                                        )}
-                                        {isCircleStyle && (
-                                            <span className={`text-[10px] sm:text-[11px] font-bold text-center leading-tight truncate px-1 ${isActive ? 'text-blue-600' : 'text-gray-600 group-hover:text-blue-500'}`}>
-                                                {opt.value}
-                                            </span>
-                                        )}
-                                    </button>
-                                );
-                            })}
+                            {visibleOptions.map((opt: any) => (
+                                <button
+                                    key={opt.id}
+                                    onClick={() => applyFilters({ [`attr_${activeAttr.id}`]: opt.value })}
+                                    className="group flex flex-col items-center gap-2 transition-all active:scale-95"
+                                >
+                                    {isCircleStyle ? (
+                                        <div className="size-12 sm:size-14 rounded-full flex items-center justify-center p-2.5 border border-gray-100 transition-all bg-white group-hover:border-blue-200 group-hover:bg-blue-50/30">
+                                            {opt.image_url ? (
+                                                <img src={getImageUrl(opt.image_url)} className="w-full h-full object-contain" alt={opt.value} />
+                                            ) : (
+                                                <div className="text-[10px] font-black text-gray-300 uppercase truncate px-1">{opt.value.substring(0, 3)}</div>
+                                            )}
+                                        </div>
+                                    ) : (
+                                        <div className="w-full py-2.5 px-3 rounded border border-gray-100 bg-gray-50 text-center transition-all group-hover:bg-blue-50 group-hover:border-blue-200 group-hover:text-blue-600 group-hover:font-bold">
+                                            <span className="text-[11px] truncate block">{opt.value}</span>
+                                        </div>
+                                    )}
+                                    {isCircleStyle && (
+                                        <span className="text-[10px] sm:text-[11px] font-bold text-center leading-tight truncate px-1 text-gray-600 group-hover:text-blue-600">
+                                            {opt.value}
+                                        </span>
+                                    )}
+                                </button>
+                            ))}
                         </div>
 
                         {hasMore && (
                             <button
-                                onClick={() => setExpandedAttrs(prev => ({ ...prev, [attr.id]: !isExpanded }))}
+                                onClick={() => setExpandedAttrs(prev => ({ ...prev, [activeAttr.id]: !isExpanded }))}
                                 className="w-full mt-6 py-2 bg-gray-100 hover:bg-gray-200 text-gray-500 text-[11px] font-bold uppercase tracking-widest rounded transition-colors flex items-center justify-center gap-1.5"
                             >
                                 {isExpanded ? 'Show Less' : 'Show More'}
@@ -348,7 +396,7 @@ export const ProductListPage = () => {
                     </div>
                 </div>
             );
-        })}
+        })()}
 
         <div className="flex flex-col gap-4 sm:gap-5">
 
