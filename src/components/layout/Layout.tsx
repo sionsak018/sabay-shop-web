@@ -1,9 +1,15 @@
-import { Outlet, Link } from 'react-router-dom';
+import { Outlet, Link, useLocation } from 'react-router-dom';
 import { Header } from './Header';
+import { useAuth } from '../../features/auth/hooks/useAuth';
 
 export const Layout = () => {
+  const location = useLocation();
+  const { user } = useAuth();
+
+  const isActive = (path: string) => location.pathname === path;
+
   return (
-    <div className="flex flex-col min-h-screen bg-gray-100 text-gray-900 antialiased font-sans">
+    <div className="flex flex-col min-h-screen bg-gray-100 text-gray-900 antialiased font-sans pb-16 md:pb-0">
       
       {/* Khmer24 Style Global Header */}
       <Header />
@@ -12,7 +18,41 @@ export const Layout = () => {
       <main className="flex-grow w-full">
         <Outlet />
       </main>
-      
+
+      {/* Khmer24 Style Bottom Navigation - Mobile Only */}
+      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-[100] md:hidden h-16 flex items-center justify-around px-2 shadow-[0_-2px_10px_rgba(0,0,0,0.05)]">
+        <Link to="/" className={`flex flex-col items-center gap-1 transition-colors ${isActive('/') ? 'text-blue-600' : 'text-gray-400'}`}>
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+          <span className="text-[9px] font-black uppercase tracking-tighter">Home</span>
+        </Link>
+
+        <Link to="/products" className={`flex flex-col items-center gap-1 transition-colors ${isActive('/products') ? 'text-blue-600' : 'text-gray-400'}`}>
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+          <span className="text-[9px] font-black uppercase tracking-tighter">Search</span>
+        </Link>
+
+        {/* Center Post Button - Prominent */}
+        <Link to="/sell" className="flex flex-col items-center -mt-8">
+          <div className="w-14 h-14 bg-blue-600 rounded-full flex items-center justify-center text-white shadow-xl shadow-blue-600/40 border-4 border-gray-100 active:scale-90 transition-transform">
+            <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M12 4v16m8-8H4"/></svg>
+          </div>
+          <span className="text-[9px] font-black uppercase tracking-tighter text-blue-600 mt-1">Post Ad</span>
+        </Link>
+
+        <Link to="/inbox" className={`flex flex-col items-center gap-1 transition-colors ${isActive('/inbox') ? 'text-blue-600' : 'text-gray-400'}`}>
+          <div className="relative">
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>
+            {/* Optional badge placeholder */}
+          </div>
+          <span className="text-[9px] font-black uppercase tracking-tighter">Chat</span>
+        </Link>
+
+        <Link to={user ? "/profile" : "/login"} className={`flex flex-col items-center gap-1 transition-colors ${isActive('/profile') || isActive('/login') ? 'text-blue-600' : 'text-gray-400'}`}>
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+          <span className="text-[9px] font-black uppercase tracking-tighter">Account</span>
+        </Link>
+      </nav>
+
       {/* Comprehensive Khmer24 Style Footer */}
       <footer className="w-full bg-white border-t border-gray-200 mt-auto">
         <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12">
