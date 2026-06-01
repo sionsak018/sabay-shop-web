@@ -10,6 +10,7 @@ export const UserPage = () => {
   const [editingUser, setEditingUser] = useState<any | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({ name: '', role: '', phone: '', account_type: 'private', post_limit: 5 });
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   const fetchData = async (page = 1, search = '') => {
     setLoading(true);
@@ -42,6 +43,7 @@ export const UserPage = () => {
   };
 
   const handleOpenModal = (user: any) => {
+    setErrors({});
     setEditingUser(user);
     setFormData({
       name: user.name,
@@ -55,6 +57,17 @@ export const UserPage = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const newErrors: Record<string, string> = {};
+    const Msg = 'ព័ត៌មាននេះត្រូវបានទាមទារ';
+
+    if (!formData.name.trim()) newErrors.name = Msg;
+    if (!formData.role) newErrors.role = Msg;
+
+    if (Object.keys(newErrors).length > 0) {
+        setErrors(newErrors);
+        return;
+    }
+
     try {
       await api.put(`/admin/users/${editingUser.id}`, formData);
       setIsModalOpen(false);
@@ -149,21 +162,44 @@ export const UserPage = () => {
               <h2 className="text-sm font-bold text-gray-800 uppercase tracking-widest">Edit User</h2>
               <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-gray-600"><svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12"/></svg></button>
             </div>
-            <form onSubmit={handleSubmit} className="p-6 space-y-4">
+            <form onSubmit={handleSubmit} noValidate className="p-6 space-y-4">
               <div>
-                <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Name</label>
-                <input type="text" required value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} className="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm font-bold outline-none focus:border-blue-500" />
+                <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Name <span className="text-red-500">*</span></label>
+                <input
+                    type="text"
+                    value={formData.name}
+                    onChange={(e) => {
+                        setFormData({ ...formData, name: e.target.value });
+                        if (errors.name) setErrors(prev => ({ ...prev, name: '' }));
+                    }}
+                    className={`w-full px-4 py-2 border rounded-lg text-sm font-bold outline-none transition-all ${errors.name ? 'border-red-300' : 'border-gray-200 focus:border-blue-500'}`}
+                />
+                {errors.name && <p className="text-red-500 text-[10px] font-bold mt-1 ml-1">{errors.name}</p>}
               </div>
               <div>
-                <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Role</label>
-                <select required value={formData.role} onChange={(e) => setFormData({ ...formData, role: e.target.value })} className="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm font-bold outline-none bg-white">
+                <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Role <span className="text-red-500">*</span></label>
+                <select
+                    value={formData.role}
+                    onChange={(e) => {
+                        setFormData({ ...formData, role: e.target.value });
+                        if (errors.role) setErrors(prev => ({ ...prev, role: '' }));
+                    }}
+                    className={`w-full px-4 py-2 border rounded-lg text-sm font-bold outline-none bg-white transition-all ${errors.role ? 'border-red-300' : 'border-gray-200 focus:border-blue-500'}`}
+                >
+                    <option value="">Select Role</option>
                     <option value="user">User</option>
                     <option value="admin">Admin</option>
                 </select>
+                {errors.role && <p className="text-red-500 text-[10px] font-bold mt-1 ml-1">{errors.role}</p>}
               </div>
               <div>
                 <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Phone</label>
-                <input type="text" value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} className="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm font-bold outline-none focus:border-blue-500" />
+                <input
+                    type="text"
+                    value={formData.phone}
+                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm font-bold outline-none focus:border-blue-500"
+                />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>

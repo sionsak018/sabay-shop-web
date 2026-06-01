@@ -19,6 +19,7 @@ export const AttributePage = () => {
     type: 'text',
     options: [{ value: '', image: null }] as OptionItem[]
   });
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   const fetchAttributes = async () => {
     try {
@@ -36,6 +37,7 @@ export const AttributePage = () => {
   }, []);
 
   const handleOpenModal = (attr: any | null = null) => {
+    setErrors({});
     if (attr) {
       setEditingAttr(attr);
       setFormData({
@@ -75,6 +77,22 @@ export const AttributePage = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const newErrors: Record<string, string> = {};
+    const Msg = 'ព័ត៌មាននេះត្រូវបានទាមទារ';
+
+    if (!formData.name.trim()) newErrors.name = Msg;
+
+    if (formData.type === 'select') {
+        const emptyOptions = formData.options.some(o => !o.value.trim());
+        if (emptyOptions) newErrors.options = 'សូមបំពេញគ្រប់ជម្រើសទាំងអស់';
+        if (formData.options.length === 0) newErrors.options = Msg;
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+        setErrors(newErrors);
+        return;
+    }
+
     try {
       const submitData = new FormData();
       submitData.append('name', formData.name);
@@ -186,10 +204,20 @@ export const AttributePage = () => {
               <button onClick={() => setIsModalOpen(false)} className="w-8 h-8 flex items-center justify-center text-gray-400 hover:bg-gray-200 hover:text-gray-900 rounded-full transition-all"><svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12"/></svg></button>
             </div>
             <div className="overflow-y-auto flex-1 custom-scrollbar">
-              <form id="attr-form" onSubmit={handleSubmit} className="p-8 space-y-6">
+              <form id="attr-form" onSubmit={handleSubmit} noValidate className="p-8 space-y-6">
                 <div>
-                  <label className="block text-[10px] font-black text-gray-400 uppercase mb-2 tracking-widest">Field Name (e.g. Brand, Color, RAM)</label>
-                  <input type="text" required value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold outline-none focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all" placeholder="Enter field name..." />
+                  <label className="block text-[10px] font-black text-gray-400 uppercase mb-2 tracking-widest">Field Name <span className="text-red-500">*</span></label>
+                  <input
+                    type="text"
+                    value={formData.name}
+                    onChange={(e) => {
+                        setFormData({ ...formData, name: e.target.value });
+                        if (errors.name) setErrors(prev => ({ ...prev, name: '' }));
+                    }}
+                    className={`w-full px-4 py-3 bg-gray-50 border rounded-xl text-sm font-bold outline-none focus:bg-white transition-all ${errors.name ? 'border-red-300' : 'border-gray-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10'}`}
+                    placeholder="Enter field name..."
+                  />
+                  {errors.name && <p className="text-red-500 text-[10px] font-bold mt-1.5 ml-1">{errors.name}</p>}
                 </div>
               <div>
                 <label className="block text-[10px] font-black text-gray-400 uppercase mb-2 tracking-widest">Input Type for Users</label>
@@ -203,13 +231,18 @@ export const AttributePage = () => {
               {formData.type === 'select' && (
                 <div className="space-y-4 pt-4 border-t border-dashed border-gray-100">
                   <div className="flex items-center justify-between">
-                    <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest">Define Options & Icons</label>
-                    <button type="button" onClick={handleAddOption} className="text-[10px] font-black text-blue-600 hover:text-blue-700 bg-blue-50 px-3 py-1 rounded-full uppercase tracking-tighter transition-colors">+ Add Option</button>
+                    <label className={`block text-[10px] font-black uppercase tracking-widest ${errors.options ? 'text-red-500' : 'text-gray-400'}`}>Define Options & Icons</label>
+                    <button type="button" onClick={() => {
+                        handleAddOption();
+                        if (errors.options) setErrors(prev => ({ ...prev, options: '' }));
+                    }} className="text-[10px] font-black text-blue-600 hover:text-blue-700 bg-blue-50 px-3 py-1 rounded-full uppercase tracking-tighter transition-colors">+ Add Option</button>
                   </div>
+
+                  {errors.options && <p className="text-red-500 text-[10px] font-bold mb-2 ml-1">{errors.options}</p>}
 
                   <div className="space-y-3">
                     {formData.options.map((opt, idx) => (
-                        <div key={idx} className="flex items-center gap-3 bg-gray-50/50 p-3 rounded-2xl border border-gray-100">
+                        <div key={idx} className={`flex items-center gap-3 bg-gray-50/50 p-3 rounded-2xl border transition-all ${errors.options && !opt.value.trim() ? 'border-red-300 bg-red-50/30' : 'border-gray-100'}`}>
                             <div className="relative group size-12 flex-shrink-0">
                                 <label className="size-12 rounded-full border-2 border-dashed border-gray-200 bg-white flex items-center justify-center cursor-pointer hover:border-blue-500 transition-all overflow-hidden shadow-sm">
                                     {opt.image || opt.image_url ? (
@@ -219,7 +252,7 @@ export const AttributePage = () => {
                                             alt="Icon"
                                         />
                                     ) : (
-                                        <svg className="w-5 h-5 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 00-2 2z"/></svg>
+                                        <svg className="w-5 h-5 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                                     )}
                                     <input
                                         type="file"
@@ -232,9 +265,11 @@ export const AttributePage = () => {
 
                             <input
                                 type="text"
-                                required
                                 value={opt.value}
-                                onChange={(e) => handleOptionValueChange(idx, e.target.value)}
+                                onChange={(e) => {
+                                    handleOptionValueChange(idx, e.target.value);
+                                    if (errors.options) setErrors(prev => ({ ...prev, options: '' }));
+                                }}
                                 className="flex-1 min-w-0 bg-transparent text-sm font-bold outline-none border-b-2 border-transparent focus:border-blue-500 transition-all py-1"
                                 placeholder="Option label (e.g. Toyota)"
                             />

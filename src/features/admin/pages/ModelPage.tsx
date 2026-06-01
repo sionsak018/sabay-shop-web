@@ -8,6 +8,7 @@ export const ModelPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingModel, setEditingModel] = useState<BrandModel | null>(null);
   const [formData, setFormData] = useState({ name: '', slug: '', brand_id: '' });
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   const fetchData = async () => {
     try {
@@ -29,6 +30,7 @@ export const ModelPage = () => {
   }, []);
 
   const handleOpenModal = (model: BrandModel | null = null) => {
+    setErrors({});
     if (model) {
       setEditingModel(model);
       setFormData({
@@ -45,6 +47,18 @@ export const ModelPage = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const newErrors: Record<string, string> = {};
+    const Msg = 'ព័ត៌មាននេះត្រូវបានទាមទារ';
+
+    if (!formData.brand_id) newErrors.brand_id = Msg;
+    if (!formData.name.trim()) newErrors.name = Msg;
+    if (!formData.slug.trim()) newErrors.slug = Msg;
+
+    if (Object.keys(newErrors).length > 0) {
+        setErrors(newErrors);
+        return;
+    }
+
     try {
       const data = { ...formData, brand_id: Number(formData.brand_id) };
       if (editingModel) {
@@ -132,21 +146,47 @@ export const ModelPage = () => {
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
               </button>
             </div>
-            <form onSubmit={handleSubmit} className="p-6 space-y-4">
+            <form onSubmit={handleSubmit} noValidate className="p-6 space-y-4">
               <div>
-                <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Brand</label>
-                <select required value={formData.brand_id} onChange={(e) => setFormData({ ...formData, brand_id: e.target.value })} className="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm font-bold outline-none bg-white">
-                  <option value="" disabled>Select Brand</option>
+                <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Brand <span className="text-red-500">*</span></label>
+                <select
+                    value={formData.brand_id}
+                    onChange={(e) => {
+                        setFormData({ ...formData, brand_id: e.target.value });
+                        if (errors.brand_id) setErrors(prev => ({ ...prev, brand_id: '' }));
+                    }}
+                    className={`w-full px-4 py-2 border rounded-lg text-sm font-bold outline-none bg-white transition-all ${errors.brand_id ? 'border-red-300' : 'border-gray-200 focus:border-blue-500'}`}
+                >
+                  <option value="">Select Brand</option>
                   {brands.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
                 </select>
+                {errors.brand_id && <p className="text-red-500 text-[10px] font-bold mt-1 ml-1">{errors.brand_id}</p>}
               </div>
               <div>
-                <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Name</label>
-                <input type="text" required value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} className="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm font-bold outline-none" />
+                <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Name <span className="text-red-500">*</span></label>
+                <input
+                    type="text"
+                    value={formData.name}
+                    onChange={(e) => {
+                        setFormData({ ...formData, name: e.target.value });
+                        if (errors.name) setErrors(prev => ({ ...prev, name: '' }));
+                    }}
+                    className={`w-full px-4 py-2 border rounded-lg text-sm font-bold outline-none transition-all ${errors.name ? 'border-red-300' : 'border-gray-200 focus:border-blue-500'}`}
+                />
+                {errors.name && <p className="text-red-500 text-[10px] font-bold mt-1 ml-1">{errors.name}</p>}
               </div>
               <div>
-                <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Slug</label>
-                <input type="text" required value={formData.slug} onChange={(e) => setFormData({ ...formData, slug: e.target.value })} className="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm outline-none" />
+                <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Slug <span className="text-red-500">*</span></label>
+                <input
+                    type="text"
+                    value={formData.slug}
+                    onChange={(e) => {
+                        setFormData({ ...formData, slug: e.target.value });
+                        if (errors.slug) setErrors(prev => ({ ...prev, slug: '' }));
+                    }}
+                    className={`w-full px-4 py-2 border rounded-lg text-sm outline-none transition-all ${errors.slug ? 'border-red-300' : 'border-gray-200 focus:border-blue-500'}`}
+                />
+                {errors.slug && <p className="text-red-500 text-[10px] font-bold mt-1 ml-1">{errors.slug}</p>}
               </div>
               <div className="pt-4 flex gap-3">
                 <button type="button" onClick={() => setIsModalOpen(false)} className="flex-1 px-4 py-2.5 bg-gray-100 text-gray-600 rounded-lg font-bold text-sm">Cancel</button>

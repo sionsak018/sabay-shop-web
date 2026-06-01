@@ -8,6 +8,7 @@ export const SliderPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingSlider, setEditingSlider] = useState<Slider | null>(null);
   const [formData, setFormData] = useState({ title: '', link_url: '', sort_order: '0' });
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
 
@@ -28,6 +29,7 @@ export const SliderPage = () => {
   }, []);
 
   const handleOpenModal = (slider: Slider | null = null) => {
+    setErrors({});
     if (slider) {
       setEditingSlider(slider);
       setFormData({
@@ -55,6 +57,16 @@ export const SliderPage = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const newErrors: Record<string, string> = {};
+    const Msg = 'ព័ត៌មាននេះត្រូវបានទាមទារ';
+
+    if (!editingSlider && !imageFile) newErrors.image = Msg;
+
+    if (Object.keys(newErrors).length > 0) {
+        setErrors(newErrors);
+        return;
+    }
+
     const data = new FormData();
     data.append('title', formData.title);
     data.append('link_url', formData.link_url);
@@ -129,20 +141,24 @@ export const SliderPage = () => {
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
               </button>
             </div>
-            <form onSubmit={handleSubmit} className="p-6 space-y-6">
+            <form onSubmit={handleSubmit} noValidate className="p-6 space-y-6">
               <div className="flex justify-center">
-                <label className="relative w-full aspect-[21/9] rounded-xl border-2 border-dashed border-gray-200 flex flex-col items-center justify-center cursor-pointer hover:border-blue-400 hover:bg-blue-50 transition overflow-hidden">
+                <label className={`relative w-full aspect-[21/9] rounded-xl border-2 border-dashed flex flex-col items-center justify-center cursor-pointer transition overflow-hidden ${errors.image ? 'border-red-300 bg-red-50' : 'border-gray-200 hover:border-blue-400 hover:bg-blue-50'}`}>
                   {imagePreview ? (
                     <img src={imagePreview} className="w-full h-full object-cover" />
                   ) : (
                     <>
-                      <svg className="w-10 h-10 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                      <span className="text-xs font-bold text-gray-400 uppercase mt-2">Upload Banner (21:9 ratio recommended)</span>
+                      <svg className={`w-10 h-10 ${errors.image ? 'text-red-400' : 'text-gray-300'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                      <span className={`text-xs font-bold uppercase mt-2 ${errors.image ? 'text-red-500' : 'text-gray-400'}`}>Upload Banner (21:9 ratio recommended)</span>
                     </>
                   )}
-                  <input type="file" className="hidden" onChange={handleImageChange} accept="image/*" />
+                  <input type="file" className="hidden" onChange={(e) => {
+                      handleImageChange(e);
+                      if (errors.image) setErrors(prev => ({ ...prev, image: '' }));
+                  }} accept="image/*" />
                 </label>
               </div>
+              {errors.image && <p className="text-red-500 text-[10px] font-bold -mt-4 ml-1">{errors.image}</p>}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-xs font-bold text-gray-400 uppercase mb-2">Title (Optional)</label>

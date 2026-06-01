@@ -8,6 +8,7 @@ export const ProvincePage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProv, setEditingProv] = useState<any | null>(null);
   const [formData, setFormData] = useState({ name: '', code: '' });
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   // Pagination & Search
   const [pagination, setPagination] = useState({ currentPage: 1, lastPage: 1, total: 0 });
@@ -45,6 +46,7 @@ export const ProvincePage = () => {
   };
 
   const handleOpenModal = (prov: any | null = null) => {
+    setErrors({});
     if (prov) {
       setEditingProv(prov);
       setFormData({ name: prov.name, code: prov.code });
@@ -57,6 +59,17 @@ export const ProvincePage = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const newErrors: Record<string, string> = {};
+    const Msg = 'ព័ត៌មាននេះត្រូវបានទាមទារ';
+
+    if (!formData.name.trim()) newErrors.name = Msg;
+    if (!formData.code.trim()) newErrors.code = Msg;
+
+    if (Object.keys(newErrors).length > 0) {
+        setErrors(newErrors);
+        return;
+    }
+
     try {
       if (editingProv) {
         await api.put(`/admin/provinces/${editingProv.id}`, formData);
@@ -151,14 +164,34 @@ export const ProvincePage = () => {
               <h2 className="text-sm font-bold text-gray-800 uppercase tracking-widest">{editingProv ? 'Edit Province' : 'New Province'}</h2>
               <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-gray-600"><svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12"/></svg></button>
             </div>
-            <form onSubmit={handleSubmit} className="p-6 space-y-4">
+            <form onSubmit={handleSubmit} noValidate className="p-6 space-y-4">
               <div>
-                <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Province Name</label>
-                <input type="text" required value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm font-bold outline-none focus:border-blue-500" placeholder="e.g. Phnom Penh" />
+                <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Province Name <span className="text-red-500">*</span></label>
+                <input
+                    type="text"
+                    value={formData.name}
+                    onChange={(e) => {
+                        setFormData({ ...formData, name: e.target.value });
+                        if (errors.name) setErrors(prev => ({ ...prev, name: '' }));
+                    }}
+                    className={`w-full px-4 py-2.5 border rounded-lg text-sm font-bold outline-none transition-all ${errors.name ? 'border-red-300' : 'border-gray-200 focus:border-blue-500'}`}
+                    placeholder="e.g. Phnom Penh"
+                />
+                {errors.name && <p className="text-red-500 text-[10px] font-bold mt-1 ml-1">{errors.name}</p>}
               </div>
               <div>
-                <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Code</label>
-                <input type="text" required value={formData.code} onChange={(e) => setFormData({ ...formData, code: e.target.value })} className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm font-medium outline-none focus:border-blue-500" placeholder="e.g. PP" />
+                <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Code <span className="text-red-500">*</span></label>
+                <input
+                    type="text"
+                    value={formData.code}
+                    onChange={(e) => {
+                        setFormData({ ...formData, code: e.target.value });
+                        if (errors.code) setErrors(prev => ({ ...prev, code: '' }));
+                    }}
+                    className={`w-full px-4 py-2.5 border rounded-lg text-sm font-medium outline-none transition-all ${errors.code ? 'border-red-300' : 'border-gray-200 focus:border-blue-500'}`}
+                    placeholder="e.g. PP"
+                />
+                {errors.code && <p className="text-red-500 text-[10px] font-bold mt-1 ml-1">{errors.code}</p>}
               </div>
               <div className="pt-4 flex gap-3">
                 <button type="button" onClick={() => setIsModalOpen(false)} className="flex-1 px-4 py-2.5 bg-gray-100 text-gray-600 rounded-lg font-bold text-sm">Cancel</button>
