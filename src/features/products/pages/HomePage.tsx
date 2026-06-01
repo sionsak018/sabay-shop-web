@@ -49,63 +49,65 @@ export const HomePage = () => {
     <div className="min-h-screen bg-[#f1f2f6] text-gray-900 antialiased pb-20 font-sans">
       
       {/* Khmer24 Style Header Search */}
-      <div className="bg-white border-b border-gray-200 py-4 sticky top-14 z-40 shadow-sm">
+      <div className="bg-white border-b border-gray-200 py-3 sm:py-4 sticky top-14 z-40 shadow-sm">
         <div className="container mx-auto px-4 max-w-7xl">
           <div className="flex flex-col md:flex-row gap-2">
-            <div className="flex-grow relative">
+            <div className="flex-grow relative order-1">
               <input
                 type="text"
                 placeholder="What are you looking for..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                className="w-full pl-4 pr-10 py-2.5 border border-[#ced4da] rounded-md focus:border-blue-500 focus:ring-0 outline-none transition placeholder:text-gray-400 font-medium text-sm"
+                className="w-full pl-4 pr-10 py-2 sm:py-2.5 border border-[#ced4da] rounded-md focus:border-blue-500 focus:ring-0 outline-none transition placeholder:text-gray-400 font-medium text-sm"
               />
               <button onClick={handleSearch} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-blue-600">
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
               </button>
             </div>
 
-            <div className="md:w-56 relative">
-              <select
-                value={selectedProvince}
-                onChange={(e) => setSelectedProvince(e.target.value)}
-                className="w-full px-3 py-2.5 border border-[#ced4da] rounded-md appearance-none bg-white focus:border-blue-500 outline-none transition text-gray-700 font-bold text-sm"
-              >
-                <option value="">All Cambodia</option>
-                {provinces.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-              </select>
-              <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
-                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"/></svg>
+            <div className="flex gap-2 order-2">
+              <div className="flex-1 md:w-56 relative">
+                <select
+                  value={selectedProvince}
+                  onChange={(e) => setSelectedProvince(e.target.value)}
+                  className="w-full px-3 py-2 sm:py-2.5 border border-[#ced4da] rounded-md appearance-none bg-white focus:border-blue-500 outline-none transition text-gray-700 font-bold text-sm"
+                >
+                  <option value="">All Cambodia</option>
+                  {provinces.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+                </select>
+                <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
+                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"/></svg>
+                </div>
               </div>
-            </div>
 
-            <button
-              onClick={handleSearch}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-2.5 rounded-md font-bold transition flex items-center justify-center gap-2 shadow-sm uppercase tracking-wider text-xs"
-            >
-              Search
-            </button>
+              <button
+                onClick={handleSearch}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-6 sm:px-8 py-2 sm:py-2.5 rounded-md font-bold transition flex items-center justify-center gap-2 shadow-sm uppercase tracking-wider text-[11px] sm:text-xs min-w-[100px]"
+              >
+                Search
+              </button>
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="container mx-auto px-4 max-w-7xl mt-3">
+      <div className="container mx-auto px-4 max-w-7xl mt-2 sm:mt-3">
 
         {/* Browse By Category Section */}
-        <div className="bg-white border border-gray-200 rounded-md p-4 shadow-sm">
-            <h2 className="text-base font-bold mb-4 text-gray-800">Browse By Category</h2>
-            <ul className="text-center grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-1.5">
+        <div className="bg-white border border-gray-200 rounded-md p-3 sm:p-4 shadow-sm">
+            <h2 className="text-sm sm:text-base font-bold mb-3 sm:mb-4 text-gray-800">Browse By Category</h2>
+            <ul className="text-center grid grid-cols-3 sm:grid-cols-4 md:grid-cols-4 lg:grid-cols-6 gap-1 sm:gap-2">
                 {mainCategories.map((cat) => (
                     <li key={cat.id}>
                         <button
                             onClick={() => browseCategory(cat.id)}
-                            className="block w-full h-full group bg-white rounded cursor-pointer active:opacity-50 p-2.5 transition-all hover:bg-[#f8f9fa]"
+                            className="block w-full h-full group bg-white rounded cursor-pointer active:opacity-50 p-1.5 sm:p-2.5 transition-all hover:bg-[#f8f9fa]"
                         >
-                            <div className="mx-auto bg-[#e9ecef] rounded-full mt-1 group-hover:bg-[#dee2e6] transition-all size-14 flex items-center justify-center p-2.5">
+                            <div className="mx-auto bg-[#e9ecef] rounded-full mt-1 group-hover:bg-[#dee2e6] transition-all size-10 sm:size-14 flex items-center justify-center p-1.5 sm:p-2.5">
                                 <CategoryIcon cat={cat} className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-300" />
                             </div>
-                            <p className="overflow-hidden text-ellipsis mt-2.5 text-[13px] font-medium text-gray-800 group-hover:text-blue-600 leading-tight">
+                            <p className="overflow-hidden text-ellipsis mt-1.5 sm:mt-2.5 text-[10px] sm:text-[13px] font-bold text-gray-700 group-hover:text-blue-600 leading-tight">
                                 {cat.name}
                             </p>
                         </button>

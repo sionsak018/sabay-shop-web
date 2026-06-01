@@ -54,6 +54,7 @@ export const ProductListPage = () => {
       return initial;
   });
 
+  const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
   const topRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -130,17 +131,17 @@ export const ProductListPage = () => {
   const provinceName = provinces.find(p => String(p.id) === searchParams.get('province_id'))?.name || 'Cambodia';
 
   return (
-    <div ref={topRef} className="min-h-screen bg-[#f1f2f6] pb-20 text-left antialiased font-sans">
+    <div ref={topRef} className="min-h-screen bg-[#f1f2f6] pb-20 text-left antialiased font-sans relative">
 
       {/* Search Bar - Khmer24 Style */}
-      <div className="bg-white border-b border-gray-200 py-3 shadow-sm sticky top-16 z-30">
-        <div className="container mx-auto px-4 max-w-7xl">
-             <div className="relative">
+      <div className="bg-white border-b border-gray-200 py-3 shadow-sm sticky top-14 z-30">
+        <div className="container mx-auto px-4 max-w-7xl flex gap-2">
+             <div className="relative flex-1">
                 <input
                     type="text"
                     defaultValue={keyword}
                     placeholder="Search in all categories..."
-                    className="w-full bg-[#f8f9fa] border border-[#dee2e6] px-4 py-2.5 rounded focus:bg-white focus:border-blue-500 outline-none text-sm font-medium text-gray-700 transition-all"
+                    className="w-full bg-[#f8f9fa] border border-[#dee2e6] px-4 py-2 rounded focus:bg-white focus:border-blue-500 outline-none text-sm font-medium text-gray-700 transition-all"
                     onKeyDown={e => {
                         if (e.key === 'Enter') {
                             const params = new URLSearchParams(searchParams);
@@ -151,38 +152,238 @@ export const ProductListPage = () => {
                 />
                 <svg className="w-4 h-4 absolute right-4 top-1/2 -translate-y-1/2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
              </div>
+
+             {/* Mobile Filter Toggle */}
+             <button
+                onClick={() => setIsMobileFilterOpen(true)}
+                className="lg:hidden p-2.5 bg-blue-600 text-white rounded shadow-md active:scale-95 transition-transform"
+             >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg>
+             </button>
         </div>
       </div>
 
 
       {/* Breadcrumbs - Khmer24 Style */}
-      <div className="py-3">
+      <div className="py-2.5">
         <div className="container mx-auto px-4 max-w-7xl">
-          <nav className="flex text-xs font-bold text-gray-400 gap-1.5 items-center">
-            <Link to="/" className="hover:text-blue-600 transition-colors">Home</Link>
+          <nav className="flex text-[10px] sm:text-xs font-bold text-gray-400 gap-1.5 items-center overflow-x-auto whitespace-nowrap scrollbar-hide pb-0.5">
+            <Link to="/" className="hover:text-blue-600 transition-colors shrink-0">Home</Link>
             {mainCategory && (
               <>
-                <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M9 5l7 7-7 7"/></svg>
-                <button onClick={() => setCategory(String(mainCategory.id))} className="hover:text-blue-600 truncate max-w-[150px]">{mainCategory.name}</button>
+                <svg className="w-2.5 h-2.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M9 5l7 7-7 7"/></svg>
+                <button onClick={() => setCategory(String(mainCategory.id))} className="hover:text-blue-600 truncate max-w-[120px] shrink-0">{mainCategory.name}</button>
               </>
             )}
             {selectedCategory && selectedCategory.parent_id && (
               <>
-                <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M9 5l7 7-7 7"/></svg>
-                <span className="text-blue-600 truncate max-w-[150px]">{selectedCategory.name}</span>
+                <svg className="w-2.5 h-2.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M9 5l7 7-7 7"/></svg>
+                <span className="text-blue-600 truncate max-w-[120px] shrink-0">{selectedCategory.name}</span>
               </>
             )}
-            <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M9 5l7 7-7 7"/></svg>
-            <span className="text-gray-500">in {provinceName}</span>
+            <svg className="w-2.5 h-2.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M9 5l7 7-7 7"/></svg>
+            <span className="text-gray-500 shrink-0">in {provinceName}</span>
           </nav>
         </div>
       </div>
 
       <div className="container mx-auto px-4 max-w-7xl">
-        <div className="flex flex-col lg:flex-row gap-5">
+        <div className="flex flex-col lg:flex-row gap-4 sm:gap-5">
 
-          {/* Sidebar - Hierarchical Tree */}
-          <aside className="lg:w-64 space-y-4 flex-shrink-0">
+          {/* Desktop Sidebar */}
+          <aside className="lg:w-64 space-y-4 flex-shrink-0 hidden lg:block">
+            {/* ... category tree ... */}
+            <div className="bg-white border border-gray-200 rounded-md overflow-hidden shadow-sm">
+                <div className="bg-[#f8f9fa] px-4 py-2 border-b border-gray-200">
+                    <h2 className="text-xs font-bold text-gray-700 uppercase tracking-tight">Categories</h2>
+                </div>
+                <div className="p-1">
+                    {!mainCategory ? (
+                        <div className="space-y-0.5">
+                            {categories.filter(c => !c.parent_id).map(cat => (
+                                <button
+                                    key={cat.id}
+                                    onClick={() => setCategory(String(cat.id))}
+                                    className="w-full text-left px-3 py-1.5 rounded text-[13px] text-gray-600 hover:bg-[#f1f2f6] flex items-center gap-2 transition"
+                                >
+                                    <CategoryIcon cat={cat} className="w-5 h-5 opacity-60 grayscale" />
+                                    {cat.name}
+                                </button>
+                            ))}
+                        </div>
+                    ) : (
+                        <div>
+                            <button
+                                onClick={() => setCategory('')}
+                                className="w-full text-left px-3 py-1.5 text-xs text-blue-600 hover:bg-blue-50 flex items-center gap-1 font-bold rounded"
+                            >
+                                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M15 19l-7-7 7-7"/></svg>
+                                All Categories
+                            </button>
+
+                            <div className="mt-2 px-3 py-1.5 text-sm font-bold text-gray-900 bg-[#f1f2f6] border-y border-gray-200 flex items-center gap-2">
+                                <CategoryIcon cat={mainCategory} className="w-4 h-4" />
+                                {mainCategory.name}
+                            </div>
+
+                            <div className="mt-1 space-y-0.5">
+                                <button
+                                    onClick={() => setCategory(String(mainCategory.id))}
+                                    className={`w-full text-left px-4 py-1.5 text-[13px] rounded transition ${categoryId === String(mainCategory.id) ? 'bg-blue-600 text-white font-bold' : 'text-gray-600 hover:bg-[#f1f2f6]'}`}
+                                >
+                                    All {mainCategory.name}
+                                </button>
+                                {subCategories.map(sub => (
+                                    <button
+                                        key={sub.id}
+                                        onClick={() => setCategory(String(sub.id))}
+                                        className={`w-full text-left px-4 py-1.5 text-[13px] rounded transition flex items-center gap-2 ${categoryId === String(sub.id) ? 'bg-blue-600 text-white font-bold' : 'text-gray-600 hover:bg-[#f1f2f6]'}`}
+                                    >
+                                        <CategoryIcon cat={sub} className={`w-4 h-4 ${categoryId === String(sub.id) ? '' : 'opacity-60 grayscale'}`} />
+                                        {sub.name}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                </div>
+            </div>
+
+            {/* Price Range Filter */}
+            <div className="bg-white border border-gray-200 rounded-md overflow-hidden shadow-sm">
+                <div className="bg-[#f8f9fa] px-4 py-2 border-b border-gray-200">
+                    <h2 className="text-xs font-bold text-gray-700 uppercase tracking-tight">Price Range</h2>
+                </div>
+                <div className="p-4 space-y-3">
+                    <div className="flex items-center gap-2">
+                        <div className="relative flex-1">
+                            <span className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400 text-[10px]">$</span>
+                            <input
+                                type="number"
+                                placeholder="Min"
+                                value={localFilters.min_price}
+                                onChange={e => setLocalFilters({...localFilters, min_price: e.target.value})}
+                                className="w-full pl-5 pr-2 py-1.5 bg-[#f8f9fa] border border-[#ced4da] rounded text-sm outline-none focus:bg-white focus:border-blue-500"
+                            />
+                        </div>
+                        <span className="text-gray-300">-</span>
+                        <div className="relative flex-1">
+                            <span className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400 text-[10px]">$</span>
+                            <input
+                                type="number"
+                                placeholder="Max"
+                                value={localFilters.max_price}
+                                onChange={e => setLocalFilters({...localFilters, max_price: e.target.value})}
+                                className="w-full pl-5 pr-2 py-1.5 bg-[#f8f9fa] border border-[#ced4da] rounded text-sm outline-none focus:bg-white focus:border-blue-500"
+                            />
+                        </div>
+                    </div>
+                    <button onClick={() => applyFilters()} className="w-full bg-blue-600 text-white py-1.5 rounded text-xs font-bold hover:bg-blue-700 transition">Apply</button>
+                </div>
+            </div>
+
+            {/* Location Selection */}
+            <div className="bg-white border border-gray-200 rounded-md overflow-hidden shadow-sm">
+                <div className="bg-[#f8f9fa] px-4 py-2 border-b border-gray-200">
+                    <h2 className="text-sm font-bold text-gray-800 uppercase tracking-tight">Location</h2>
+                </div>
+                <div className="p-2 max-h-80 overflow-y-auto custom-scrollbar">
+                    <button
+                        onClick={() => applyFilters({ province_id: '' })}
+                        className={`w-full text-left px-3 py-1.5 text-[13px] rounded transition ${!localFilters.province_id ? 'bg-blue-50 text-blue-600 font-bold' : 'text-gray-600 hover:bg-[#f1f2f6]'}`}
+                    >
+                        All Cambodia
+                    </button>
+                    {provinces.map(p => (
+                        <button
+                            key={p.id}
+                            onClick={() => applyFilters({ province_id: String(p.id) })}
+                            className={`w-full text-left px-3 py-1.5 text-[13px] rounded transition ${localFilters.province_id === String(p.id) ? 'bg-blue-50 text-blue-600 font-bold' : 'text-gray-600 hover:bg-[#f1f2f6]'}`}
+                        >
+                            {p.name}
+                        </button>
+                    ))}
+                </div>
+            </div>
+          </aside>
+
+          {/* Mobile Filter Modal */}
+          {isMobileFilterOpen && (
+            <div className="fixed inset-0 z-50 bg-white flex flex-col animate-in slide-in-from-bottom duration-300 lg:hidden">
+              <div className="h-14 flex items-center justify-between px-4 border-b border-gray-200 sticky top-0 bg-white">
+                <h2 className="font-bold text-gray-800">Filter & Sort</h2>
+                <button onClick={() => setIsMobileFilterOpen(false)} className="p-2 text-gray-400 hover:text-red-500">
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+              </div>
+              <div className="flex-1 overflow-y-auto p-4 space-y-8">
+                {/* Categories */}
+                <div className="space-y-4">
+                  <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest">Categories</h3>
+                  <div className="grid grid-cols-2 gap-2">
+                    {categories.filter(c => !c.parent_id).map(cat => (
+                      <button
+                        key={cat.id}
+                        onClick={() => { setCategory(String(cat.id)); setIsMobileFilterOpen(false); }}
+                        className={`flex items-center gap-2 p-3 rounded-lg border transition ${categoryId === String(cat.id) ? 'border-blue-600 bg-blue-50 text-blue-600' : 'border-gray-100 bg-gray-50'}`}
+                      >
+                        <CategoryIcon cat={cat} className="w-5 h-5 shrink-0" />
+                        <span className="text-[11px] font-bold truncate">{cat.name}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Price Range */}
+                <div className="space-y-4">
+                  <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest">Price Range ($)</h3>
+                  <div className="flex gap-4">
+                    <input
+                      type="number"
+                      placeholder="Min"
+                      value={localFilters.min_price}
+                      onChange={e => setLocalFilters({...localFilters, min_price: e.target.value})}
+                      className="flex-1 bg-gray-50 border border-gray-200 p-3 rounded-xl outline-none focus:bg-white focus:border-blue-500 transition-all font-bold"
+                    />
+                    <input
+                      type="number"
+                      placeholder="Max"
+                      value={localFilters.max_price}
+                      onChange={e => setLocalFilters({...localFilters, max_price: e.target.value})}
+                      className="flex-1 bg-gray-50 border border-gray-200 p-3 rounded-xl outline-none focus:bg-white focus:border-blue-500 transition-all font-bold"
+                    />
+                  </div>
+                </div>
+
+                {/* Locations */}
+                <div className="space-y-4 pb-10">
+                  <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest">Locations</h3>
+                  <div className="grid grid-cols-2 gap-2">
+                    {provinces.map(p => (
+                      <button
+                        key={p.id}
+                        onClick={() => setLocalFilters({...localFilters, province_id: String(p.id)})}
+                        className={`p-3 rounded-lg border text-center transition ${localFilters.province_id === String(p.id) ? 'border-blue-600 bg-blue-50 text-blue-600 font-black' : 'border-gray-100 bg-gray-50 text-gray-600 font-bold'} text-[11px]`}
+                      >
+                        {p.name}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              <div className="p-4 border-t border-gray-100 bg-white sticky bottom-0">
+                <button
+                  onClick={() => { applyFilters(); setIsMobileFilterOpen(false); }}
+                  className="w-full bg-blue-600 text-white py-4 rounded-xl font-black uppercase tracking-widest shadow-xl shadow-blue-600/30 active:scale-[0.98] transition-all"
+                >
+                  Apply Filters
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Product Grid Area */}
+          <div className="flex-grow">
 
             <div className="bg-white border border-gray-200 rounded-md overflow-hidden shadow-sm">
                 <div className="bg-[#f8f9fa] px-4 py-2 border-b border-gray-200">
