@@ -1,3 +1,4 @@
+import React, { useState, useEffect } from 'react';
 import { productSpecApi, type BodyType } from '../services/productSpecApi';
 import { getImageUrl } from '../../../utils/imageUrl';
 
