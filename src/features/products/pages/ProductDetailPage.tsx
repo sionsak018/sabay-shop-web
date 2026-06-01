@@ -110,7 +110,7 @@ export const ProductDetailPage = () => {
 
   const images = product.images?.length > 0
     ? product.images.map((img: any) => getImageUrl(img.image_url))
-    : ['https://via.placeholder.com/800x600?text=No+Image'];
+    : ['https://placehold.co/800x600?text=No+Image'];
 
   const mainCategory = product.category?.parent || product.category;
   const subCategory = product.category?.parent ? product.category : null;

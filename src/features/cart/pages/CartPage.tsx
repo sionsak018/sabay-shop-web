@@ -1,5 +1,6 @@
 import { useCart } from '../hooks/useCart';
 import { Link } from 'react-router-dom';
+import { getImageUrl } from '../../../utils/imageUrl';
 
 export const CartPage = () => {
   const { cart, loading, updateQuantity, removeItem, clearCart } = useCart();
@@ -46,7 +47,7 @@ export const CartPage = () => {
           return (
             <div key={item.id} className="flex flex-col sm:flex-row gap-6 bg-white border border-gray-100 p-6 rounded-2xl shadow-sm hover:shadow-md transition-all group">
               <div className="w-full sm:w-32 h-32 rounded-xl overflow-hidden bg-gray-50 flex-shrink-0 border border-gray-100">
-                <img src={item.product.images[0]?.image_url ? `http://127.0.0.1:8000/storage/${item.product.images[0].image_url}` : 'https://via.placeholder.com/200x200?text=No+Image'} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                <img src={getImageUrl(item.product.images[0]?.image_url, 'https://placehold.co/200x200?text=No+Image')} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
               </div>
               <div className="flex-1 flex flex-col justify-between">
                 <div>
