@@ -183,6 +183,81 @@ export const ProductListPage = () => {
       </div>
 
       <div className="container mx-auto px-4 max-w-7xl">
+        {/* Category Header Box (Khmer24 Style) */}
+        {(selectedCategory || keyword) && (
+            <div className="bg-white border border-gray-200 rounded mb-3 shadow-sm">
+                <div className="px-4 py-3 border-b border-gray-100">
+                    <h1 className="text-base sm:text-lg font-bold text-gray-800">
+                        {selectedCategory ? `${selectedCategory.name} in ${provinceName}` : `Search results for "${keyword}"`}
+                    </h1>
+                </div>
+
+                {/* Filter Bar */}
+                <div className="px-4 py-2 flex items-center justify-between bg-white overflow-x-auto scrollbar-hide">
+                    <div className="flex items-center gap-1.5 shrink-0">
+                        <button className="flex items-center gap-1.5 px-3 py-1.5 bg-[#f8f9fa] hover:bg-[#e9ecef] rounded border border-[#dee2e6] text-[11px] font-bold text-gray-700 transition">
+                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                            Location
+                        </button>
+                        <div className="relative">
+                            <select
+                                value={localFilters.sort}
+                                onChange={e => applyFilters({ sort: e.target.value })}
+                                className="appearance-none flex items-center gap-1.5 px-3 py-1.5 bg-[#f8f9fa] hover:bg-[#e9ecef] rounded border border-[#dee2e6] text-[11px] font-bold text-gray-700 transition outline-none cursor-pointer pr-7"
+                            >
+                                <option value="latest">Sort: Newest</option>
+                                <option value="price_low">Price: Low</option>
+                                <option value="price_high">Price: High</option>
+                            </select>
+                            <svg className="w-3 h-3 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"/></svg>
+                        </div>
+                        <button className="flex items-center gap-1.5 px-3 py-1.5 bg-[#f8f9fa] hover:bg-[#e9ecef] rounded border border-[#dee2e6] text-[11px] font-bold text-gray-700 transition">
+                            Price
+                        </button>
+                        <button
+                            onClick={() => setIsMobileFilterOpen(true)}
+                            className="flex items-center gap-1.5 px-3 py-1.5 bg-[#f8f9fa] hover:bg-[#e9ecef] rounded border border-[#dee2e6] text-[11px] font-bold text-gray-700 transition"
+                        >
+                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg>
+                            More Filters
+                        </button>
+                    </div>
+
+                    <div className="flex items-center gap-3 shrink-0 ml-4">
+                         <button className="text-gray-400 hover:text-blue-600 transition">
+                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M7 11h-2c-1.105 0-2 .895-2 2v2c0 1.105.895 2 2 2h2c1.105 0 2-.895 2-2v-2c0-1.105-.895-2-2-2zm0-6h-2c-1.105 0-2 .895-2 2v2c0 1.105.895 2 2 2h2c1.105 0 2-.895 2-2v-2c0-1.105-.895-2-2-2zm6 0h-2c-1.105 0-2 .895-2 2v2c0 1.105.895 2 2 2h2c1.105 0 2-.895 2-2v-2c0-1.105-.895-2-2-2zm0 6h-2c-1.105 0-2 .895-2 2v2c0 1.105.895 2 2 2h2c1.105 0 2-.895 2-2v-2c0-1.105-.895-2-2-2zm6-6h-2c-1.105 0-2 .895-2 2v2c0 1.105.895 2 2 2h2c1.105 0 2-.895 2-2v-2c0-1.105-.895-2-2-2zm0 6h-2c-1.105 0-2 .895-2 2v2c0 1.105.895 2 2 2h2c1.105 0 2-.895 2-2v-2c0-1.105-.895-2-2-2zm-6 6h-2c-1.105 0-2 .895-2 2v2c0 1.105.895 2 2 2h2c1.105 0 2-.895 2-2v-2c0-1.105-.895-2-2-2zm6 0h-2c-1.105 0-2 .895-2 2v2c0 1.105.895 2 2 2h2c1.105 0 2-.895 2-2v-2c0-1.105-.895-2-2-2z"/></svg>
+                         </button>
+                         <button className="text-gray-400 hover:text-blue-600 transition">
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+                         </button>
+                    </div>
+                </div>
+            </div>
+        )}
+
+        {/* Subcategories Bar (Browse By Category Style) */}
+        {subCategories.length > 0 && (
+            <div className="bg-white border border-gray-200 rounded mb-4 shadow-sm overflow-hidden">
+                <ul className="flex overflow-x-auto scrollbar-hide py-3 px-2">
+                    {subCategories.map((sub) => (
+                        <li key={sub.id} className="shrink-0 w-[95px] sm:w-[110px]">
+                            <button
+                                onClick={() => setCategory(String(sub.id))}
+                                className="block w-full group transition-all"
+                            >
+                                <div className={`mx-auto rounded-full size-11 sm:size-14 flex items-center justify-center p-2 mb-1.5 transition-all ${categoryId === String(sub.id) ? 'bg-blue-50 ring-2 ring-blue-500' : 'bg-[#f1f2f6] group-hover:bg-[#e9ecef]'}`}>
+                                    <CategoryIcon cat={sub} className="w-full h-full object-contain" />
+                                </div>
+                                <p className={`text-[10px] sm:text-[11.5px] font-bold text-center px-1 truncate ${categoryId === String(sub.id) ? 'text-blue-600' : 'text-gray-700 group-hover:text-blue-600'}`}>
+                                    {sub.name}
+                                </p>
+                            </button>
+                        </li>
+                    ))}
+                </ul>
+            </div>
+        )}
+
         <div className="flex flex-col lg:flex-row gap-4 sm:gap-5">
 
           {/* Sidebar */}
@@ -341,25 +416,24 @@ export const ProductListPage = () => {
 
           {/* Product Grid Area */}
           <div className="flex-grow">
+             {/* Simple Title for non-category/non-search or fallback */}
+             {!selectedCategory && !keyword && (
+                 <div className="mb-4 flex items-center justify-between px-1">
+                    <h1 className="text-sm sm:text-base font-bold text-gray-900 uppercase">
+                        Latest Classifieds
+                        <span className="text-[10px] sm:text-xs font-normal text-gray-500 ml-2 normal-case">({pagination.total} ads found)</span>
+                    </h1>
+                 </div>
+             )}
 
-             <div className="mb-4 flex items-center justify-between px-1">
-                <h1 className="text-sm sm:text-base font-bold text-gray-900 uppercase">
-                    {selectedCategory?.name || keyword || 'Latest Classifieds'}
-                    <span className="text-[10px] sm:text-xs font-normal text-gray-500 ml-2 normal-case">({pagination.total} ads found)</span>
-                </h1>
-                <div className="flex items-center gap-2">
-                    <span className="text-[10px] sm:text-xs font-bold text-gray-400 uppercase">Sort:</span>
-                    <select
-                        value={localFilters.sort}
-                        onChange={e => applyFilters({ sort: e.target.value })}
-                        className="bg-transparent border-none text-[10px] sm:text-xs font-bold text-blue-600 focus:ring-0 cursor-pointer outline-none"
-                    >
-                        <option value="latest">Newest First</option>
-                        <option value="price_low">Price: Low to High</option>
-                        <option value="price_high">Price: High to Low</option>
-                    </select>
-                </div>
-             </div>
+             {/* Results count for category/search */}
+             {(selectedCategory || keyword) && (
+                 <div className="mb-3 px-1 flex justify-between items-center">
+                    <span className="text-[10px] sm:text-xs font-bold text-gray-400 uppercase">
+                        {pagination.total} ads found
+                    </span>
+                 </div>
+             )}
 
              {loading && products.length === 0 ? (
                 <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-2 sm:gap-3">
