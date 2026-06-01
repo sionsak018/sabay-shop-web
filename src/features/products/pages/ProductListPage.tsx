@@ -354,35 +354,16 @@ export const ProductListPage = () => {
 
         {/* Khmer24 Step-by-Step Selection UI */}
         {(() => {
-            // Get attributes that are not yet selected
+            // Get unselected select-type attributes
             const unselectedAttrs = dynamicAttributes.filter(a => a.type === 'select' && !localFilters[`attr_${a.id}`]);
             if (unselectedAttrs.length === 0) return null;
 
-            const brandAttr = dynamicAttributes.find(a => a.name === 'Brand');
-            const isBrandSelected = brandAttr ? !!localFilters[`attr_${brandAttr.id}`] : true;
-
-            // Logic for what to display:
-            // 1. If Brand is not picked, show Brand.
-            // 2. If Brand is picked, show Model.
-            // 3. Body Type should be visible if Brand is picked OR if no Model is pending.
-            // 4. Other attributes show up as they become relevant.
-
-            let displayAttrs = unselectedAttrs.filter(attr => {
-                if (attr.name === 'Model') return isBrandSelected;
-                // Don't show generic boxes if a more specific one (Brand) is pending
-                // except for Body Type which Khmer24 often shows alongside Brand.
-                if (attr.name !== 'Brand' && attr.name !== 'Body Type' && !isBrandSelected) return false;
-                return true;
-            });
-
-            // Sort unselected attributes to ensure "Body Type" stays at the bottom
-            displayAttrs.sort((a, b) => {
+            // Sort unselected attributes to ensure "Body Type" always stays at the bottom
+            const displayAttrs = [...unselectedAttrs].sort((a, b) => {
                 if (a.name === 'Body Type') return 1;
                 if (b.name === 'Body Type') return -1;
                 return 0;
             });
-
-            if (displayAttrs.length === 0) return null;
 
             return displayAttrs.map(attr => {
                 const isExpanded = expandedAttrs[attr.id] || false;
