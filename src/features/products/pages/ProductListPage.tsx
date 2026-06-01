@@ -35,7 +35,6 @@ export const ProductListPage = () => {
 
   const [categories, setCategories] = useState<Category[]>([]);
   const [provinces, setProvinces] = useState<any[]>([]);
-  const [brands, setBrands] = useState<any[]>([]);
   const [dynamicAttributes, setDynamicAttributes] = useState<any[]>([]);
   const [page, setPage] = useState(1);
 
@@ -58,7 +57,6 @@ export const ProductListPage = () => {
   useEffect(() => {
     categoryApi.getAll().then(res => setCategories(Array.isArray(res.data) ? res.data : res.data.data || []));
     api.get('/provinces').then(res => setProvinces(Array.isArray(res.data) ? res.data : res.data.data || []));
-    api.get('/brands').then(res => setBrands(res.data));
   }, []);
 
   useEffect(() => {
@@ -247,71 +245,7 @@ export const ProductListPage = () => {
 
             <div className="bg-white border border-gray-200 rounded-md overflow-hidden shadow-sm">
                 <div className="bg-[#f8f9fa] px-4 py-2 border-b border-gray-200">
-                    <h2 className="text-xs font-bold text-gray-700 uppercase tracking-tight">Price Range</h2>
-                </div>
-                <div className="p-4 space-y-3">
-                    <div className="flex items-center gap-2">
-                        <div className="relative flex-1">
-                            <span className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400 text-[10px]">$</span>
-                            <input
-                                type="number"
-                                placeholder="Min"
-                                value={localFilters.min_price}
-                                onChange={e => setLocalFilters({...localFilters, min_price: e.target.value})}
-                                className="w-full pl-5 pr-2 py-1.5 bg-[#f8f9fa] border border-[#ced4da] rounded text-sm outline-none focus:bg-white focus:border-blue-500"
-                            />
-                        </div>
-                        <span className="text-gray-300">-</span>
-                        <div className="relative flex-1">
-                            <span className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400 text-[10px]">$</span>
-                            <input
-                                type="number"
-                                placeholder="Max"
-                                value={localFilters.max_price}
-                                onChange={e => setLocalFilters({...localFilters, max_price: e.target.value})}
-                                className="w-full pl-5 pr-2 py-1.5 bg-[#f8f9fa] border border-[#ced4da] rounded text-sm outline-none focus:bg-white focus:border-blue-500"
-                            />
-                        </div>
-                    </div>
-                    <button onClick={() => applyFilters()} className="w-full bg-blue-600 text-white py-1.5 rounded text-xs font-bold hover:bg-blue-700 transition">Apply</button>
-                </div>
-            </div>
-
-            {/* Brand Filter */}
-            <div className="bg-white border border-gray-200 rounded-md overflow-hidden shadow-sm">
-                <div className="bg-[#f8f9fa] px-4 py-2 border-b border-gray-200">
-                    <h2 className="text-xs font-bold text-gray-700 uppercase tracking-tight">Brands</h2>
-                </div>
-                <div className="p-2 max-h-60 overflow-y-auto custom-scrollbar">
-                    <button
-                        onClick={() => {
-                            const newParams = new URLSearchParams(searchParams);
-                            newParams.delete('brand_id');
-                            setSearchParams(newParams);
-                        }}
-                        className={`w-full text-left px-3 py-1.5 rounded text-[13px] transition ${!searchParams.get('brand_id') ? 'bg-blue-50 text-blue-600 font-bold' : 'text-gray-600 hover:bg-[#f1f2f6]'}`}
-                    >
-                        All Brands
-                    </button>
-                    {brands.map(b => (
-                        <button
-                            key={b.id}
-                            onClick={() => {
-                                const newParams = new URLSearchParams(searchParams);
-                                newParams.set('brand_id', String(b.id));
-                                setSearchParams(newParams);
-                            }}
-                            className={`w-full text-left px-3 py-1.5 rounded text-[13px] transition ${searchParams.get('brand_id') === String(b.id) ? 'bg-blue-50 text-blue-600 font-bold' : 'text-gray-600 hover:bg-[#f1f2f6]'}`}
-                        >
-                            {b.name}
-                        </button>
-                    ))}
-                </div>
-            </div>
-
-            <div className="bg-white border border-gray-200 rounded-md overflow-hidden shadow-sm">
-                <div className="bg-[#f8f9fa] px-4 py-2 border-b border-gray-200">
-                    <h2 className="text-sm font-bold text-gray-800 uppercase tracking-tight">Location</h2>
+                    <h2 className="text-xs font-bold text-gray-700 uppercase tracking-tight">Location</h2>
                 </div>
                 <div className="p-2 max-h-80 overflow-y-auto custom-scrollbar">
                     <button
