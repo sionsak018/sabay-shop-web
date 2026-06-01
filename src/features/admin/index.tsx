@@ -15,3 +15,4 @@ export * from './pages/CommunePage';
 export * from './pages/VillagePage';
 export * from './pages/UserPage';
 export * from './pages/ProductPage';
+export * from './pages/SliderPage';

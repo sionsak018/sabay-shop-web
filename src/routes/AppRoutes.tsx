@@ -14,7 +14,7 @@ import { InboxPage } from '../features/messages/pages/InboxPage';
 import { ProductDetailPage } from '../features/products/pages/ProductDetailPage';
 import { ProfilePage } from '../features/profile/pages/ProfilePage';
 import { PublicProfilePage } from '../features/profile/pages/PublicProfilePage';
-import { AdminLayout, AdminDashboard, AdminPlaceholder, MainCategoryPage, SubCategoryPage, BrandPage, ModelPage, BodyTypePage, AttributePage, CategoryFieldPage, ProvincePage, DistrictPage, CommunePage, VillagePage, UserPage, ProductPage } from '../features/admin';
+import { AdminLayout, AdminDashboard, AdminPlaceholder, MainCategoryPage, SubCategoryPage, BrandPage, ModelPage, BodyTypePage, AttributePage, CategoryFieldPage, ProvincePage, DistrictPage, CommunePage, VillagePage, UserPage, ProductPage, SliderPage } from '../features/admin';
 
 const AppRoutes = () => {
   const { user, loading } = useAuth();
@@ -88,6 +88,7 @@ const AppRoutes = () => {
         <Route path="attributes" element={<AttributePage />} />
 
         <Route path="products" element={<ProductPage />} />
+        <Route path="sliders" element={<SliderPage />} />
 
         {/* User Access Group */}
         <Route path="users" element={<UserPage />} />

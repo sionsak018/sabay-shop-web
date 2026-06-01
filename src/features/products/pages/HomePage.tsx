@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useProducts } from '../hooks/useProducts';
 import { ProductCard } from '../components/ProductCard';
+import { HomeSlider } from '../components/HomeSlider';
 import { categoryApi } from '../../categories/services/categoryApi';
 import { type Category } from '../../categories/types/category.types';
 import api from '../../../services/api';
@@ -93,6 +94,9 @@ export const HomePage = () => {
       </div>
 
       <div className="container mx-auto px-4 max-w-7xl mt-2 sm:mt-3">
+
+        {/* Auto Slider */}
+        <HomeSlider />
 
         {/* Browse By Category Section */}
         <div className="bg-white border border-gray-200 rounded-md p-3 sm:p-4 shadow-sm">
