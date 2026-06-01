@@ -354,12 +354,35 @@ export const ProductListPage = () => {
 
         {/* Khmer24 Step-by-Step Selection UI */}
         {(() => {
-            // Get unselected select-type attributes
-            const unselectedAttrs = dynamicAttributes.filter(a => a.type === 'select' && !localFilters[`attr_${a.id}`]);
-            if (unselectedAttrs.length === 0) return null;
+            if (dynamicAttributes.length === 0) return null;
 
-            // Sort unselected attributes to ensure "Body Type" always stays at the bottom
-            const displayAttrs = [...unselectedAttrs].sort((a, b) => {
+            const brandAttr = dynamicAttributes.find(a => a.name === 'Brand');
+            const isBrandSelected = brandAttr ? !!localFilters[`attr_${brandAttr.id}`] : true;
+
+            let displayAttrs = [];
+
+            if (!isBrandSelected) {
+                // Stage 1: Only show Brand
+                if (brandAttr) displayAttrs.push(brandAttr);
+            } else {
+                // Stage 2: Brand selected, show Model and Body Type (don't hide)
+                const modelAttr = dynamicAttributes.find(a => a.name === 'Model');
+                const bodyTypeAttr = dynamicAttributes.find(a => a.name === 'Body Type');
+
+                if (modelAttr) displayAttrs.push(modelAttr);
+                if (bodyTypeAttr) displayAttrs.push(bodyTypeAttr);
+
+                // Show any other select attributes that aren't picked yet
+                const others = dynamicAttributes.filter(a =>
+                    a.type === 'select' &&
+                    !['Brand', 'Model', 'Body Type'].includes(a.name) &&
+                    !localFilters[`attr_${a.id}`]
+                );
+                displayAttrs.push(...others);
+            }
+
+            // Body Type always at bottom
+            displayAttrs.sort((a, b) => {
                 if (a.name === 'Body Type') return 1;
                 if (b.name === 'Body Type') return -1;
                 return 0;
@@ -374,44 +397,47 @@ export const ProductListPage = () => {
 
                 return (
                     <div key={attr.id} className="bg-white border border-gray-200 rounded mb-3 shadow-sm animate-in fade-in slide-in-from-top-2 duration-500">
-                        <div className="px-4 py-3 border-b border-gray-50">
+                        <div className="px-4 py-3 border-b border-gray-50 flex items-center justify-between">
                             <h2 className="text-sm font-bold text-gray-800 uppercase tracking-tight">{attr.name}</h2>
                         </div>
                         <div className="p-4">
                             <div className={`grid gap-x-2 gap-y-4 ${isCircleStyle ? 'grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10' : 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6'}`}>
-                                {visibleOptions.map((opt: any) => (
-                                    <button
-                                        key={opt.id}
-                                        onClick={() => {
-                                            applyFilters({ [`attr_${attr.id}`]: opt.value });
-                                            // Find fast: Scroll to results count for immediate feedback
-                                            setTimeout(() => {
-                                                const el = document.getElementById('results-count');
-                                                if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                                            }, 100);
-                                        }}
-                                        className="group flex flex-col items-center gap-2 transition-all active:scale-95"
-                                    >
-                                        {isCircleStyle ? (
-                                            <div className="size-12 sm:size-14 rounded-full flex items-center justify-center p-2.5 border border-gray-100 transition-all bg-white group-hover:border-blue-200 group-hover:bg-blue-50/30">
-                                                {opt.image_url ? (
-                                                    <img src={getImageUrl(opt.image_url)} className="w-full h-full object-contain" alt={opt.value} />
-                                                ) : (
-                                                    <div className="text-[10px] font-black text-gray-300 uppercase truncate px-1">{opt.value.substring(0, 3)}</div>
-                                                )}
-                                            </div>
-                                        ) : (
-                                            <div className="w-full py-2.5 px-3 rounded border border-gray-100 bg-gray-50 text-center transition-all group-hover:bg-blue-50 group-hover:border-blue-200 group-hover:text-blue-600 group-hover:font-bold shadow-sm">
-                                                <span className="text-[11px] truncate block">{opt.value}</span>
-                                            </div>
-                                        )}
-                                        {isCircleStyle && (
-                                            <span className={`text-[10px] sm:text-[11px] font-bold text-center leading-tight truncate px-1 text-gray-600 group-hover:text-blue-600`}>
-                                                {opt.value}
-                                            </span>
-                                        )}
-                                    </button>
-                                ))}
+                                {visibleOptions.map((opt: any) => {
+                                    const isActive = localFilters[`attr_${attr.id}`] === opt.value;
+                                    return (
+                                        <button
+                                            key={opt.id}
+                                            onClick={() => {
+                                                applyFilters({ [`attr_${attr.id}`]: isActive ? '' : opt.value });
+                                                // Instant scroll to results
+                                                setTimeout(() => {
+                                                    const el = document.getElementById('results-count');
+                                                    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                                                }, 100);
+                                            }}
+                                            className="group flex flex-col items-center gap-2 transition-all active:scale-95"
+                                        >
+                                            {isCircleStyle ? (
+                                                <div className={`size-12 sm:size-14 rounded-full flex items-center justify-center p-2.5 border transition-all ${isActive ? 'bg-blue-50 border-blue-500 ring-2 ring-blue-500/20' : 'bg-white border-gray-100 group-hover:border-blue-200'}`}>
+                                                    {opt.image_url ? (
+                                                        <img src={getImageUrl(opt.image_url)} className="w-full h-full object-contain" alt={opt.value} />
+                                                    ) : (
+                                                        <div className="text-[10px] font-black text-gray-300 uppercase truncate px-1">{opt.value.substring(0, 3)}</div>
+                                                    )}
+                                                </div>
+                                            ) : (
+                                                <div className={`w-full py-2.5 px-3 rounded border text-center transition-all ${isActive ? 'bg-blue-50 border-blue-500 text-blue-600 font-bold shadow-sm' : 'bg-gray-50 border-gray-100 text-gray-700 hover:bg-gray-100'}`}>
+                                                    <span className="text-[11px] truncate block">{opt.value}</span>
+                                                </div>
+                                            )}
+                                            {isCircleStyle && (
+                                                <span className={`text-[10px] sm:text-[11px] font-bold text-center leading-tight truncate px-1 ${isActive ? 'text-blue-600' : 'text-gray-600 group-hover:text-blue-600'}`}>
+                                                    {opt.value}
+                                                </span>
+                                            )}
+                                        </button>
+                                    );
+                                })}
                             </div>
 
                             {hasMore && (
