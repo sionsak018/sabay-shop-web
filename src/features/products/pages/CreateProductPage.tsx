@@ -171,26 +171,26 @@ export const CreateProductPage = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const newErrors: Record<string, string> = {};
-    const requiredMsg = 'ព័ត៌មាននេះត្រូវបានទាមទារ';
+    const Msg = 'ព័ត៌មាននេះត្រូវបានទាមទារ';
 
-    if (!formData.category_id) newErrors.category_id = requiredMsg;
-    if (images.length === 0) newErrors.images = requiredMsg;
-    if (!formData.title.trim()) newErrors.title = requiredMsg;
-    if (!formData.price) newErrors.price = requiredMsg;
-    if (!formData.province_id) newErrors.province_id = requiredMsg;
-    if (!formData.district_id) newErrors.district_id = requiredMsg;
-    if (!formData.poster_name.trim()) newErrors.poster_name = requiredMsg;
-    if (!phones[0]?.trim()) newErrors.phone = requiredMsg;
+    if (!formData.category_id) newErrors.category_id = Msg;
+    if (images.length === 0) newErrors.images = Msg;
+    if (!formData.title.trim()) newErrors.title = Msg;
+    if (!formData.price) newErrors.price = Msg;
+    if (!formData.province_id) newErrors.province_id = Msg;
+    if (!formData.district_id) newErrors.district_id = Msg;
+    if (!formData.poster_name.trim()) newErrors.poster_name = Msg;
+    if (!phones[0]?.trim()) newErrors.phone = Msg;
 
     const description = editorRef.current?.getInstance().getMarkdown();
     if (!description || description.trim().length < 5) {
-      newErrors.description = requiredMsg;
+      newErrors.description = Msg;
     }
 
     // Validate dynamic attributes
     dynamicAttributes.forEach(attr => {
-        if (attr.pivot.is_required && !attributeValues[attr.id]) {
-            newErrors[`attr_${attr.id}`] = requiredMsg;
+        if (attr.pivot.is_ && !attributeValues[attr.id]) {
+            newErrors[`attr_${attr.id}`] = Msg;
         }
     });
 
@@ -457,11 +457,11 @@ export const CreateProductPage = () => {
                         {dynamicAttributes.map(attr => (
                             <div key={attr.id}>
                                 <label className="block text-[11px] font-black text-gray-400 uppercase mb-3 tracking-widest ml-1">
-                                    {attr.name} {attr.pivot.is_required && <span className="text-red-500">*</span>}
+                                    {attr.name} {attr.pivot.is_ && <span className="text-red-500">*</span>}
                                 </label>
                                 {attr.type === 'select' ? (
                                     <select
-                                    required={!!attr.pivot.is_required}
+                                    ={!!attr.pivot.is_}
                                     value={attributeValues[attr.id] || ''}
                                     onChange={e => {
                                         setAttributeValues({ ...attributeValues, [attr.id]: e.target.value });
@@ -475,7 +475,7 @@ export const CreateProductPage = () => {
                             ) : (
                                 <input
                                     type={attr.type === 'number' ? 'number' : 'text'}
-                                    required={!!attr.pivot.is_required}
+                                    ={!!attr.pivot.is_}
                                     value={attributeValues[attr.id] || ''}
                                     autoComplete="off"
                                     onChange={e => {
@@ -691,7 +691,7 @@ export const CreateProductPage = () => {
                                                 <svg className={`w-4 h-4 ${idx === 0 && errors.phone ? 'text-red-400' : 'text-gray-400'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
                                                 <span className={`text-[10px] font-black ${idx === 0 && errors.phone ? 'text-red-400' : 'text-gray-400'}`}>{idx + 1}</span>
                                             </div>
-                                            <input type="tel" required={idx === 0} placeholder="012 345 678" value={phone} onChange={e => handlePhoneValueChange(idx, e.target.value)} className={`w-full pl-16 pr-4 py-4 border rounded-2xl focus:bg-white outline-none transition font-bold text-gray-800 shadow-sm ${idx === 0 && errors.phone ? 'border-red-300' : 'border-gray-200 focus:border-blue-500'}`} />
+                                            <input type="tel" ={idx === 0} placeholder="012 345 678" value={phone} onChange={e => handlePhoneValueChange(idx, e.target.value)} className={`w-full pl-16 pr-4 py-4 border rounded-2xl focus:bg-white outline-none transition font-bold text-gray-800 shadow-sm ${idx === 0 && errors.phone ? 'border-red-300' : 'border-gray-200 focus:border-blue-500'}`} />
                                         </div>
                                         {phones.length > 1 && (
                                             <button type="button" onClick={() => removePhoneField(idx)} className="p-4 text-gray-400 hover:text-red-500 transition-colors">
@@ -715,7 +715,7 @@ export const CreateProductPage = () => {
 
             <div className="flex flex-col sm:flex-row items-center justify-between gap-8 pt-12 mt-12 border-t border-gray-100">
               <div className="flex items-start gap-3 max-w-md">
-                 <input type="checkbox" required className="mt-1 w-4 h-4 rounded text-blue-600 focus:ring-blue-500" />
+                 <input type="checkbox"  className="mt-1 w-4 h-4 rounded text-blue-600 focus:ring-blue-500" />
                  <p className="text-[11px] text-gray-500 leading-relaxed font-bold uppercase tracking-tight">
                    I agree to the <span className="text-blue-600 hover:underline cursor-pointer">Terms and Conditions</span> and <span className="text-blue-600 hover:underline cursor-pointer">Safety Guidelines</span> of Sabay Shop.
                  </p>
