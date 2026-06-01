@@ -150,6 +150,7 @@ export const ProductListPage = () => {
                 <svg className="w-4 h-4 absolute right-4 top-1/2 -translate-y-1/2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
              </div>
 
+             {/* Mobile Filter Toggle */}
              <button
                 onClick={() => setIsMobileFilterOpen(true)}
                 className="lg:hidden p-2.5 bg-blue-600 text-white rounded shadow-md active:scale-95 transition-transform"
@@ -184,7 +185,7 @@ export const ProductListPage = () => {
       <div className="container mx-auto px-4 max-w-7xl">
         <div className="flex flex-col lg:flex-row gap-4 sm:gap-5">
 
-          {/* Desktop Sidebar */}
+          {/* Sidebar */}
           <aside className="lg:w-64 space-y-4 flex-shrink-0 hidden lg:block">
             <div className="bg-white border border-gray-200 rounded-md overflow-hidden shadow-sm">
                 <div className="bg-[#f8f9fa] px-4 py-2 border-b border-gray-200">
@@ -222,7 +223,7 @@ export const ProductListPage = () => {
                             <div className="mt-1 space-y-0.5">
                                 <button
                                     onClick={() => setCategory(String(mainCategory.id))}
-                                    className={`w-full text-left px-4 py-1.5 text-[13px] rounded transition \${categoryId === String(mainCategory.id) ? 'bg-blue-600 text-white font-bold' : 'text-gray-600 hover:bg-[#f1f2f6]'}`}
+                                    className={`w-full text-left px-4 py-1.5 text-[13px] rounded transition ${categoryId === String(mainCategory.id) ? 'bg-blue-600 text-white font-bold' : 'text-gray-600 hover:bg-[#f1f2f6]'}`}
                                 >
                                     All {mainCategory.name}
                                 </button>
@@ -230,9 +231,9 @@ export const ProductListPage = () => {
                                     <button
                                         key={sub.id}
                                         onClick={() => setCategory(String(sub.id))}
-                                        className={`w-full text-left px-4 py-1.5 text-[13px] rounded transition flex items-center gap-2 \${categoryId === String(sub.id) ? 'bg-blue-600 text-white font-bold' : 'text-gray-600 hover:bg-[#f1f2f6]'}`}
+                                        className={`w-full text-left px-4 py-1.5 text-[13px] rounded transition flex items-center gap-2 ${categoryId === String(sub.id) ? 'bg-blue-600 text-white font-bold' : 'text-gray-600 hover:bg-[#f1f2f6]'}`}
                                     >
-                                        <CategoryIcon cat={sub} className={`w-4 h-4 \${categoryId === String(sub.id) ? '' : 'opacity-60 grayscale'}`} />
+                                        <CategoryIcon cat={sub} className={`w-4 h-4 ${categoryId === String(sub.id) ? '' : 'opacity-60 grayscale'}`} />
                                         {sub.name}
                                     </button>
                                 ))}
@@ -281,7 +282,7 @@ export const ProductListPage = () => {
                 <div className="p-2 max-h-80 overflow-y-auto custom-scrollbar">
                     <button
                         onClick={() => applyFilters({ province_id: '' })}
-                        className={`w-full text-left px-3 py-1.5 text-[13px] rounded transition \${!localFilters.province_id ? 'bg-blue-50 text-blue-600 font-bold' : 'text-gray-600 hover:bg-[#f1f2f6]'}`}
+                        className={`w-full text-left px-3 py-1.5 text-[13px] rounded transition ${!localFilters.province_id ? 'bg-blue-50 text-blue-600 font-bold' : 'text-gray-600 hover:bg-[#f1f2f6]'}`}
                     >
                         All Cambodia
                     </button>
@@ -289,7 +290,7 @@ export const ProductListPage = () => {
                         <button
                             key={p.id}
                             onClick={() => applyFilters({ province_id: String(p.id) })}
-                            className={`w-full text-left px-3 py-1.5 text-[13px] rounded transition \${localFilters.province_id === String(p.id) ? 'bg-blue-50 text-blue-600 font-bold' : 'text-gray-600 hover:bg-[#f1f2f6]'}`}
+                            className={`w-full text-left px-3 py-1.5 text-[13px] rounded transition ${localFilters.province_id === String(p.id) ? 'bg-blue-50 text-blue-600 font-bold' : 'text-gray-600 hover:bg-[#f1f2f6]'}`}
                         >
                             {p.name}
                         </button>
@@ -315,7 +316,7 @@ export const ProductListPage = () => {
                       <button
                         key={cat.id}
                         onClick={() => { setCategory(String(cat.id)); setIsMobileFilterOpen(false); }}
-                        className={`flex items-center gap-2 p-3 rounded-lg border transition \${categoryId === String(cat.id) ? 'border-blue-600 bg-blue-50 text-blue-600' : 'border-gray-100 bg-gray-50'}`}
+                        className={`flex items-center gap-2 p-3 rounded-lg border transition ${categoryId === String(cat.id) ? 'border-blue-600 bg-blue-50 text-blue-600' : 'border-gray-100 bg-gray-50'}`}
                       >
                         <CategoryIcon cat={cat} className="w-5 h-5 shrink-0" />
                         <span className="text-[11px] font-bold truncate">{cat.name}</span>
@@ -351,7 +352,7 @@ export const ProductListPage = () => {
                       <button
                         key={p.id}
                         onClick={() => setLocalFilters({...localFilters, province_id: String(p.id)})}
-                        className={`p-3 rounded-lg border text-center transition \${localFilters.province_id === String(p.id) ? 'border-blue-600 bg-blue-50 text-blue-600 font-black' : 'border-gray-100 bg-gray-50 text-gray-600 font-bold'} text-[11px]`}
+                        className={`p-3 rounded-lg border text-center transition ${localFilters.province_id === String(p.id) ? 'border-blue-600 bg-blue-50 text-blue-600 font-black' : 'border-gray-100 bg-gray-50 text-gray-600 font-bold'} text-[11px]`}
                       >
                         {p.name}
                       </button>
@@ -374,16 +375,16 @@ export const ProductListPage = () => {
           <div className="flex-grow">
 
              <div className="mb-4 flex items-center justify-between px-1">
-                <h1 className="text-base font-bold text-gray-900 uppercase">
+                <h1 className="text-sm sm:text-base font-bold text-gray-900 uppercase">
                     {selectedCategory?.name || keyword || 'Latest Classifieds'}
-                    <span className="text-xs font-normal text-gray-500 ml-2 normal-case">({pagination.total} ads found)</span>
+                    <span className="text-[10px] sm:text-xs font-normal text-gray-500 ml-2 normal-case">({pagination.total} ads found)</span>
                 </h1>
                 <div className="flex items-center gap-2">
-                    <span className="text-xs font-bold text-gray-400 uppercase">Sort:</span>
+                    <span className="text-[10px] sm:text-xs font-bold text-gray-400 uppercase">Sort:</span>
                     <select
                         value={localFilters.sort}
                         onChange={e => applyFilters({ sort: e.target.value })}
-                        className="bg-transparent border-none text-xs font-bold text-blue-600 focus:ring-0 cursor-pointer outline-none"
+                        className="bg-transparent border-none text-[10px] sm:text-xs font-bold text-blue-600 focus:ring-0 cursor-pointer outline-none"
                     >
                         <option value="latest">Newest First</option>
                         <option value="price_low">Price: Low to High</option>
@@ -393,36 +394,36 @@ export const ProductListPage = () => {
              </div>
 
              {loading && products.length === 0 ? (
-                <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3">
+                <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-2 sm:gap-3">
                   {[...Array(12)].map((_, i) => (
                     <div key={i} className="bg-white border border-gray-200 rounded-md h-72 animate-pulse" />
                   ))}
                 </div>
              ) : products.length === 0 ? (
-                <div className="bg-white border border-gray-200 rounded-md p-20 text-center shadow-sm">
-                    <h3 className="text-lg font-bold text-gray-900 mb-2 uppercase">No results matched</h3>
-                    <p className="text-gray-500 text-sm mb-8 font-medium">Try different keywords or filters.</p>
+                <div className="bg-white border border-gray-200 rounded-md p-10 sm:p-20 text-center shadow-sm">
+                    <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-2 uppercase">No results matched</h3>
+                    <p className="text-gray-500 text-xs sm:text-sm mb-6 sm:mb-8 font-medium">Try different keywords or filters.</p>
                     <button onClick={() => navigate('/')} className="bg-blue-600 text-white px-8 py-2 rounded font-bold text-xs uppercase shadow-md transition active:scale-95">Reset Search</button>
                 </div>
              ) : (
-                <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3">
+                <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-2 sm:gap-3">
                    {products.map(p => <ProductCard key={p.id} product={p} />)}
                 </div>
              )}
 
              {/* Pagination */}
              {pagination.lastPage > 1 && (
-                <div className="mt-16 flex justify-center">
-                    <nav className="flex items-center gap-1">
+                <div className="mt-12 sm:mt-16 flex justify-center">
+                    <nav className="flex items-center gap-0.5 sm:gap-1">
                       <button
                         onClick={() => goToPage(page - 1)}
                         disabled={page === 1}
-                        className="w-10 h-10 flex items-center justify-center border border-gray-300 bg-white text-gray-600 hover:bg-gray-50 disabled:opacity-30 rounded transition"
+                        className="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center border border-gray-300 bg-white text-gray-600 hover:bg-gray-50 disabled:opacity-30 rounded transition"
                       >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M15 19l-7-7 7-7"/></svg>
+                        <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M15 19l-7-7 7-7"/></svg>
                       </button>
 
-                      <div className="flex gap-1 mx-2">
+                      <div className="flex gap-0.5 sm:gap-1 mx-1 sm:mx-2">
                         {[...Array(pagination.lastPage)].map((_, i) => {
                             const p = i + 1;
                             if (p === 1 || p === pagination.lastPage || (p >= page - 1 && p <= page + 1)) {
@@ -430,13 +431,13 @@ export const ProductListPage = () => {
                                     <button
                                         key={p}
                                         onClick={() => goToPage(p)}
-                                        className={`w-10 h-10 rounded border text-[13px] font-bold transition \${page === p ? 'bg-blue-600 border-blue-600 text-white shadow-md z-10' : 'bg-white border-gray-300 text-gray-600 hover:bg-gray-50'}`}
+                                        className={`w-8 h-8 sm:w-10 sm:h-10 rounded border text-[11px] sm:text-[13px] font-bold transition ${page === p ? 'bg-blue-600 border-blue-600 text-white shadow-md z-10' : 'bg-white border-gray-300 text-gray-600 hover:bg-gray-50'}`}
                                     >
                                         {p}
                                     </button>
                                 );
                             }
-                            if (p === 2 || p === pagination.lastPage - 1) return <span key={p} className="px-1 text-gray-300 self-end font-bold">...</span>;
+                            if (p === 2 || p === pagination.lastPage - 1) return <span key={p} className="px-0.5 sm:px-1 text-gray-300 self-end font-bold">...</span>;
                             return null;
                         })}
                       </div>
@@ -444,9 +445,9 @@ export const ProductListPage = () => {
                       <button
                         onClick={() => goToPage(page + 1)}
                         disabled={page === pagination.lastPage}
-                        className="w-10 h-10 flex items-center justify-center border border-gray-300 bg-white text-gray-600 hover:bg-gray-50 disabled:opacity-30 rounded transition"
+                        className="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center border border-gray-300 bg-white text-gray-600 hover:bg-gray-50 disabled:opacity-30 rounded transition"
                       >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 5l7 7-7 7"/></svg>
+                        <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 5l7 7-7 7"/></svg>
                       </button>
                     </nav>
                 </div>
