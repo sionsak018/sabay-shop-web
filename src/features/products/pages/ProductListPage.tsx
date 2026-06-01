@@ -223,29 +223,45 @@ export const ProductListPage = () => {
                 </button>
               </>
             )}
-            {/* Khmer24 Style Attribute Breadcrumbs */}
-            {dynamicAttributes.map((attr, idx) => {
-                const val = localFilters[`attr_${attr.id}`];
-                if (!val) return null;
-                return (
-                    <div key={attr.id} className="flex items-center gap-1.5 shrink-0">
-                        <svg className="w-2.5 h-2.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M9 5l7 7-7 7"/></svg>
-                        <button
-                            onClick={() => {
-                                const params = new URLSearchParams(searchParams);
-                                // Back to this level: remove everything deeper than this attribute
-                                for (let i = idx + 1; i < dynamicAttributes.length; i++) {
-                                    params.delete(`attr_${dynamicAttributes[i].id}`);
-                                }
-                                setSearchParams(params);
-                            }}
-                            className="text-blue-600 font-bold hover:underline"
-                        >
-                            {val}
-                        </button>
-                    </div>
-                );
-            })}
+            {/* Khmer24 Style Attribute Breadcrumbs - Fixed order and back logic */}
+            {(() => {
+                // Sort attributes for breadcrumb display: Brand -> Model -> Others -> Body Type
+                const sortedForBreadcrumb = [...dynamicAttributes].sort((a, b) => {
+                    const order = ['Brand', 'Model', 'Year', 'Condition'];
+                    const idxA = order.indexOf(a.name);
+                    const idxB = order.indexOf(b.name);
+
+                    if (a.name === 'Body Type') return 1;
+                    if (b.name === 'Body Type') return -1;
+                    if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+                    if (idxA !== -1) return -1;
+                    if (idxB !== -1) return 1;
+                    return 0;
+                });
+
+                return sortedForBreadcrumb.map((attr, idx) => {
+                    const val = localFilters[`attr_${attr.id}`];
+                    if (!val) return null;
+                    return (
+                        <div key={attr.id} className="flex items-center gap-1.5 shrink-0">
+                            <svg className="w-2.5 h-2.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M9 5l7 7-7 7"/></svg>
+                            <button
+                                onClick={() => {
+                                    const params = new URLSearchParams(searchParams);
+                                    // Remove this attribute and all subsequent ones in the sorted order
+                                    for (let i = idx; i < sortedForBreadcrumb.length; i++) {
+                                        params.delete(`attr_${sortedForBreadcrumb[i].id}`);
+                                    }
+                                    setSearchParams(params);
+                                }}
+                                className="text-blue-600 font-bold hover:underline"
+                            >
+                                {val}
+                            </button>
+                        </div>
+                    );
+                });
+            })()}
             <svg className="w-2.5 h-2.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M9 5l7 7-7 7"/></svg>
             <span className="text-gray-500 shrink-0">in {fullLocationName}</span>
           </nav>
@@ -338,44 +354,35 @@ export const ProductListPage = () => {
 
         {/* Khmer24 Step-by-Step Selection UI */}
         {(() => {
-            // Get unselected select-type attributes
+            // Get attributes that are not yet selected
             const unselectedAttrs = dynamicAttributes.filter(a => a.type === 'select' && !localFilters[`attr_${a.id}`]);
             if (unselectedAttrs.length === 0) return null;
 
-            // Khmer24 Sequential Logic:
-            // 1. If Brand exists but not selected, show Brand box (and hide Model).
-            // 2. If Brand is selected, show Model box.
-            // 3. Body Type should always be visible if Brand is selected OR if it's a top-level choice.
-
             const brandAttr = dynamicAttributes.find(a => a.name === 'Brand');
-            const modelAttr = dynamicAttributes.find(a => a.name === 'Model');
-            const bodyTypeAttr = dynamicAttributes.find(a => a.name === 'Body Type');
-
             const isBrandSelected = brandAttr ? !!localFilters[`attr_${brandAttr.id}`] : true;
 
-            // Attributes to display in the main area
-            let displayAttrs = [];
+            // Logic for what to display:
+            // 1. If Brand is not picked, show Brand.
+            // 2. If Brand is picked, show Model.
+            // 3. Body Type should be visible if Brand is picked OR if no Model is pending.
+            // 4. Other attributes show up as they become relevant.
 
-            if (!isBrandSelected) {
-                // Show Brand and potentially Body Type (if it's not model-dependent)
-                if (brandAttr) displayAttrs.push(brandAttr);
-                if (bodyTypeAttr && !localFilters[`attr_${bodyTypeAttr.id}`]) displayAttrs.push(bodyTypeAttr);
-            } else {
-                // Brand is selected, show Model and Body Type (if not selected)
-                if (modelAttr && !localFilters[`attr_${modelAttr.id}`]) displayAttrs.push(modelAttr);
-                if (bodyTypeAttr && !localFilters[`attr_${bodyTypeAttr.id}`]) displayAttrs.push(bodyTypeAttr);
+            let displayAttrs = unselectedAttrs.filter(attr => {
+                if (attr.name === 'Model') return isBrandSelected;
+                // Don't show generic boxes if a more specific one (Brand) is pending
+                // except for Body Type which Khmer24 often shows alongside Brand.
+                if (attr.name !== 'Brand' && attr.name !== 'Body Type' && !isBrandSelected) return false;
+                return true;
+            });
 
-                // Show any other select attributes that aren't picked
-                const others = unselectedAttrs.filter(a => !['Brand', 'Model', 'Body Type'].includes(a.name));
-                displayAttrs.push(...others);
-            }
-
-            // Ensure Body Type is always at the bottom of the display list
+            // Sort unselected attributes to ensure "Body Type" stays at the bottom
             displayAttrs.sort((a, b) => {
                 if (a.name === 'Body Type') return 1;
                 if (b.name === 'Body Type') return -1;
                 return 0;
             });
+
+            if (displayAttrs.length === 0) return null;
 
             return displayAttrs.map(attr => {
                 const isExpanded = expandedAttrs[attr.id] || false;
@@ -386,7 +393,7 @@ export const ProductListPage = () => {
 
                 return (
                     <div key={attr.id} className="bg-white border border-gray-200 rounded mb-3 shadow-sm animate-in fade-in slide-in-from-top-2 duration-500">
-                        <div className="px-4 py-3 border-b border-gray-50 flex items-center justify-between">
+                        <div className="px-4 py-3 border-b border-gray-50">
                             <h2 className="text-sm font-bold text-gray-800 uppercase tracking-tight">{attr.name}</h2>
                         </div>
                         <div className="p-4">
@@ -396,10 +403,10 @@ export const ProductListPage = () => {
                                         key={opt.id}
                                         onClick={() => {
                                             applyFilters({ [`attr_${attr.id}`]: opt.value });
-                                            // Fast find: smooth scroll to results area
+                                            // Find fast: Scroll to results count for immediate feedback
                                             setTimeout(() => {
-                                                const resultsEl = document.getElementById('results-count');
-                                                resultsEl?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                                                const el = document.getElementById('results-count');
+                                                if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
                                             }, 100);
                                         }}
                                         className="group flex flex-col items-center gap-2 transition-all active:scale-95"
