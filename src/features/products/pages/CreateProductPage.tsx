@@ -41,8 +41,8 @@ export const CreateProductPage = () => {
     poster_email: '',
     condition: 'used',
     company_name: '',
-    lat: '11.5564',
-    lng: '104.9282',
+    lat: '',
+    lng: '',
   });
 
   const [attributeValues, setAttributeValues] = useState<Record<number, string>>({});
