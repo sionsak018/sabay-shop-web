@@ -197,29 +197,35 @@ export const AdminLayout = () => {
       </aside>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
-        {/* Mobile Header */}
-        <header className="h-14 bg-white border-b border-gray-200 flex items-center justify-between px-4 lg:hidden sticky top-0 z-30">
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative bg-[#f8fafc]">
+        {/* Mobile Header - Improved for iPhone 14 Pro Max & larger screens */}
+        <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 lg:hidden sticky top-0 z-40">
           <div className="flex items-center gap-3">
             <button
               onClick={() => setIsMobileSidebarOpen(true)}
-              className="p-2 -ml-2 text-gray-500 hover:text-blue-600 transition-colors"
+              className="p-2.5 -ml-2 text-blue-600 bg-blue-50 rounded-lg active:scale-95 transition-all shadow-sm flex items-center justify-center"
+              aria-label="Open Menu"
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16m-7 6h7"/></svg>
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16m-7 6h7"/>
+              </svg>
             </button>
             <Link to="/" className="flex items-center gap-2">
-              <div className="bg-blue-600 text-white font-black px-1.5 py-0.5 rounded text-lg italic leading-tight">SABAY</div>
+              <div className="bg-blue-600 text-white font-black px-2 py-0.5 rounded text-lg italic leading-tight shadow-sm">SABAY</div>
+              <span className="text-sm font-black text-gray-800 uppercase tracking-tighter hidden xs:block">Admin</span>
             </Link>
           </div>
 
-          <Link to="/profile" className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-xs border border-blue-200">
-            {user.name.charAt(0).toUpperCase()}
-          </Link>
+          <div className="flex items-center gap-3">
+             <Link to="/profile" className="w-9 h-9 rounded-full bg-blue-600 flex items-center justify-center text-white font-black text-xs border-2 border-white shadow-md ring-1 ring-blue-100">
+                {user.name.charAt(0).toUpperCase()}
+             </Link>
+          </div>
         </header>
 
         {/* Content Area */}
-        <main className="flex-1 overflow-y-auto p-4 md:p-6 bg-[#f8fafc] custom-scrollbar">
-          <div className="max-w-6xl mx-auto">
+        <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-10 custom-scrollbar">
+          <div className="max-w-7xl mx-auto">
             <Outlet />
           </div>
         </main>
