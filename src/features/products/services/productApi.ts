@@ -9,14 +9,10 @@ export const productApi = {
   
   getOne: (id: number) => api.get<Product>(ENDPOINTS.PRODUCT_DETAIL(id)),
   
-  create: (formData: FormData) => api.post<Product>(ENDPOINTS.PRODUCTS, formData, {
-    headers: { 'Content-Type': 'multipart/form-data' },
-  }),
+  create: (formData: FormData) => api.post<Product>(ENDPOINTS.PRODUCTS, formData),
   
   update: (id: number, formData: FormData) =>
-    api.post<Product>(`${ENDPOINTS.PRODUCTS}/${id}?_method=PUT`, formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    }),
+    api.post<Product>(`${ENDPOINTS.PRODUCTS}/${id}?_method=PUT`, formData),
   
   delete: (id: number) => api.delete(ENDPOINTS.PRODUCT_DETAIL(id)),
 
