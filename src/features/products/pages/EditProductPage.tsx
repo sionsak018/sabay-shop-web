@@ -252,7 +252,6 @@ export const EditProductPage = () => {
     setErrors({});
 
     const submitForm = new FormData();
-    // Use the latest formData state here
     Object.entries(formData).forEach(([key, value]) => {
       if (value && key !== 'poster_phones' && key !== 'condition') {
           submitForm.append(key, value as string);
@@ -260,11 +259,8 @@ export const EditProductPage = () => {
     });
 
     submitForm.set('poster_phones', JSON.stringify(phones.filter(p => p.trim() !== '')));
-
-    // Ensure condition is explicitly set from the current state
     submitForm.set('condition', formData.condition);
 
-    // Set combined location string for backend validation
     const provName = provinces.find(p => String(p.id) === String(formData.province_id))?.name || '';
     const distName = districts.find(d => String(d.id) === String(formData.district_id))?.name || '';
     const commName = communes.find(c => String(c.id) === String(formData.commune_id))?.name || '';
@@ -550,8 +546,6 @@ export const EditProductPage = () => {
                             </div>
                         </button>
                         {errors.lat && <p className="text-red-500 text-[10px] font-bold mt-2 ml-1">{errors.lat}</p>}
-                    </div>
-
                         <MapPickerModal
                             isOpen={isMapModalOpen}
                             onClose={() => setIsMapModalOpen(false)}
