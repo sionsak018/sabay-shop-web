@@ -288,15 +288,15 @@ export const CreateProductPage = () => {
             <h2 className="font-semibold text-lg mt-6 mb-4">Category</h2>
 
             {/* Split Category Selection */}
-            <div className="grid grid-cols-1 md:grid-cols-2 border border-gray-200 rounded-lg overflow-hidden h-[500px]">
+            <div className="grid grid-cols-1 md:grid-cols-2 border border-gray-200 rounded-lg overflow-hidden h-[500px] sm:h-[600px]">
 
               {/* Parent Categories */}
-              <div className="bg-white border-r border-gray-200 flex flex-col h-full">
-                <div className="px-4 py-3 bg-gray-50 border-b border-gray-200 flex items-center gap-2 text-xs font-bold text-gray-500 uppercase tracking-widest">
+              <div className="bg-white border-r border-gray-200 flex flex-col h-full overflow-hidden">
+                <div className="px-4 py-3 bg-gray-50 border-b border-gray-200 flex items-center gap-2 text-xs font-bold text-gray-500 uppercase tracking-widest shrink-0">
                   <span className="w-5 h-5 bg-gray-200 rounded-full flex items-center justify-center text-[10px] text-gray-600">1</span>
                   Choose a category
                 </div>
-                <div className="overflow-y-auto flex-1 custom-scrollbar">
+                <div className="overflow-y-auto flex-1 custom-scrollbar py-1 min-h-0">
                   <ul className="divide-y divide-gray-50">
                     {mainCategories.map((cat) => (
                       <li key={cat.id}>
@@ -321,12 +321,12 @@ export const CreateProductPage = () => {
               </div>
 
               {/* Sub Categories */}
-              <div className="bg-white flex flex-col h-full">
-                <div className="px-4 py-3 bg-gray-50 border-b border-gray-200 flex items-center gap-2 text-xs font-bold text-gray-500 uppercase tracking-widest">
+              <div className="bg-white flex flex-col h-full overflow-hidden">
+                <div className="px-4 py-3 bg-gray-50 border-b border-gray-200 flex items-center gap-2 text-xs font-bold text-gray-500 uppercase tracking-widest shrink-0">
                   <span className="w-5 h-5 bg-gray-200 rounded-full flex items-center justify-center text-[10px] text-gray-600">2</span>
                   Select a subcategory
                 </div>
-                <div className="overflow-y-auto flex-1 custom-scrollbar">
+                <div className="overflow-y-auto flex-1 custom-scrollbar py-1 min-h-0">
                   {!selectedMainCat ? (
                     <div className="h-full flex flex-col items-center justify-center text-center p-10 space-y-4">
                         <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center">
