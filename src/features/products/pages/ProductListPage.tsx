@@ -35,6 +35,7 @@ export const ProductListPage = () => {
 
   const [categories, setCategories] = useState<Category[]>([]);
   const [provinces, setProvinces] = useState<any[]>([]);
+  const [brands, setBrands] = useState<any[]>([]);
   const [dynamicAttributes, setDynamicAttributes] = useState<any[]>([]);
   const [page, setPage] = useState(1);
 
@@ -57,6 +58,7 @@ export const ProductListPage = () => {
   useEffect(() => {
     categoryApi.getAll().then(res => setCategories(Array.isArray(res.data) ? res.data : res.data.data || []));
     api.get('/provinces').then(res => setProvinces(Array.isArray(res.data) ? res.data : res.data.data || []));
+    api.get('/brands').then(res => setBrands(res.data));
   }, []);
 
   useEffect(() => {
@@ -272,6 +274,38 @@ export const ProductListPage = () => {
                         </div>
                     </div>
                     <button onClick={() => applyFilters()} className="w-full bg-blue-600 text-white py-1.5 rounded text-xs font-bold hover:bg-blue-700 transition">Apply</button>
+                </div>
+            </div>
+
+            {/* Brand Filter */}
+            <div className="bg-white border border-gray-200 rounded-md overflow-hidden shadow-sm">
+                <div className="bg-[#f8f9fa] px-4 py-2 border-b border-gray-200">
+                    <h2 className="text-xs font-bold text-gray-700 uppercase tracking-tight">Brands</h2>
+                </div>
+                <div className="p-2 max-h-60 overflow-y-auto custom-scrollbar">
+                    <button
+                        onClick={() => {
+                            const newParams = new URLSearchParams(searchParams);
+                            newParams.delete('brand_id');
+                            setSearchParams(newParams);
+                        }}
+                        className={`w-full text-left px-3 py-1.5 rounded text-[13px] transition ${!searchParams.get('brand_id') ? 'bg-blue-50 text-blue-600 font-bold' : 'text-gray-600 hover:bg-[#f1f2f6]'}`}
+                    >
+                        All Brands
+                    </button>
+                    {brands.map(b => (
+                        <button
+                            key={b.id}
+                            onClick={() => {
+                                const newParams = new URLSearchParams(searchParams);
+                                newParams.set('brand_id', String(b.id));
+                                setSearchParams(newParams);
+                            }}
+                            className={`w-full text-left px-3 py-1.5 rounded text-[13px] transition ${searchParams.get('brand_id') === String(b.id) ? 'bg-blue-50 text-blue-600 font-bold' : 'text-gray-600 hover:bg-[#f1f2f6]'}`}
+                        >
+                            {b.name}
+                        </button>
+                    ))}
                 </div>
             </div>
 
