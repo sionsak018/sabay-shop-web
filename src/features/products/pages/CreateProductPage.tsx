@@ -189,7 +189,7 @@ export const CreateProductPage = () => {
 
     // Validate dynamic attributes
     dynamicAttributes.forEach(attr => {
-        if (attr.pivot.is_ && !attributeValues[attr.id]) {
+        if (attr.pivot.is_required && !attributeValues[attr.id]) {
             newErrors[`attr_${attr.id}`] = Msg;
         }
     });
@@ -457,11 +457,11 @@ export const CreateProductPage = () => {
                         {dynamicAttributes.map(attr => (
                             <div key={attr.id}>
                                 <label className="block text-[11px] font-black text-gray-400 uppercase mb-3 tracking-widest ml-1">
-                                    {attr.name} {attr.pivot.is_ && <span className="text-red-500">*</span>}
+                                    {attr.name} {attr.pivot.is_required && <span className="text-red-500">*</span>}
                                 </label>
                                 {attr.type === 'select' ? (
                                     <select
-                                    ={!!attr.pivot.is_}
+                                    required={!!attr.pivot.is_required}
                                     value={attributeValues[attr.id] || ''}
                                     onChange={e => {
                                         setAttributeValues({ ...attributeValues, [attr.id]: e.target.value });
@@ -475,7 +475,7 @@ export const CreateProductPage = () => {
                             ) : (
                                 <input
                                     type={attr.type === 'number' ? 'number' : 'text'}
-                                    ={!!attr.pivot.is_}
+                                    required={!!attr.pivot.is_required}
                                     value={attributeValues[attr.id] || ''}
                                     autoComplete="off"
                                     onChange={e => {
