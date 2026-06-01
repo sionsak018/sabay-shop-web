@@ -150,10 +150,10 @@ export const ProductListPage = () => {
                 <svg className="w-4 h-4 absolute right-4 top-1/2 -translate-y-1/2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
              </div>
 
-             {/* Mobile Filter Toggle */}
+             {/* Filter Toggle */}
              <button
                 onClick={() => setIsMobileFilterOpen(true)}
-                className="lg:hidden p-2.5 bg-blue-600 text-white rounded shadow-md active:scale-95 transition-transform"
+                className="p-2.5 bg-blue-600 text-white rounded shadow-md active:scale-95 transition-transform"
              >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg>
              </button>
@@ -184,21 +184,33 @@ export const ProductListPage = () => {
 
       <div className="container mx-auto px-4 max-w-7xl">
         {/* Category Header Box (Khmer24 Style) */}
-        {(selectedCategory || keyword) && (
-            <div className="bg-white border border-gray-200 rounded mb-3 shadow-sm">
-                <div className="px-4 py-3 border-b border-gray-100">
-                    <h1 className="text-base sm:text-lg font-bold text-gray-800">
-                        {selectedCategory ? `${selectedCategory.name} in ${provinceName}` : `Search results for "${keyword}"`}
-                    </h1>
-                </div>
+        <div className="bg-white border border-gray-200 rounded mb-3 shadow-sm">
+            <div className="px-4 py-3 border-b border-gray-100">
+                <h1 className="text-base sm:text-lg font-bold text-gray-800">
+                    {selectedCategory ? `${selectedCategory.name} in ${provinceName}` :
+                     keyword ? `Search results for "${keyword}"` :
+                     `Latest Classifieds in ${provinceName}`}
+                </h1>
+            </div>
 
-                {/* Filter Bar */}
-                <div className="px-4 py-2 flex items-center justify-between bg-white overflow-x-auto scrollbar-hide">
+            {/* Filter Bar */}
+            <div className="px-4 py-2 flex items-center justify-between bg-white overflow-x-auto scrollbar-hide">
                     <div className="flex items-center gap-1.5 shrink-0">
-                        <button className="flex items-center gap-1.5 px-3 py-1.5 bg-[#f8f9fa] hover:bg-[#e9ecef] rounded border border-[#dee2e6] text-[11px] font-bold text-gray-700 transition">
-                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                            Location
-                        </button>
+                        <div className="relative">
+                            <select
+                                value={localFilters.province_id}
+                                onChange={e => applyFilters({ province_id: e.target.value })}
+                                className="appearance-none flex items-center gap-1.5 px-3 py-1.5 bg-[#f8f9fa] hover:bg-[#e9ecef] rounded border border-[#dee2e6] text-[11px] font-bold text-gray-700 transition outline-none cursor-pointer pr-7 pl-8"
+                            >
+                                <option value="">Location: All</option>
+                                {provinces.map(p => (
+                                    <option key={p.id} value={p.id}>{p.name}</option>
+                                ))}
+                            </select>
+                            <svg className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                            <svg className="w-3 h-3 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"/></svg>
+                        </div>
+
                         <div className="relative">
                             <select
                                 value={localFilters.sort}
@@ -211,7 +223,11 @@ export const ProductListPage = () => {
                             </select>
                             <svg className="w-3 h-3 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"/></svg>
                         </div>
-                        <button className="flex items-center gap-1.5 px-3 py-1.5 bg-[#f8f9fa] hover:bg-[#e9ecef] rounded border border-[#dee2e6] text-[11px] font-bold text-gray-700 transition">
+
+                        <button
+                            onClick={() => setIsMobileFilterOpen(true)}
+                            className="flex items-center gap-1.5 px-3 py-1.5 bg-[#f8f9fa] hover:bg-[#e9ecef] rounded border border-[#dee2e6] text-[11px] font-bold text-gray-700 transition"
+                        >
                             Price
                         </button>
                         <button
@@ -233,7 +249,6 @@ export const ProductListPage = () => {
                     </div>
                 </div>
             </div>
-        )}
 
         {/* Subcategories Bar (Browse By Category Style) */}
         {subCategories.length > 0 && (
@@ -258,93 +273,11 @@ export const ProductListPage = () => {
             </div>
         )}
 
-        <div className="flex flex-col lg:flex-row gap-4 sm:gap-5">
+        <div className="flex flex-col gap-4 sm:gap-5">
 
-          {/* Sidebar */}
-          <aside className="lg:w-64 space-y-4 flex-shrink-0 hidden lg:block">
-            <div className="bg-white border border-gray-200 rounded-md overflow-hidden shadow-sm">
-                <div className="bg-[#f8f9fa] px-4 py-2 border-b border-gray-200">
-                    <h2 className="text-xs font-bold text-gray-700 uppercase tracking-tight">Categories</h2>
-                </div>
-                <div className="p-1">
-                    {!mainCategory ? (
-                        <div className="space-y-0.5">
-                            {categories.filter(c => !c.parent_id).map(cat => (
-                                <button
-                                    key={cat.id}
-                                    onClick={() => setCategory(String(cat.id))}
-                                    className="w-full text-left px-3 py-1.5 rounded text-[13px] text-gray-600 hover:bg-[#f1f2f6] flex items-center gap-2 transition"
-                                >
-                                    <CategoryIcon cat={cat} className="w-5 h-5 opacity-60 grayscale" />
-                                    {cat.name}
-                                </button>
-                            ))}
-                        </div>
-                    ) : (
-                        <div>
-                            <button
-                                onClick={() => setCategory('')}
-                                className="w-full text-left px-3 py-1.5 text-xs text-blue-600 hover:bg-blue-50 flex items-center gap-1 font-bold rounded"
-                            >
-                                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M15 19l-7-7 7-7"/></svg>
-                                All Categories
-                            </button>
-
-                            <div className="mt-2 px-3 py-1.5 text-sm font-bold text-gray-900 bg-[#f1f2f6] border-y border-gray-200 flex items-center gap-2">
-                                <CategoryIcon cat={mainCategory} className="w-4 h-4" />
-                                {mainCategory.name}
-                            </div>
-
-                            <div className="mt-1 space-y-0.5">
-                                <button
-                                    onClick={() => setCategory(String(mainCategory.id))}
-                                    className={`w-full text-left px-4 py-1.5 text-[13px] rounded transition ${categoryId === String(mainCategory.id) ? 'bg-blue-600 text-white font-bold' : 'text-gray-600 hover:bg-[#f1f2f6]'}`}
-                                >
-                                    All {mainCategory.name}
-                                </button>
-                                {subCategories.map(sub => (
-                                    <button
-                                        key={sub.id}
-                                        onClick={() => setCategory(String(sub.id))}
-                                        className={`w-full text-left px-4 py-1.5 text-[13px] rounded transition flex items-center gap-2 ${categoryId === String(sub.id) ? 'bg-blue-600 text-white font-bold' : 'text-gray-600 hover:bg-[#f1f2f6]'}`}
-                                    >
-                                        <CategoryIcon cat={sub} className={`w-4 h-4 ${categoryId === String(sub.id) ? '' : 'opacity-60 grayscale'}`} />
-                                        {sub.name}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-                    )}
-                </div>
-            </div>
-
-            <div className="bg-white border border-gray-200 rounded-md overflow-hidden shadow-sm">
-                <div className="bg-[#f8f9fa] px-4 py-2 border-b border-gray-200">
-                    <h2 className="text-xs font-bold text-gray-700 uppercase tracking-tight">Location</h2>
-                </div>
-                <div className="p-2 max-h-80 overflow-y-auto custom-scrollbar">
-                    <button
-                        onClick={() => applyFilters({ province_id: '' })}
-                        className={`w-full text-left px-3 py-1.5 text-[13px] rounded transition ${!localFilters.province_id ? 'bg-blue-50 text-blue-600 font-bold' : 'text-gray-600 hover:bg-[#f1f2f6]'}`}
-                    >
-                        All Cambodia
-                    </button>
-                    {provinces.map(p => (
-                        <button
-                            key={p.id}
-                            onClick={() => applyFilters({ province_id: String(p.id) })}
-                            className={`w-full text-left px-3 py-1.5 text-[13px] rounded transition ${localFilters.province_id === String(p.id) ? 'bg-blue-50 text-blue-600 font-bold' : 'text-gray-600 hover:bg-[#f1f2f6]'}`}
-                        >
-                            {p.name}
-                        </button>
-                    ))}
-                </div>
-            </div>
-          </aside>
-
-          {/* Mobile Filter Modal */}
+          {/* Filter Modal */}
           {isMobileFilterOpen && (
-            <div className="fixed inset-0 z-50 bg-white flex flex-col animate-in slide-in-from-bottom duration-300 lg:hidden">
+            <div className="fixed inset-0 z-50 bg-white flex flex-col animate-in slide-in-from-bottom duration-300">
               <div className="h-14 flex items-center justify-between px-4 border-b border-gray-200 sticky top-0 bg-white">
                 <h2 className="font-bold text-gray-800">Filter & Sort</h2>
                 <button onClick={() => setIsMobileFilterOpen(false)} className="p-2 text-gray-400 hover:text-red-500">
@@ -416,24 +349,12 @@ export const ProductListPage = () => {
 
           {/* Product Grid Area */}
           <div className="flex-grow">
-             {/* Simple Title for non-category/non-search or fallback */}
-             {!selectedCategory && !keyword && (
-                 <div className="mb-4 flex items-center justify-between px-1">
-                    <h1 className="text-sm sm:text-base font-bold text-gray-900 uppercase">
-                        Latest Classifieds
-                        <span className="text-[10px] sm:text-xs font-normal text-gray-500 ml-2 normal-case">({pagination.total} ads found)</span>
-                    </h1>
-                 </div>
-             )}
-
-             {/* Results count for category/search */}
-             {(selectedCategory || keyword) && (
-                 <div className="mb-3 px-1 flex justify-between items-center">
-                    <span className="text-[10px] sm:text-xs font-bold text-gray-400 uppercase">
-                        {pagination.total} ads found
-                    </span>
-                 </div>
-             )}
+             {/* Results count */}
+             <div className="mb-3 px-1 flex justify-between items-center">
+                <span className="text-[10px] sm:text-xs font-bold text-gray-400 uppercase">
+                    {pagination.total} ads found
+                </span>
+             </div>
 
              {loading && products.length === 0 ? (
                 <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-2 sm:gap-3">
