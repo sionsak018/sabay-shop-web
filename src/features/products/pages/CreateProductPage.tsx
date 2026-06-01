@@ -183,9 +183,13 @@ export const CreateProductPage = () => {
     if (!formData.poster_name.trim()) newErrors.poster_name = Msg;
     if (!phones[0]?.trim()) newErrors.phone = Msg;
 
-    if (formData.poster_email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.poster_email)) {
+    if (!formData.poster_email.trim()) {
+        newErrors.poster_email = Msg;
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.poster_email)) {
         newErrors.poster_email = 'អាសយដ្ឋានអ៊ីមែលមិនត្រឹមត្រូវ';
     }
+
+    if (!formData.company_name.trim()) newErrors.company_name = Msg;
 
     if (!formData.address.trim()) newErrors.address = Msg;
     if (!formData.lat || !formData.lng) newErrors.lat = Msg;
@@ -657,7 +661,10 @@ export const CreateProductPage = () => {
                                 onClose={() => setIsMapModalOpen(false)}
                                 lat={formData.lat}
                                 lng={formData.lng}
-                                onSelect={(lat, lng) => setFormData((prev: any) => ({ ...prev, lat, lng }))}
+                                onSelect={(lat, lng) => {
+                                    setFormData((prev: any) => ({ ...prev, lat, lng }));
+                                    if (errors.lat) setErrors(prev => ({ ...prev, lat: '' }));
+                                }}
                             />
                         </div>
                     </div>
@@ -686,7 +693,7 @@ export const CreateProductPage = () => {
                                 {errors.poster_name && <p className="text-red-500 text-[10px] font-bold mt-2 ml-1">{errors.poster_name}</p>}
                             </div>
                             <div>
-                                <label className="block text-[11px] font-black text-gray-400 uppercase mb-3 tracking-widest ml-1">Email Address</label>
+                                <label className="block text-[11px] font-black text-gray-400 uppercase mb-3 tracking-widest ml-1">Email Address <span className="text-red-500">*</span></label>
                                 <input
                                     type="email"
                                     placeholder="email@example.com"
@@ -733,7 +740,7 @@ export const CreateProductPage = () => {
                         </div>
 
                         <div>
-                            <label className="block text-[11px] font-black text-gray-400 uppercase mb-3 tracking-widest ml-1">Business/Company Name (Optional)</label>
+                            <label className="block text-[11px] font-black text-gray-400 uppercase mb-3 tracking-widest ml-1">Business/Company Name <span className="text-red-500">*</span></label>
                             <input
                                 type="text"
                                 placeholder="Enter company name if applicable"
