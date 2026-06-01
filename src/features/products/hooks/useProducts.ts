@@ -53,6 +53,13 @@ export const useProducts = (filters: ProductFilters = {}) => {
       if (filters.sort) params.append('sort', filters.sort);
       if (page) params.append('page', String(page));
 
+      // Append dynamic attributes (attr_*)
+      Object.entries(filters).forEach(([key, value]) => {
+          if (key.startsWith('attr_') && value) {
+              params.append(key, String(value));
+          }
+      });
+
       const response = await productApi.getFiltered(params.toString());
       setProducts(response.data.data);
       setPagination({

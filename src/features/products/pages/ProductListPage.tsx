@@ -61,6 +61,21 @@ export const ProductListPage = () => {
   const [expandedAttrs, setExpandedAttrs] = useState<Record<number, boolean>>({});
   const topRef = useRef<HTMLDivElement>(null);
 
+  // Sync localFilters with searchParams (Crucial for Breadcrumb Back navigation)
+  useEffect(() => {
+    const updated: LocalFilters = {
+        min_price: searchParams.get('min_price') || '',
+        max_price: searchParams.get('max_price') || '',
+        province_id: searchParams.get('province_id') || '',
+        district_id: searchParams.get('district_id') || '',
+        sort: searchParams.get('sort') || 'latest',
+    };
+    searchParams.forEach((val, key) => {
+        if (key.startsWith('attr_')) updated[key] = val;
+    });
+    setLocalFilters(updated);
+  }, [searchParams]);
+
   useEffect(() => {
     categoryApi.getAll().then(res => setCategories(Array.isArray(res.data) ? res.data : res.data.data || []));
     api.get('/provinces').then(res => setProvinces(Array.isArray(res.data) ? res.data : res.data.data || []));
@@ -217,29 +232,26 @@ export const ProductListPage = () => {
                         });
                         setSearchParams(params);
                     }}
-                    className="hover:text-blue-600 truncate max-w-[120px] shrink-0 font-bold"
+                    className={`truncate max-w-[120px] shrink-0 font-bold ${!Object.keys(localFilters).some(k => k.startsWith('attr_')) ? 'text-gray-500' : 'text-blue-600 hover:underline'}`}
                 >
                     {selectedCategory.name}
                 </button>
               </>
             )}
-            {/* Khmer24 Style Attribute Breadcrumbs - Fixed order and back logic */}
+            {/* Khmer24 Style Attribute Breadcrumbs - Fixed for Back Navigation */}
             {(() => {
-                // Sort attributes for breadcrumb display: Brand -> Model -> Others -> Body Type
-                const sortedForBreadcrumb = [...dynamicAttributes].sort((a, b) => {
-                    const order = ['Brand', 'Model', 'Year', 'Condition'];
+                // Logical Display Order for Breadcrumb: Brand -> Model -> Year -> Body Type -> Others
+                const sortedAttrs = [...dynamicAttributes].sort((a, b) => {
+                    const order = ['Brand', 'Model', 'Year', 'Condition', 'Body Type'];
                     const idxA = order.indexOf(a.name);
                     const idxB = order.indexOf(b.name);
-
-                    if (a.name === 'Body Type') return 1;
-                    if (b.name === 'Body Type') return -1;
                     if (idxA !== -1 && idxB !== -1) return idxA - idxB;
                     if (idxA !== -1) return -1;
                     if (idxB !== -1) return 1;
                     return 0;
                 });
 
-                return sortedForBreadcrumb.map((attr, idx) => {
+                return sortedAttrs.map((attr, idx) => {
                     const val = localFilters[`attr_${attr.id}`];
                     if (!val) return null;
                     return (
@@ -248,9 +260,9 @@ export const ProductListPage = () => {
                             <button
                                 onClick={() => {
                                     const params = new URLSearchParams(searchParams);
-                                    // Remove this attribute and all subsequent ones in the sorted order
-                                    for (let i = idx; i < sortedForBreadcrumb.length; i++) {
-                                        params.delete(`attr_${sortedForBreadcrumb[i].id}`);
+                                    // Back to this level: remove this attribute and all subsequent ones in the logical sequence
+                                    for (let i = idx; i < sortedAttrs.length; i++) {
+                                        params.delete(`attr_${sortedAttrs[i].id}`);
                                     }
                                     setSearchParams(params);
                                 }}
@@ -356,103 +368,83 @@ export const ProductListPage = () => {
         {(() => {
             if (dynamicAttributes.length === 0) return null;
 
-            const brandAttr = dynamicAttributes.find(a => a.name === 'Brand');
-            const isBrandSelected = brandAttr ? !!localFilters[`attr_${brandAttr.id}`] : true;
-
-            let displayAttrs = [];
-
-            if (!isBrandSelected) {
-                // Stage 1: Only show Brand
-                if (brandAttr) displayAttrs.push(brandAttr);
-            } else {
-                // Stage 2: Brand selected, show Model and Body Type (don't hide)
-                const modelAttr = dynamicAttributes.find(a => a.name === 'Model');
-                const bodyTypeAttr = dynamicAttributes.find(a => a.name === 'Body Type');
-
-                if (modelAttr) displayAttrs.push(modelAttr);
-                if (bodyTypeAttr) displayAttrs.push(bodyTypeAttr);
-
-                // Show any other select attributes that aren't picked yet
-                const others = dynamicAttributes.filter(a =>
-                    a.type === 'select' &&
-                    !['Brand', 'Model', 'Body Type'].includes(a.name) &&
-                    !localFilters[`attr_${a.id}`]
-                );
-                displayAttrs.push(...others);
-            }
-
-            // Body Type always at bottom
-            displayAttrs.sort((a, b) => {
+            // Define Logical Order: Brand -> Model -> Others -> Body Type
+            const sortedAttrs = [...dynamicAttributes].sort((a, b) => {
+                const order = ['Brand', 'Model', 'Year', 'Condition'];
                 if (a.name === 'Body Type') return 1;
                 if (b.name === 'Body Type') return -1;
+                const idxA = order.indexOf(a.name);
+                const idxB = order.indexOf(b.name);
+                if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+                if (idxA !== -1) return -1;
+                if (idxB !== -1) return 1;
                 return 0;
             });
 
-            return displayAttrs.map(attr => {
-                const isExpanded = expandedAttrs[attr.id] || false;
-                const options = attr.options || [];
-                const visibleOptions = isExpanded ? options : options.slice(0, 12);
-                const hasMore = options.length > 12;
-                const isCircleStyle = ['Brand', 'Body Type', 'Make'].includes(attr.name);
+            // Stage 1: Find the first attribute that hasn't been selected yet
+            const nextAttr = sortedAttrs.find(attr => attr.type === 'select' && !localFilters[`attr_${attr.id}`]);
+            if (!nextAttr) return null;
 
-                return (
-                    <div key={attr.id} className="bg-white border border-gray-200 rounded mb-3 shadow-sm animate-in fade-in slide-in-from-top-2 duration-500">
-                        <div className="px-4 py-3 border-b border-gray-50 flex items-center justify-between">
-                            <h2 className="text-sm font-bold text-gray-800 uppercase tracking-tight">{attr.name}</h2>
-                        </div>
-                        <div className="p-4">
-                            <div className={`grid gap-x-2 gap-y-4 ${isCircleStyle ? 'grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10' : 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6'}`}>
-                                {visibleOptions.map((opt: any) => {
-                                    const isActive = localFilters[`attr_${attr.id}`] === opt.value;
-                                    return (
-                                        <button
-                                            key={opt.id}
-                                            onClick={() => {
-                                                applyFilters({ [`attr_${attr.id}`]: isActive ? '' : opt.value });
-                                                // Instant scroll to results
-                                                setTimeout(() => {
-                                                    const el = document.getElementById('results-count');
-                                                    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                                                }, 100);
-                                            }}
-                                            className="group flex flex-col items-center gap-2 transition-all active:scale-95"
-                                        >
-                                            {isCircleStyle ? (
-                                                <div className={`size-12 sm:size-14 rounded-full flex items-center justify-center p-2.5 border transition-all ${isActive ? 'bg-blue-50 border-blue-500 ring-2 ring-blue-500/20' : 'bg-white border-gray-100 group-hover:border-blue-200'}`}>
-                                                    {opt.image_url ? (
-                                                        <img src={getImageUrl(opt.image_url)} className="w-full h-full object-contain" alt={opt.value} />
-                                                    ) : (
-                                                        <div className="text-[10px] font-black text-gray-300 uppercase truncate px-1">{opt.value.substring(0, 3)}</div>
-                                                    )}
-                                                </div>
-                                            ) : (
-                                                <div className={`w-full py-2.5 px-3 rounded border text-center transition-all ${isActive ? 'bg-blue-50 border-blue-500 text-blue-600 font-bold shadow-sm' : 'bg-gray-50 border-gray-100 text-gray-700 hover:bg-gray-100'}`}>
-                                                    <span className="text-[11px] truncate block">{opt.value}</span>
-                                                </div>
-                                            )}
-                                            {isCircleStyle && (
-                                                <span className={`text-[10px] sm:text-[11px] font-bold text-center leading-tight truncate px-1 ${isActive ? 'text-blue-600' : 'text-gray-600 group-hover:text-blue-600'}`}>
-                                                    {opt.value}
-                                                </span>
-                                            )}
-                                        </button>
-                                    );
-                                })}
-                            </div>
+            const isExpanded = expandedAttrs[nextAttr.id] || false;
+            const options = nextAttr.options || [];
+            const visibleOptions = isExpanded ? options : options.slice(0, 12);
+            const hasMore = options.length > 12;
+            const isCircleStyle = ['Brand', 'Body Type', 'Make'].includes(nextAttr.name);
 
-                            {hasMore && (
-                                <button
-                                    onClick={() => setExpandedAttrs(prev => ({ ...prev, [attr.id]: !isExpanded }))}
-                                    className="w-full mt-6 py-2 bg-gray-100 hover:bg-gray-200 text-gray-500 text-[11px] font-bold uppercase tracking-widest rounded transition-colors flex items-center justify-center gap-1.5"
-                                >
-                                    {isExpanded ? 'Show Less' : 'Show More'}
-                                    <svg className={`w-3.5 h-3.5 transition-transform ${isExpanded ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M19 9l-7 7-7-7"/></svg>
-                                </button>
-                            )}
-                        </div>
+            return (
+                <div key={nextAttr.id} className="bg-white border border-gray-200 rounded mb-3 shadow-sm animate-in fade-in slide-in-from-top-2 duration-500">
+                    <div className="px-4 py-3 border-b border-gray-50">
+                        <h2 className="text-sm font-bold text-gray-800 uppercase tracking-tight">{nextAttr.name}</h2>
                     </div>
-                );
-            });
+                    <div className="p-4">
+                        <div className={`grid gap-x-2 gap-y-4 ${isCircleStyle ? 'grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10' : 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6'}`}>
+                            {visibleOptions.map((opt: any) => (
+                                <button
+                                    key={opt.id}
+                                    onClick={() => {
+                                        applyFilters({ [`attr_${nextAttr.id}`]: opt.value });
+                                        // Auto-scroll to results
+                                        setTimeout(() => {
+                                            const el = document.getElementById('results-count');
+                                            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                                        }, 100);
+                                    }}
+                                    className="group flex flex-col items-center gap-2 transition-all active:scale-95"
+                                >
+                                    {isCircleStyle ? (
+                                        <div className="size-12 sm:size-14 rounded-full flex items-center justify-center p-2.5 border border-gray-100 transition-all bg-white group-hover:border-blue-200 group-hover:bg-blue-50/30">
+                                            {opt.image_url ? (
+                                                <img src={getImageUrl(opt.image_url)} className="w-full h-full object-contain" alt={opt.value} />
+                                            ) : (
+                                                <div className="text-[10px] font-black text-gray-300 uppercase truncate px-1">{opt.value.substring(0, 3)}</div>
+                                            )}
+                                        </div>
+                                    ) : (
+                                        <div className="w-full py-2.5 px-3 rounded border border-gray-100 bg-gray-50 text-center transition-all group-hover:bg-blue-50 group-hover:border-blue-200 group-hover:text-blue-600 group-hover:font-bold shadow-sm">
+                                            <span className="text-[11px] truncate block">{opt.value}</span>
+                                        </div>
+                                    )}
+                                    {isCircleStyle && (
+                                        <span className={`text-[10px] sm:text-[11px] font-bold text-center leading-tight truncate px-1 text-gray-600 group-hover:text-blue-600`}>
+                                            {opt.value}
+                                        </span>
+                                    )}
+                                </button>
+                            ))}
+                        </div>
+
+                        {hasMore && (
+                            <button
+                                onClick={() => setExpandedAttrs(prev => ({ ...prev, [nextAttr.id]: !isExpanded }))}
+                                className="w-full mt-6 py-2 bg-gray-100 hover:bg-gray-200 text-gray-500 text-[11px] font-bold uppercase tracking-widest rounded transition-colors flex items-center justify-center gap-1.5"
+                            >
+                                {isExpanded ? 'Show Less' : 'Show More'}
+                                <svg className={`w-3.5 h-3.5 transition-transform ${isExpanded ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M19 9l-7 7-7-7"/></svg>
+                            </button>
+                        )}
+                    </div>
+                </div>
+            );
         })()}
 
         <div className="flex flex-col gap-4 sm:gap-5">
