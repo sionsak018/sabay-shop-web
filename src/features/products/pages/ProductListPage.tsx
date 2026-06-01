@@ -58,6 +58,7 @@ export const ProductListPage = () => {
   });
 
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
+  const [expandedAttrs, setExpandedAttrs] = useState<Record<number, boolean>>({});
   const topRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -264,67 +265,90 @@ export const ProductListPage = () => {
                 </div>
             </div>
 
-        {/* Subcategories & Dynamic Attributes Bar */}
-        {(subCategories.length > 0 || dynamicAttributes.length > 0) && (
-            <div className="bg-white border border-gray-200 rounded mb-4 shadow-sm overflow-hidden divide-y divide-gray-100">
-                {/* Subcategories (if any) */}
-                {subCategories.length > 0 && (
-                    <ul className="flex overflow-x-auto scrollbar-hide py-3 px-2">
-                        {subCategories.map((sub) => (
-                            <li key={sub.id} className="shrink-0 w-[95px] sm:w-[110px]">
-                                <button
-                                    onClick={() => setCategory(String(sub.id))}
-                                    className="block w-full group transition-all"
-                                >
-                                    <div className={`mx-auto rounded-full size-11 sm:size-14 flex items-center justify-center p-2 mb-1.5 transition-all ${categoryId === String(sub.id) ? 'bg-blue-50 ring-2 ring-blue-500' : 'bg-[#f1f2f6] group-hover:bg-[#e9ecef]'}`}>
-                                        <CategoryIcon cat={sub} className="w-full h-full object-contain" />
-                                    </div>
-                                    <p className={`text-[10px] sm:text-[11.5px] font-bold text-center px-1 truncate ${categoryId === String(sub.id) ? 'text-blue-600' : 'text-gray-700 group-hover:text-blue-600'}`}>
-                                        {sub.name}
-                                    </p>
-                                </button>
-                            </li>
-                        ))}
-                    </ul>
-                )}
-
-                {/* Dynamic Attributes (if any) */}
-                {dynamicAttributes.length > 0 && (
-                    <div className="flex overflow-x-auto scrollbar-hide py-3 px-4 gap-3 bg-gray-50/50">
-                        {dynamicAttributes.map((attr) => (
-                            <div key={attr.id} className="shrink-0 flex flex-col gap-1.5 min-w-[140px]">
-                                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">{attr.name}</label>
-                                {attr.type === 'select' ? (
-                                    <select
-                                        value={localFilters[`attr_${attr.id}`] || ''}
-                                        onChange={(e) => applyFilters({ [`attr_${attr.id}`]: e.target.value })}
-                                        className="w-full bg-white border border-gray-200 rounded px-3 py-1.5 text-xs font-bold text-gray-700 outline-none focus:border-blue-500 transition shadow-sm"
-                                    >
-                                        <option value="">All {attr.name}</option>
-                                        {attr.options?.map((opt: any) => (
-                                            <option key={opt.id} value={opt.value}>{opt.value}</option>
-                                        ))}
-                                    </select>
-                                ) : (
-                                    <input
-                                        type="text"
-                                        placeholder={`Filter ${attr.name}`}
-                                        value={localFilters[`attr_${attr.id}`] || ''}
-                                        className="w-full bg-white border border-gray-200 rounded px-3 py-1.5 text-xs font-bold text-gray-700 outline-none focus:border-blue-500 transition shadow-sm"
-                                        onKeyDown={(e) => {
-                                            if (e.key === 'Enter') {
-                                                applyFilters({ [`attr_${attr.id}`]: (e.target as HTMLInputElement).value });
-                                            }
-                                        }}
-                                        onChange={(e) => setLocalFilters(prev => ({ ...prev, [`attr_${attr.id}`]: e.target.value }))}
-                                    />
-                                )}
-                            </div>
-                        ))}
-                    </div>
-                )}
+        {/* Subcategories Bar */}
+        {subCategories.length > 0 && (
+            <div className="bg-white border border-gray-200 rounded mb-3 shadow-sm overflow-hidden">
+                <ul className="flex overflow-x-auto scrollbar-hide py-3 px-2">
+                    {subCategories.map((sub) => (
+                        <li key={sub.id} className="shrink-0 w-[95px] sm:w-[110px]">
+                            <button
+                                onClick={() => setCategory(String(sub.id))}
+                                className="block w-full group transition-all"
+                            >
+                                <div className={`mx-auto rounded-full size-11 sm:size-14 flex items-center justify-center p-2 mb-1.5 transition-all ${categoryId === String(sub.id) ? 'bg-blue-50 ring-2 ring-blue-500' : 'bg-[#f1f2f6] group-hover:bg-[#e9ecef]'}`}>
+                                    <CategoryIcon cat={sub} className="w-full h-full object-contain" />
+                                </div>
+                                <p className={`text-[10px] sm:text-[11.5px] font-bold text-center px-1 truncate ${categoryId === String(sub.id) ? 'text-blue-600' : 'text-gray-700 group-hover:text-blue-600'}`}>
+                                    {sub.name}
+                                </p>
+                            </button>
+                        </li>
+                    ))}
+                </ul>
             </div>
         )}
+
+        {/* Visual Dynamic Attributes (Brand, Body Type, etc.) */}
+        {dynamicAttributes.filter(a => a.type === 'select').map(attr => {
+            const isExpanded = expandedAttrs[attr.id] || false;
+            const options = attr.options || [];
+            const visibleOptions = isExpanded ? options : options.slice(0, 12);
+            const hasMore = options.length > 12;
+
+            // Determine UI style based on attribute name (Screen short reference)
+            const isCircleStyle = ['Brand', 'Body Type', 'Make'].includes(attr.name);
+
+            return (
+                <div key={attr.id} className="bg-white border border-gray-200 rounded mb-3 shadow-sm">
+                    <div className="px-4 py-3 border-b border-gray-50 flex items-center justify-between">
+                        <h2 className="text-sm font-bold text-gray-800 uppercase tracking-tight">{attr.name}</h2>
+                    </div>
+                    <div className="p-4">
+                        <div className={`grid gap-x-2 gap-y-4 ${isCircleStyle ? 'grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10' : 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6'}`}>
+                            {visibleOptions.map((opt: any) => {
+                                const isActive = localFilters[`attr_${attr.id}`] === opt.value;
+                                return (
+                                    <button
+                                        key={opt.id}
+                                        onClick={() => applyFilters({ [`attr_${attr.id}`]: isActive ? '' : opt.value })}
+                                        className="group flex flex-col items-center gap-2 transition-all active:scale-95"
+                                    >
+                                        {isCircleStyle ? (
+                                            <div className={`size-12 sm:size-14 rounded-full flex items-center justify-center p-2.5 border transition-all ${isActive ? 'bg-blue-50 border-blue-500 ring-2 ring-blue-500/20' : 'bg-white border-gray-100 group-hover:border-blue-200'}`}>
+                                                {opt.image_url ? (
+                                                    <img src={getImageUrl(opt.image_url)} className="w-full h-full object-contain" alt={opt.value} />
+                                                ) : (
+                                                    <div className="text-[10px] font-black text-gray-300 uppercase truncate px-1">{opt.value.substring(0, 3)}</div>
+                                                )}
+                                            </div>
+                                        ) : (
+                                            <div className={`w-full py-2.5 px-3 rounded border text-center transition-all ${isActive ? 'bg-blue-50 border-blue-500 text-blue-600 font-bold' : 'bg-gray-50 border-gray-100 text-gray-700 hover:bg-gray-100'}`}>
+                                                <span className="text-[11px] truncate block">{opt.value}</span>
+                                            </div>
+                                        )}
+                                        {isCircleStyle && (
+                                            <span className={`text-[10px] sm:text-[11px] font-bold text-center leading-tight truncate px-1 ${isActive ? 'text-blue-600' : 'text-gray-600 group-hover:text-blue-500'}`}>
+                                                {opt.value}
+                                            </span>
+                                        )}
+                                    </button>
+                                );
+                            })}
+                        </div>
+
+                        {hasMore && (
+                            <button
+                                onClick={() => setExpandedAttrs(prev => ({ ...prev, [attr.id]: !isExpanded }))}
+                                className="w-full mt-6 py-2 bg-gray-100 hover:bg-gray-200 text-gray-500 text-[11px] font-bold uppercase tracking-widest rounded transition-colors flex items-center justify-center gap-1.5"
+                            >
+                                {isExpanded ? 'Show Less' : 'Show More'}
+                                <svg className={`w-3.5 h-3.5 transition-transform ${isExpanded ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M19 9l-7 7-7-7"/></svg>
+                            </button>
+                        )}
+                    </div>
+                </div>
+            );
+        })}
 
         <div className="flex flex-col gap-4 sm:gap-5">
 
