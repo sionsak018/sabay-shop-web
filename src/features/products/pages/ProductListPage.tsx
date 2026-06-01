@@ -35,9 +35,6 @@ export const ProductListPage = () => {
 
   const [categories, setCategories] = useState<Category[]>([]);
   const [provinces, setProvinces] = useState<any[]>([]);
-  const [districts, setDistricts] = useState<any[]>([]);
-  const [communes, setCommunes] = useState<any[]>([]);
-  const [villages, setVillages] = useState<any[]>([]);
   const [dynamicAttributes, setDynamicAttributes] = useState<any[]>([]);
   const [page, setPage] = useState(1);
 
@@ -153,7 +150,6 @@ export const ProductListPage = () => {
                 <svg className="w-4 h-4 absolute right-4 top-1/2 -translate-y-1/2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
              </div>
 
-             {/* Mobile Filter Toggle */}
              <button
                 onClick={() => setIsMobileFilterOpen(true)}
                 className="lg:hidden p-2.5 bg-blue-600 text-white rounded shadow-md active:scale-95 transition-transform"
@@ -163,8 +159,6 @@ export const ProductListPage = () => {
         </div>
       </div>
 
-
-      {/* Breadcrumbs - Khmer24 Style */}
       <div className="py-2.5">
         <div className="container mx-auto px-4 max-w-7xl">
           <nav className="flex text-[10px] sm:text-xs font-bold text-gray-400 gap-1.5 items-center overflow-x-auto whitespace-nowrap scrollbar-hide pb-0.5">
@@ -192,7 +186,6 @@ export const ProductListPage = () => {
 
           {/* Desktop Sidebar */}
           <aside className="lg:w-64 space-y-4 flex-shrink-0 hidden lg:block">
-            {/* ... category tree ... */}
             <div className="bg-white border border-gray-200 rounded-md overflow-hidden shadow-sm">
                 <div className="bg-[#f8f9fa] px-4 py-2 border-b border-gray-200">
                     <h2 className="text-xs font-bold text-gray-700 uppercase tracking-tight">Categories</h2>
@@ -229,7 +222,7 @@ export const ProductListPage = () => {
                             <div className="mt-1 space-y-0.5">
                                 <button
                                     onClick={() => setCategory(String(mainCategory.id))}
-                                    className={`w-full text-left px-4 py-1.5 text-[13px] rounded transition ${categoryId === String(mainCategory.id) ? 'bg-blue-600 text-white font-bold' : 'text-gray-600 hover:bg-[#f1f2f6]'}`}
+                                    className={`w-full text-left px-4 py-1.5 text-[13px] rounded transition \${categoryId === String(mainCategory.id) ? 'bg-blue-600 text-white font-bold' : 'text-gray-600 hover:bg-[#f1f2f6]'}`}
                                 >
                                     All {mainCategory.name}
                                 </button>
@@ -237,9 +230,9 @@ export const ProductListPage = () => {
                                     <button
                                         key={sub.id}
                                         onClick={() => setCategory(String(sub.id))}
-                                        className={`w-full text-left px-4 py-1.5 text-[13px] rounded transition flex items-center gap-2 ${categoryId === String(sub.id) ? 'bg-blue-600 text-white font-bold' : 'text-gray-600 hover:bg-[#f1f2f6]'}`}
+                                        className={`w-full text-left px-4 py-1.5 text-[13px] rounded transition flex items-center gap-2 \${categoryId === String(sub.id) ? 'bg-blue-600 text-white font-bold' : 'text-gray-600 hover:bg-[#f1f2f6]'}`}
                                     >
-                                        <CategoryIcon cat={sub} className={`w-4 h-4 ${categoryId === String(sub.id) ? '' : 'opacity-60 grayscale'}`} />
+                                        <CategoryIcon cat={sub} className={`w-4 h-4 \${categoryId === String(sub.id) ? '' : 'opacity-60 grayscale'}`} />
                                         {sub.name}
                                     </button>
                                 ))}
@@ -249,7 +242,6 @@ export const ProductListPage = () => {
                 </div>
             </div>
 
-            {/* Price Range Filter */}
             <div className="bg-white border border-gray-200 rounded-md overflow-hidden shadow-sm">
                 <div className="bg-[#f8f9fa] px-4 py-2 border-b border-gray-200">
                     <h2 className="text-xs font-bold text-gray-700 uppercase tracking-tight">Price Range</h2>
@@ -282,7 +274,6 @@ export const ProductListPage = () => {
                 </div>
             </div>
 
-            {/* Location Selection */}
             <div className="bg-white border border-gray-200 rounded-md overflow-hidden shadow-sm">
                 <div className="bg-[#f8f9fa] px-4 py-2 border-b border-gray-200">
                     <h2 className="text-sm font-bold text-gray-800 uppercase tracking-tight">Location</h2>
@@ -290,7 +281,7 @@ export const ProductListPage = () => {
                 <div className="p-2 max-h-80 overflow-y-auto custom-scrollbar">
                     <button
                         onClick={() => applyFilters({ province_id: '' })}
-                        className={`w-full text-left px-3 py-1.5 text-[13px] rounded transition ${!localFilters.province_id ? 'bg-blue-50 text-blue-600 font-bold' : 'text-gray-600 hover:bg-[#f1f2f6]'}`}
+                        className={`w-full text-left px-3 py-1.5 text-[13px] rounded transition \${!localFilters.province_id ? 'bg-blue-50 text-blue-600 font-bold' : 'text-gray-600 hover:bg-[#f1f2f6]'}`}
                     >
                         All Cambodia
                     </button>
@@ -298,7 +289,7 @@ export const ProductListPage = () => {
                         <button
                             key={p.id}
                             onClick={() => applyFilters({ province_id: String(p.id) })}
-                            className={`w-full text-left px-3 py-1.5 text-[13px] rounded transition ${localFilters.province_id === String(p.id) ? 'bg-blue-50 text-blue-600 font-bold' : 'text-gray-600 hover:bg-[#f1f2f6]'}`}
+                            className={`w-full text-left px-3 py-1.5 text-[13px] rounded transition \${localFilters.province_id === String(p.id) ? 'bg-blue-50 text-blue-600 font-bold' : 'text-gray-600 hover:bg-[#f1f2f6]'}`}
                         >
                             {p.name}
                         </button>
@@ -317,7 +308,6 @@ export const ProductListPage = () => {
                 </button>
               </div>
               <div className="flex-1 overflow-y-auto p-4 space-y-8">
-                {/* Categories */}
                 <div className="space-y-4">
                   <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest">Categories</h3>
                   <div className="grid grid-cols-2 gap-2">
@@ -325,7 +315,7 @@ export const ProductListPage = () => {
                       <button
                         key={cat.id}
                         onClick={() => { setCategory(String(cat.id)); setIsMobileFilterOpen(false); }}
-                        className={`flex items-center gap-2 p-3 rounded-lg border transition ${categoryId === String(cat.id) ? 'border-blue-600 bg-blue-50 text-blue-600' : 'border-gray-100 bg-gray-50'}`}
+                        className={`flex items-center gap-2 p-3 rounded-lg border transition \${categoryId === String(cat.id) ? 'border-blue-600 bg-blue-50 text-blue-600' : 'border-gray-100 bg-gray-50'}`}
                       >
                         <CategoryIcon cat={cat} className="w-5 h-5 shrink-0" />
                         <span className="text-[11px] font-bold truncate">{cat.name}</span>
@@ -334,7 +324,6 @@ export const ProductListPage = () => {
                   </div>
                 </div>
 
-                {/* Price Range */}
                 <div className="space-y-4">
                   <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest">Price Range ($)</h3>
                   <div className="flex gap-4">
@@ -355,7 +344,6 @@ export const ProductListPage = () => {
                   </div>
                 </div>
 
-                {/* Locations */}
                 <div className="space-y-4 pb-10">
                   <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest">Locations</h3>
                   <div className="grid grid-cols-2 gap-2">
@@ -363,7 +351,7 @@ export const ProductListPage = () => {
                       <button
                         key={p.id}
                         onClick={() => setLocalFilters({...localFilters, province_id: String(p.id)})}
-                        className={`p-3 rounded-lg border text-center transition ${localFilters.province_id === String(p.id) ? 'border-blue-600 bg-blue-50 text-blue-600 font-black' : 'border-gray-100 bg-gray-50 text-gray-600 font-bold'} text-[11px]`}
+                        className={`p-3 rounded-lg border text-center transition \${localFilters.province_id === String(p.id) ? 'border-blue-600 bg-blue-50 text-blue-600 font-black' : 'border-gray-100 bg-gray-50 text-gray-600 font-bold'} text-[11px]`}
                       >
                         {p.name}
                       </button>
@@ -381,159 +369,6 @@ export const ProductListPage = () => {
               </div>
             </div>
           )}
-
-          {/* Product Grid Area */}
-          <div className="flex-grow">
-
-            <div className="bg-white border border-gray-200 rounded-md overflow-hidden shadow-sm">
-                <div className="bg-[#f8f9fa] px-4 py-2 border-b border-gray-200">
-                    <h2 className="text-xs font-bold text-gray-700 uppercase tracking-tight">Categories</h2>
-                </div>
-                <div className="p-1">
-                    {!mainCategory ? (
-                        <div className="space-y-0.5">
-                            {categories.filter(c => !c.parent_id).map(cat => (
-                                <button
-                                    key={cat.id}
-                                    onClick={() => setCategory(String(cat.id))}
-                                    className="w-full text-left px-3 py-1.5 rounded text-[13px] text-gray-600 hover:bg-[#f1f2f6] flex items-center gap-2 transition"
-                                >
-                                    <CategoryIcon cat={cat} className="w-5 h-5 opacity-60 grayscale" />
-                                    {cat.name}
-                                </button>
-                            ))}
-                        </div>
-                    ) : (
-                        <div>
-                            <button
-                                onClick={() => setCategory('')}
-                                className="w-full text-left px-3 py-1.5 text-xs text-blue-600 hover:bg-blue-50 flex items-center gap-1 font-bold rounded"
-                            >
-                                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M15 19l-7-7 7-7"/></svg>
-                                All Categories
-                            </button>
-
-                            <div className="mt-2 px-3 py-1.5 text-sm font-bold text-gray-900 bg-[#f1f2f6] border-y border-gray-200 flex items-center gap-2">
-                                <CategoryIcon cat={mainCategory} className="w-4 h-4" />
-                                {mainCategory.name}
-                            </div>
-
-                            <div className="mt-1 space-y-0.5">
-                                <button
-                                    onClick={() => setCategory(String(mainCategory.id))}
-                                    className={`w-full text-left px-4 py-1.5 text-[13px] rounded transition ${categoryId === String(mainCategory.id) ? 'bg-blue-600 text-white font-bold' : 'text-gray-600 hover:bg-[#f1f2f6]'}`}
-                                >
-                                    All {mainCategory.name}
-                                </button>
-                                {subCategories.map(sub => (
-                                    <button
-                                        key={sub.id}
-                                        onClick={() => setCategory(String(sub.id))}
-                                        className={`w-full text-left px-4 py-1.5 text-[13px] rounded transition flex items-center gap-2 ${categoryId === String(sub.id) ? 'bg-blue-600 text-white font-bold' : 'text-gray-600 hover:bg-[#f1f2f6]'}`}
-                                    >
-                                        <CategoryIcon cat={sub} className={`w-4 h-4 ${categoryId === String(sub.id) ? '' : 'opacity-60 grayscale'}`} />
-                                        {sub.name}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-                    )}
-                </div>
-            </div>
-
-            {/* Price Range Filter */}
-            <div className="bg-white border border-gray-200 rounded-md overflow-hidden shadow-sm">
-                <div className="bg-[#f8f9fa] px-4 py-2 border-b border-gray-200">
-                    <h2 className="text-xs font-bold text-gray-700 uppercase tracking-tight">Price Range</h2>
-                </div>
-                <div className="p-4 space-y-3">
-                    <div className="flex items-center gap-2">
-                        <div className="relative flex-1">
-                            <span className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400 text-[10px]">$</span>
-                            <input
-                                type="number"
-                                placeholder="Min"
-                                value={localFilters.min_price}
-                                onChange={e => setLocalFilters({...localFilters, min_price: e.target.value})}
-                                className="w-full pl-5 pr-2 py-1.5 bg-[#f8f9fa] border border-[#ced4da] rounded text-sm outline-none focus:bg-white focus:border-blue-500"
-                            />
-                        </div>
-                        <span className="text-gray-300">-</span>
-                        <div className="relative flex-1">
-                            <span className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400 text-[10px]">$</span>
-                            <input
-                                type="number"
-                                placeholder="Max"
-                                value={localFilters.max_price}
-                                onChange={e => setLocalFilters({...localFilters, max_price: e.target.value})}
-                                className="w-full pl-5 pr-2 py-1.5 bg-[#f8f9fa] border border-[#ced4da] rounded text-sm outline-none focus:bg-white focus:border-blue-500"
-                            />
-                        </div>
-                    </div>
-                    <button onClick={applyFilters} className="w-full bg-blue-600 text-white py-1.5 rounded text-xs font-bold hover:bg-blue-700 transition">Apply</button>
-                </div>
-            </div>
-
-            {/* Dynamic Attributes - ONLY show when category is selected */}
-            {dynamicAttributes.length > 0 && (
-                <div className="bg-white border border-gray-200 rounded-md overflow-hidden shadow-sm">
-                    <div className="bg-[#f8f9fa] px-4 py-2 border-b border-gray-200">
-                        <h2 className="text-xs font-bold text-gray-700 uppercase tracking-tight">Specifications</h2>
-                    </div>
-                    <div className="p-4 space-y-4">
-                        {dynamicAttributes.map(attr => (
-                            <div key={attr.id} className="space-y-1">
-                                <label className="block text-[11px] font-bold text-gray-500 uppercase">{attr.name}</label>
-                                {attr.type === 'select' ? (
-                                    <select
-                                        value={localFilters[`attr_${attr.id}`] || ''}
-                                        onChange={e => setLocalFilters({...localFilters, [`attr_${attr.id}`]: e.target.value})}
-                                        className="w-full px-2 py-1.5 bg-[#f8f9fa] border border-[#ced4da] rounded text-sm outline-none focus:bg-white focus:border-blue-500"
-                                    >
-                                        <option value="">All {attr.name}</option>
-                                        {attr.options?.map((o: any) => <option key={o.id} value={o.value}>{o.value}</option>)}
-                                    </select>
-                                ) : (
-                                    <input
-                                        type="text"
-                                        placeholder={`Search ${attr.name}`}
-                                        value={localFilters[`attr_${attr.id}`] || ''}
-                                        onChange={e => setLocalFilters({...localFilters, [`attr_${attr.id}`]: e.target.value})}
-                                        className="w-full px-2 py-1.5 bg-[#f8f9fa] border border-[#ced4da] rounded text-sm outline-none focus:bg-white focus:border-blue-500"
-                                    />
-                                )}
-                            </div>
-                        ))}
-                        <button onClick={applyFilters} className="w-full bg-blue-600 text-white py-1.5 rounded text-xs font-bold hover:bg-blue-700 transition">Apply Filter</button>
-                    </div>
-                </div>
-            )}
-
-            {/* Location Selection */}
-            <div className="bg-white border border-gray-200 rounded-md overflow-hidden shadow-sm">
-                <div className="bg-[#f8f9fa] px-4 py-2 border-b border-gray-200">
-                    <h2 className="text-sm font-bold text-gray-800 uppercase tracking-tight">Location</h2>
-                </div>
-                <div className="p-2 max-h-80 overflow-y-auto custom-scrollbar">
-                    <button
-                        onClick={() => applyFilters({ province_id: '' })}
-                        className={`w-full text-left px-3 py-1.5 text-[13px] rounded transition ${!localFilters.province_id ? 'bg-blue-50 text-blue-600 font-bold' : 'text-gray-600 hover:bg-[#f1f2f6]'}`}
-                    >
-                        All Cambodia
-                    </button>
-                    {provinces.map(p => (
-                        <button
-                            key={p.id}
-                            onClick={() => applyFilters({ province_id: String(p.id) })}
-                            className={`w-full text-left px-3 py-1.5 text-[13px] rounded transition ${localFilters.province_id === String(p.id) ? 'bg-blue-50 text-blue-600 font-bold' : 'text-gray-600 hover:bg-[#f1f2f6]'}`}
-                        >
-                            {p.name}
-                        </button>
-                    ))}
-                </div>
-            </div>
-
-          </aside>
 
           {/* Product Grid Area */}
           <div className="flex-grow">
@@ -595,7 +430,7 @@ export const ProductListPage = () => {
                                     <button
                                         key={p}
                                         onClick={() => goToPage(p)}
-                                        className={`w-10 h-10 rounded border text-[13px] font-bold transition ${page === p ? 'bg-blue-600 border-blue-600 text-white shadow-md z-10' : 'bg-white border-gray-300 text-gray-600 hover:bg-gray-50'}`}
+                                        className={`w-10 h-10 rounded border text-[13px] font-bold transition \${page === p ? 'bg-blue-600 border-blue-600 text-white shadow-md z-10' : 'bg-white border-gray-300 text-gray-600 hover:bg-gray-50'}`}
                                     >
                                         {p}
                                     </button>
