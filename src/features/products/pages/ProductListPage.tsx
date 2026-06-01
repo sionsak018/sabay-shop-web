@@ -233,8 +233,8 @@ export const ProductListPage = () => {
                         <button
                             onClick={() => {
                                 const params = new URLSearchParams(searchParams);
-                                // Reset: remove this and all subsequent attributes to allow re-selection
-                                for (let i = idx; i < dynamicAttributes.length; i++) {
+                                // Back to this level: remove everything deeper than this attribute
+                                for (let i = idx + 1; i < dynamicAttributes.length; i++) {
                                     params.delete(`attr_${dynamicAttributes[i].id}`);
                                 }
                                 setSearchParams(params);
@@ -338,32 +338,50 @@ export const ProductListPage = () => {
 
         {/* Khmer24 Step-by-Step Selection UI */}
         {(() => {
-            // Filter attributes that are NOT selected yet
+            // Get unselected select-type attributes
             const unselectedAttrs = dynamicAttributes.filter(a => a.type === 'select' && !localFilters[`attr_${a.id}`]);
             if (unselectedAttrs.length === 0) return null;
 
-            // Sort unselected attributes to ensure "Body Type" stays at the bottom
-            const sortedAttrs = [...unselectedAttrs].sort((a, b) => {
+            // Khmer24 Sequential Logic:
+            // 1. If Brand exists but not selected, show Brand box (and hide Model).
+            // 2. If Brand is selected, show Model box.
+            // 3. Body Type should always be visible if Brand is selected OR if it's a top-level choice.
+
+            const brandAttr = dynamicAttributes.find(a => a.name === 'Brand');
+            const modelAttr = dynamicAttributes.find(a => a.name === 'Model');
+            const bodyTypeAttr = dynamicAttributes.find(a => a.name === 'Body Type');
+
+            const isBrandSelected = brandAttr ? !!localFilters[`attr_${brandAttr.id}`] : true;
+
+            // Attributes to display in the main area
+            let displayAttrs = [];
+
+            if (!isBrandSelected) {
+                // Show Brand and potentially Body Type (if it's not model-dependent)
+                if (brandAttr) displayAttrs.push(brandAttr);
+                if (bodyTypeAttr && !localFilters[`attr_${bodyTypeAttr.id}`]) displayAttrs.push(bodyTypeAttr);
+            } else {
+                // Brand is selected, show Model and Body Type (if not selected)
+                if (modelAttr && !localFilters[`attr_${modelAttr.id}`]) displayAttrs.push(modelAttr);
+                if (bodyTypeAttr && !localFilters[`attr_${bodyTypeAttr.id}`]) displayAttrs.push(bodyTypeAttr);
+
+                // Show any other select attributes that aren't picked
+                const others = unselectedAttrs.filter(a => !['Brand', 'Model', 'Body Type'].includes(a.name));
+                displayAttrs.push(...others);
+            }
+
+            // Ensure Body Type is always at the bottom of the display list
+            displayAttrs.sort((a, b) => {
                 if (a.name === 'Body Type') return 1;
                 if (b.name === 'Body Type') return -1;
                 return 0;
             });
 
-            // Khmer24 Logic: Usually Brand -> Model is a sequence.
-            // If Brand is not selected, hide Model.
-            const brandAttr = dynamicAttributes.find(a => a.name === 'Brand');
-            const modelAttr = dynamicAttributes.find(a => a.name === 'Model');
-            const isBrandSelected = brandAttr ? !!localFilters[`attr_${brandAttr.id}`] : true;
-
-            return sortedAttrs.map(attr => {
-                // Skip Model if Brand exists but isn't picked yet
-                if (attr.name === 'Model' && !isBrandSelected) return null;
-
+            return displayAttrs.map(attr => {
                 const isExpanded = expandedAttrs[attr.id] || false;
                 const options = attr.options || [];
                 const visibleOptions = isExpanded ? options : options.slice(0, 12);
                 const hasMore = options.length > 12;
-
                 const isCircleStyle = ['Brand', 'Body Type', 'Make'].includes(attr.name);
 
                 return (
@@ -376,7 +394,14 @@ export const ProductListPage = () => {
                                 {visibleOptions.map((opt: any) => (
                                     <button
                                         key={opt.id}
-                                        onClick={() => applyFilters({ [`attr_${attr.id}`]: opt.value })}
+                                        onClick={() => {
+                                            applyFilters({ [`attr_${attr.id}`]: opt.value });
+                                            // Fast find: smooth scroll to results area
+                                            setTimeout(() => {
+                                                const resultsEl = document.getElementById('results-count');
+                                                resultsEl?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                                            }, 100);
+                                        }}
                                         className="group flex flex-col items-center gap-2 transition-all active:scale-95"
                                     >
                                         {isCircleStyle ? (
@@ -388,7 +413,7 @@ export const ProductListPage = () => {
                                                 )}
                                             </div>
                                         ) : (
-                                            <div className="w-full py-2.5 px-3 rounded border border-gray-100 bg-gray-50 text-center transition-all group-hover:bg-blue-50 group-hover:border-blue-200 group-hover:text-blue-600 group-hover:font-bold">
+                                            <div className="w-full py-2.5 px-3 rounded border border-gray-100 bg-gray-50 text-center transition-all group-hover:bg-blue-50 group-hover:border-blue-200 group-hover:text-blue-600 group-hover:font-bold shadow-sm">
                                                 <span className="text-[11px] truncate block">{opt.value}</span>
                                             </div>
                                         )}
@@ -489,7 +514,7 @@ export const ProductListPage = () => {
           {/* Product Grid Area */}
           <div className="flex-grow">
              {/* Results count */}
-             <div className="mb-3 px-1 flex justify-between items-center">
+             <div id="results-count" className="mb-3 px-1 flex justify-between items-center">
                 <span className="text-[10px] sm:text-xs font-bold text-gray-400 uppercase">
                     {pagination.total} ads found
                 </span>
