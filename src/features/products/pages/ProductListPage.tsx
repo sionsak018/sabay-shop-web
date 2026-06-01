@@ -6,11 +6,13 @@ import { categoryApi } from '../../categories/services/categoryApi';
 import { type Category } from '../../categories/types/category.types';
 import api from '../../../services/api';
 import { getImageUrl } from '../../../utils/imageUrl';
+import { LocationPickerModal } from '../../../components/common/LocationPickerModal';
 
 interface LocalFilters {
   min_price: string;
   max_price: string;
   province_id: string;
+  district_id: string;
   [key: string]: string;
 }
 
@@ -31,18 +33,22 @@ export const ProductListPage = () => {
   const categoryId = searchParams.get('category_id') || '';
   const keyword = searchParams.get('keyword') || '';
   const provinceIdParam = searchParams.get('province_id') || '';
+  const districtIdParam = searchParams.get('district_id') || '';
   const sortParam = searchParams.get('sort') || 'latest';
 
   const [categories, setCategories] = useState<Category[]>([]);
   const [provinces, setProvinces] = useState<any[]>([]);
   const [dynamicAttributes, setDynamicAttributes] = useState<any[]>([]);
   const [page, setPage] = useState(1);
+  const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
+  const [districtName, setDistrictName] = useState('');
 
   const [localFilters, setLocalFilters] = useState<LocalFilters>(() => {
       const initial: LocalFilters = {
           min_price: searchParams.get('min_price') || '',
           max_price: searchParams.get('max_price') || '',
           province_id: provinceIdParam,
+          district_id: districtIdParam,
           sort: sortParam,
       };
       searchParams.forEach((val, key) => {
@@ -60,6 +66,18 @@ export const ProductListPage = () => {
   }, []);
 
   useEffect(() => {
+    if (districtIdParam && provinceIdParam) {
+        api.get(`/districts?province_id=${provinceIdParam}`).then(res => {
+            const list = Array.isArray(res.data) ? res.data : res.data.data || [];
+            const found = list.find((d: any) => String(d.id) === districtIdParam);
+            if (found) setDistrictName(found.name);
+        });
+    } else {
+        setDistrictName('');
+    }
+  }, [districtIdParam, provinceIdParam]);
+
+  useEffect(() => {
     if (categoryId) {
       api.get(`/category-attributes/${categoryId}`).then(res => setDynamicAttributes(res.data));
     } else {
@@ -73,6 +91,7 @@ export const ProductListPage = () => {
     min_price: searchParams.get('min_price') || undefined,
     max_price: searchParams.get('max_price') || undefined,
     province_id: searchParams.get('province_id') || undefined,
+    district_id: searchParams.get('district_id') || undefined,
     sort: sortParam || undefined,
     page,
   };
@@ -94,6 +113,7 @@ export const ProductListPage = () => {
     if (filters.min_price) newParams.set('min_price', filters.min_price);
     if (filters.max_price) newParams.set('max_price', filters.max_price);
     if (filters.province_id) newParams.set('province_id', filters.province_id);
+    if (filters.district_id) newParams.set('district_id', filters.district_id);
     if (filters.sort) newParams.set('sort', filters.sort);
 
     dynamicAttributes.forEach(attr => {
@@ -126,6 +146,7 @@ export const ProductListPage = () => {
   const subCategories = mainCategory ? categories.filter(c => c.parent_id === mainCategory.id) : [];
 
   const provinceName = provinces.find(p => String(p.id) === searchParams.get('province_id'))?.name || 'Cambodia';
+  const fullLocationName = districtName ? `${districtName}, ${provinceName}` : provinceName;
 
   return (
     <div ref={topRef} className="min-h-screen bg-[#f1f2f6] pb-20 text-left antialiased font-sans relative">
@@ -177,7 +198,7 @@ export const ProductListPage = () => {
               </>
             )}
             <svg className="w-2.5 h-2.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M9 5l7 7-7 7"/></svg>
-            <span className="text-gray-500 shrink-0">in {provinceName}</span>
+            <span className="text-gray-500 shrink-0">in {fullLocationName}</span>
           </nav>
         </div>
       </div>
@@ -187,29 +208,22 @@ export const ProductListPage = () => {
         <div className="bg-white border border-gray-200 rounded mb-3 shadow-sm">
             <div className="px-4 py-3 border-b border-gray-100">
                 <h1 className="text-base sm:text-lg font-bold text-gray-800">
-                    {selectedCategory ? `${selectedCategory.name} in ${provinceName}` :
+                    {selectedCategory ? `${selectedCategory.name} in ${fullLocationName}` :
                      keyword ? `Search results for "${keyword}"` :
-                     `Latest Classifieds in ${provinceName}`}
+                     `Latest Classifieds in ${fullLocationName}`}
                 </h1>
             </div>
 
             {/* Filter Bar */}
             <div className="px-4 py-2 flex items-center justify-between bg-white overflow-x-auto scrollbar-hide">
                     <div className="flex items-center gap-1.5 shrink-0">
-                        <div className="relative">
-                            <select
-                                value={localFilters.province_id}
-                                onChange={e => applyFilters({ province_id: e.target.value })}
-                                className="appearance-none flex items-center gap-1.5 px-3 py-1.5 bg-[#f8f9fa] hover:bg-[#e9ecef] rounded border border-[#dee2e6] text-[11px] font-bold text-gray-700 transition outline-none cursor-pointer pr-7 pl-8"
-                            >
-                                <option value="">Location: All</option>
-                                {provinces.map(p => (
-                                    <option key={p.id} value={p.id}>{p.name}</option>
-                                ))}
-                            </select>
-                            <svg className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                            <svg className="w-3 h-3 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"/></svg>
-                        </div>
+                        <button
+                            onClick={() => setIsLocationModalOpen(true)}
+                            className="flex items-center gap-1.5 px-3 py-1.5 bg-[#f8f9fa] hover:bg-[#e9ecef] rounded border border-[#dee2e6] text-[11px] font-bold text-gray-700 transition whitespace-nowrap"
+                        >
+                            <svg className="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                            {localFilters.province_id ? (districtName ? `${districtName}, ${provinces.find(p => String(p.id) === localFilters.province_id)?.name}` : (provinces.find(p => String(p.id) === localFilters.province_id)?.name || 'Location')) : 'Location: All'}
+                        </button>
 
                         <div className="relative">
                             <select
@@ -322,18 +336,14 @@ export const ProductListPage = () => {
                 </div>
 
                 <div className="space-y-4 pb-10">
-                  <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest">Locations</h3>
-                  <div className="grid grid-cols-2 gap-2">
-                    {provinces.map(p => (
-                      <button
-                        key={p.id}
-                        onClick={() => setLocalFilters({...localFilters, province_id: String(p.id)})}
-                        className={`p-3 rounded-lg border text-center transition ${localFilters.province_id === String(p.id) ? 'border-blue-600 bg-blue-50 text-blue-600 font-black' : 'border-gray-100 bg-gray-50 text-gray-600 font-bold'} text-[11px]`}
-                      >
-                        {p.name}
-                      </button>
-                    ))}
-                  </div>
+                  <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest">Location</h3>
+                  <button
+                    onClick={() => setIsLocationModalOpen(true)}
+                    className="w-full flex items-center justify-between p-4 bg-gray-50 border border-gray-100 rounded-xl font-bold text-sm text-gray-700"
+                  >
+                    <span>{localFilters.province_id ? (districtName ? `${districtName}, ${provinces.find(p => String(p.id) === localFilters.province_id)?.name}` : (provinces.find(p => String(p.id) === localFilters.province_id)?.name || 'Select Location')) : 'All Cambodia'}</span>
+                    <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7"/></svg>
+                  </button>
                 </div>
               </div>
               <div className="p-4 border-t border-gray-100 bg-white sticky bottom-0">
@@ -418,6 +428,16 @@ export const ProductListPage = () => {
           </div>
         </div>
       </div>
+      <LocationPickerModal
+        isOpen={isLocationModalOpen}
+        onClose={() => setIsLocationModalOpen(false)}
+        onSelect={(data) => {
+            applyFilters({
+                province_id: data.province_id,
+                district_id: data.district_id
+            });
+        }}
+      />
     </div>
   );
 };

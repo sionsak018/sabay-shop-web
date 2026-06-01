@@ -10,6 +10,7 @@ export interface ProductFilters {
   max_price?: string;
   location?: string;
   province_id?: string;
+  district_id?: string;
   sort?: string;
   page?: number;
 }
@@ -45,6 +46,7 @@ export const useProducts = (filters: ProductFilters = {}) => {
       if (filters.max_price) params.append('max_price', filters.max_price);
       if (filters.location) params.append('location', filters.location);
       if (filters.province_id) params.append('province_id', filters.province_id);
+      if (filters.district_id) params.append('district_id', filters.district_id);
       if (filters.sort) params.append('sort', filters.sort);
       if (page) params.append('page', String(page));
 
