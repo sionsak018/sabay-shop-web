@@ -506,8 +506,7 @@ export const CreateProductPage = () => {
                             <label className="block text-[11px] font-black text-gray-400 uppercase mb-3 tracking-widest ml-1">Ad Title <span className="text-red-500">*</span></label>
                             <input
                                 type="text"
-                                required
-                                placeholder="e.g. iPhone 15 Pro Max 256GB Gold"
+                                                                placeholder="e.g. iPhone 15 Pro Max 256GB Gold"
                                 value={formData.title}
                                 onChange={e => {
                                     setFormData({...formData, title: e.target.value});
@@ -524,8 +523,7 @@ export const CreateProductPage = () => {
                                 <span className={`absolute left-6 top-1/2 -translate-y-1/2 font-black text-lg ${errors.price ? 'text-red-300' : 'text-gray-400'}`}>$</span>
                                 <input
                                     type="number"
-                                    required
-                                    placeholder="0.00"
+                                                                        placeholder="0.00"
                                     value={formData.price}
                                     onChange={e => {
                                         setFormData({...formData, price: e.target.value});
@@ -659,8 +657,7 @@ export const CreateProductPage = () => {
                                 <label className="block text-[11px] font-black text-gray-400 uppercase mb-3 tracking-widest ml-1">Poster Name <span className="text-red-500">*</span></label>
                                 <input
                                     type="text"
-                                    required
-                                    placeholder="Enter your name"
+                                                                        placeholder="Enter your name"
                                     value={formData.poster_name}
                                     onChange={e => {
                                         setFormData({...formData, poster_name: e.target.value});
