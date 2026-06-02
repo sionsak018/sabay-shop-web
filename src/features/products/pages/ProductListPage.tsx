@@ -189,6 +189,8 @@ export const ProductListPage = () => {
   const subCategories = mainCategory ? categories.filter(c => c.parent_id === mainCategory.id) : [];
   const isSubCategorySelected = selectedCategory && selectedCategory.parent_id;
 
+  const brandAttr = dynamicAttributes.find(a => a.name === 'Brand');
+
   const provinceName = provinces.find(p => String(p.id) === searchParams.get('province_id'))?.name || 'Cambodia';
   const fullLocationName = districtName ? `${districtName}, ${provinceName}` : provinceName;
 
