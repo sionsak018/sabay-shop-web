@@ -62,6 +62,13 @@ export const HomePage = () => {
 
   const { products, loading, error } = useProducts(productFilters);
 
+  const getResultsTitle = () => {
+    if (activeKeyword) return `Results for "${activeKeyword}"`;
+    if (activeCategoryId) return `Results in ${selectedCategory?.name}`;
+    if (activeProvinceId !== '') return `Results in ${locationName}`;
+    return 'Recent Ads';
+  };
+
   const handleSearch = () => {
     if (searchQuery.trim()) {
       setActiveKeyword(searchQuery);
@@ -286,10 +293,10 @@ export const HomePage = () => {
         <div className="mt-5">
             <div className="flex items-center justify-between mb-3 px-1 border-b border-gray-200 dark:border-gray-800 pb-1.5">
                 <h2 className="text-sm font-bold text-gray-800 dark:text-gray-100 uppercase tracking-tight">
-                    {activeKeyword ? `Results for "${activeKeyword}"` : 'Recent Ads'}
+                    {getResultsTitle()}
                 </h2>
-                {activeKeyword ? (
-                    <button onClick={clearSearch} className="text-xs font-bold text-red-600 hover:underline">Clear Search</button>
+                {(activeKeyword || activeCategoryId || activeProvinceId) ? (
+                    <button onClick={clearSearch} className="text-xs font-bold text-red-600 hover:underline">Clear Filters</button>
                 ) : (
                     <Link to="/products" className="text-xs font-bold text-blue-600 hover:underline">View All</Link>
                 )}
