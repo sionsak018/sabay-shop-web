@@ -1,28 +1,53 @@
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
+import { useAlert } from '../../../context/AlertContext';
 
 export const LoginPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
+  const { showAlert } = useAlert();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    const newErrors: Record<string, string> = {};
+    const Msg = 'ព័ត៌មាននេះត្រូវបានទាមទារ';
+
+    if (!email.trim()) newErrors.email = Msg;
+    if (!password.trim()) newErrors.password = Msg;
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+
+    setErrors({});
     setLoading(true);
     try {
       const user = await login(email, password);
-      if (user.role === 'admin') {
-        navigate('/admin', { replace: true });
-      } else {
-        navigate('/', { replace: true });
-      }
+      showAlert({
+        title: 'ជោគជ័យ!',
+        message: 'អ្នកបានចូលប្រើប្រាស់ដោយជោគជ័យ។',
+        type: 'success',
+        onClose: () => {
+          if (user.role === 'admin') {
+            navigate('/admin', { replace: true });
+          } else {
+            navigate('/', { replace: true });
+          }
+        }
+      });
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Invalid email or password');
+      showAlert({
+        title: 'បរាជ័យ!',
+        message: err.response?.data?.message || 'អ៊ីមែល ឬលេខសម្ងាត់មិនត្រឹមត្រូវឡើយ។',
+        type: 'error'
+      });
     } finally {
       setLoading(false);
     }
@@ -45,23 +70,20 @@ export const LoginPage = () => {
         </div>
 
         <div className="p-8">
-          {error && (
-            <div className="mb-6 bg-red-50 border border-red-100 text-red-600 px-4 py-3 rounded text-xs font-bold animate-in fade-in slide-in-from-top-1">
-              {error}
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={handleSubmit} noValidate className="space-y-5">
             <div>
               <label className="block text-xs font-bold text-gray-500 uppercase mb-2 tracking-wider">Email Address</label>
               <input
                 type="email"
                 placeholder="your@email.com"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded focus:border-blue-500 outline-none transition text-sm"
-                required
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  if (errors.email) setErrors(prev => ({ ...prev, email: '' }));
+                }}
+                className={`w-full px-4 py-3 border rounded focus:border-blue-500 outline-none transition text-sm ${errors.email ? 'border-red-300' : 'border-gray-300'}`}
               />
+              {errors.email && <p className="text-red-500 text-[10px] font-bold mt-1.5 ml-1">{errors.email}</p>}
             </div>
 
             <div>
@@ -69,14 +91,30 @@ export const LoginPage = () => {
                 <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider">Password</label>
                 <Link to="#" className="text-[11px] font-bold text-blue-600 hover:underline">Forgot?</Link>
               </div>
-              <input
-                type="password"
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded focus:border-blue-500 outline-none transition text-sm"
-                required
-              />
+              <div className="relative">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    if (errors.password) setErrors(prev => ({ ...prev, password: '' }));
+                  }}
+                  className={`w-full px-4 py-3 pr-10 border rounded focus:border-blue-500 outline-none transition text-sm ${errors.password ? 'border-red-300' : 'border-gray-300'}`}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  {showPassword ? (
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                  ) : (
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18"/></svg>
+                  )}
+                </button>
+              </div>
+              {errors.password && <p className="text-red-500 text-[10px] font-bold mt-1.5 ml-1">{errors.password}</p>}
             </div>
 
             <button
