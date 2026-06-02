@@ -199,7 +199,7 @@ export const ProductListPage = () => {
     <div ref={topRef} className="min-h-screen bg-[#f1f2f6] dark:bg-[#08060d] text-gray-900 dark:text-gray-100 pb-20 text-left antialiased font-sans relative transition-colors duration-300">
 
       {/* Search Bar - Khmer24 Style */}
-      <div className="bg-white dark:bg-[#16171d] border-b border-gray-200 dark:border-gray-800 py-3 shadow-sm sticky top-14 z-30 transition-colors">
+      <div className="bg-white dark:bg-[#16171d] border-b border-gray-200 dark:border-gray-800 py-3 shadow-sm transition-colors">
         <div className="container mx-auto px-4 max-w-7xl flex gap-2">
              <div className="relative flex-1">
                 <input
@@ -227,7 +227,7 @@ export const ProductListPage = () => {
       </div>
 
       {/* Filter Bar - Sticky */}
-      <div className="bg-white dark:bg-[#16171d] border-b border-gray-200 dark:border-gray-800 sticky top-[116px] z-20 transition-colors shadow-sm">
+      <div className="bg-white dark:bg-[#16171d] border-b border-gray-200 dark:border-gray-800 sticky top-14 z-30 transition-colors shadow-sm">
         <div className="container mx-auto px-4 max-w-7xl flex items-center overflow-hidden">
             <div className="flex-1 overflow-x-auto scrollbar-hide flex items-center gap-1.5 py-2">
                 <button
@@ -263,19 +263,6 @@ export const ProductListPage = () => {
                 >
                     <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg>
                     More Filters
-                </button>
-            </div>
-
-            <div className="flex items-center shrink-0 ml-3 border-l border-gray-100 dark:border-gray-800 pl-3 py-2">
-                <button
-                    onClick={() => setViewMode(viewMode === 'grid' ? 'list' : 'grid')}
-                    className="p-1.5 rounded text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all flex items-center justify-center w-9 h-9"
-                >
-                    {viewMode === 'grid' ? (
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
-                    ) : (
-                        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M7 11h-2c-1.105 0-2 .895-2 2v2c0 1.105.895 2 2 2h2c1.105 0 2-.895 2-2v-2c0-1.105-.895-2-2-2zm0-6h-2c-1.105 0-2 .895-2 2v2c0 1.105.895 2 2 2h2c1.105 0 2-.895 2-2v-2c0-1.105-.895-2-2-2zm6 0h-2c-1.105 0-2 .895-2 2v2c0 1.105.895 2 2 2h2c1.105 0 2-.895 2-2v-2c0-1.105-.895-2-2-2zm0 6h-2c-1.105 0-2 .895-2 2v2c0 1.105.895 2 2 2h2c1.105 0 2-.895 2-2v-2c0-1.105-.895-2-2-2zm6-6h-2c-1.105 0-2 .895-2 2v2c0 1.105.895 2 2 2h2c1.105 0 2-.895 2-2v-2c0-1.105-.895-2-2-2zm0 6h-2c-1.105 0-2 .895-2 2v2c0 1.105.895 2 2 2h2c1.105 0 2-.895 2-2v-2c0-1.105-.895-2-2-2zm-6 6h-2c-1.105 0-2 .895-2 2v2c0 1.105.895 2 2 2h2c1.105 0 2-.895 2-2v-2c0-1.105-.895-2-2-2zm6 0h-2c-1.105 0-2 .895-2 2v2c0 1.105.895 2 2 2h2c1.105 0 2-.895 2-2v-2c0-1.105-.895-2-2-2z"/></svg>
-                    )}
                 </button>
             </div>
         </div>
