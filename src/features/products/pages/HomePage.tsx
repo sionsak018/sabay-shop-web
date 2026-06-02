@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useProducts } from '../hooks/useProducts';
 import { ProductCard } from '../components/ProductCard';
+import { ProductSkeleton } from '../components/ProductSkeleton';
 import { HomeSlider } from '../components/HomeSlider';
 import { categoryApi } from '../../categories/services/categoryApi';
 import { type Category } from '../../categories/types/category.types';
@@ -108,9 +109,9 @@ export const HomePage = () => {
             </div>
 
             {loading ? (
-                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3">
                     {[...Array(10)].map((_, i) => (
-                        <div key={i} className="bg-white border border-gray-200 rounded-md h-72 animate-pulse" />
+                        <ProductSkeleton key={i} />
                     ))}
                 </div>
             ) : (

@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useSearchParams, Link, useNavigate } from 'react-router-dom';
 import { useProducts, type ProductFilters } from '../hooks/useProducts';
 import { ProductCard } from '../components/ProductCard';
+import { ProductSkeleton } from '../components/ProductSkeleton';
 import { categoryApi } from '../../categories/services/categoryApi';
 import { type Category } from '../../categories/types/category.types';
 import api from '../../../services/api';
@@ -562,9 +563,12 @@ export const ProductListPage = () => {
              </div>
 
              {loading && products.length === 0 ? (
-                <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-2 sm:gap-3">
+                <div className={viewMode === 'grid'
+                    ? "grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-2 sm:gap-3"
+                    : "flex flex-col gap-3"
+                }>
                   {[...Array(12)].map((_, i) => (
-                    <div key={i} className="bg-white border border-gray-200 rounded-md h-72 animate-pulse" />
+                    <ProductSkeleton key={i} variant={viewMode} />
                   ))}
                 </div>
              ) : products.length === 0 ? (

@@ -1,11 +1,12 @@
 import { useCart } from '../hooks/useCart';
 import { Link } from 'react-router-dom';
 import { getImageUrl } from '../../../utils/imageUrl';
+import { CartSkeleton } from '../components/CartSkeleton';
 
 export const CartPage = () => {
   const { cart, loading, updateQuantity, removeItem, clearCart } = useCart();
 
-  if (loading) return <div className="p-20 text-center animate-pulse font-bold text-gray-400 uppercase tracking-widest">Loading Cart...</div>;
+  if (loading) return <CartSkeleton />;
   if (!cart || cart.items.length === 0) return (
     <div className="max-w-4xl mx-auto p-12 text-center">
         <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6">
