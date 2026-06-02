@@ -171,7 +171,10 @@ export const HomePage = () => {
         {activeCategoryId && (
             <div className="mb-3 flex items-center gap-2 overflow-x-auto whitespace-nowrap scrollbar-hide py-2 px-1">
                 <button
-                  onClick={() => setActiveCategoryId(undefined)}
+                  onClick={() => {
+                      setActiveCategoryId(undefined);
+                      setActiveAttributes({});
+                  }}
                   className="text-sm sm:text-base font-bold text-blue-600 hover:underline transition-colors"
                 >
                   All Categories
@@ -180,8 +183,11 @@ export const HomePage = () => {
                     <>
                         <svg className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 5l7 7-7 7"/></svg>
                         <button
-                            onClick={() => setActiveCategoryId(mainCategory.id)}
-                            className={`text-sm sm:text-base font-bold transition-colors ${activeCategoryId === mainCategory.id ? 'text-gray-500 cursor-default' : 'text-blue-600 hover:underline'}`}
+                            onClick={() => {
+                                setActiveCategoryId(mainCategory.id);
+                                setActiveAttributes({});
+                            }}
+                            className={`text-sm sm:text-base font-bold transition-colors ${activeCategoryId === mainCategory.id && Object.keys(activeAttributes).length === 0 ? 'text-gray-500 cursor-default' : 'text-blue-600 hover:underline'}`}
                         >
                             {mainCategory.name}
                         </button>
@@ -190,11 +196,66 @@ export const HomePage = () => {
                 {selectedCategory && selectedCategory.id !== mainCategory?.id && (
                     <>
                         <svg className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 5l7 7-7 7"/></svg>
-                        <span className="text-sm sm:text-base font-bold text-gray-500">
-                          {selectedCategory.name}
-                        </span>
+                        {Object.keys(activeAttributes).length > 0 ? (
+                            <button
+                                onClick={() => setActiveAttributes({})}
+                                className="text-sm sm:text-base font-bold text-blue-600 hover:underline transition-colors"
+                            >
+                                {selectedCategory.name}
+                            </button>
+                        ) : (
+                            <span className="text-sm sm:text-base font-bold text-gray-500">
+                              {selectedCategory.name}
+                            </span>
+                        )}
                     </>
                 )}
+
+                {/* Dynamic Attribute Breadcrumbs (Brand, Model, Body Type) */}
+                {(() => {
+                    const activeAttrList = dynamicAttributes
+                        .filter(attr => activeAttributes[`attr_${attr.id}`])
+                        .sort((a, b) => {
+                            const order = ['Brand', 'Model', 'Year', 'Condition', 'Body Type'];
+                            const idxA = order.indexOf(a.name);
+                            const idxB = order.indexOf(b.name);
+                            if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+                            if (idxA !== -1) return -1;
+                            if (idxB !== -1) return 1;
+                            return 0;
+                        });
+
+                    return activeAttrList.map((attr, idx) => {
+                        const val = activeAttributes[`attr_${attr.id}`];
+                        const isLast = idx === activeAttrList.length - 1;
+
+                        return (
+                            <div key={attr.id} className="flex items-center gap-2 shrink-0">
+                                <svg className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 5l7 7-7 7"/></svg>
+                                {isLast ? (
+                                    <span className="text-sm sm:text-base font-bold text-gray-500">
+                                        {val}
+                                    </span>
+                                ) : (
+                                    <button
+                                        onClick={() => {
+                                            setActiveAttributes(prev => {
+                                                const next = { ...prev };
+                                                for (let i = idx; i < activeAttrList.length; i++) {
+                                                    delete next[`attr_${activeAttrList[i].id}`];
+                                                }
+                                                return next;
+                                            });
+                                        }}
+                                        className="text-sm sm:text-base font-bold text-blue-600 hover:underline transition-colors"
+                                    >
+                                        {val}
+                                    </button>
+                                )}
+                            </div>
+                        );
+                    });
+                })()}
             </div>
         )}
 
