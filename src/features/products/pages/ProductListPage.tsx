@@ -578,7 +578,7 @@ export const ProductListPage = () => {
 
              {loading && products.length === 0 ? (
                 <div className={viewMode === 'grid'
-                    ? "grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-2 sm:gap-3"
+                    ? "grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-3"
                     : "flex flex-col gap-3"
                 }>
                   {[...Array(12)].map((_, i) => (
@@ -593,7 +593,7 @@ export const ProductListPage = () => {
                 </div>
              ) : (
                 <div className={viewMode === 'grid'
-                    ? "grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-2 sm:gap-3"
+                    ? "grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-3"
                     : "flex flex-col gap-3"
                 }>
                    {products.map(p => <ProductCard key={p.id} product={p} variant={viewMode} />)}
