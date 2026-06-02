@@ -11,7 +11,7 @@ import { getImageUrl } from '../../../utils/imageUrl';
 
 const CategoryIcon = ({ cat, className = "" }: { cat: Category, className?: string }) => {
   if (cat.image_url) {
-    return <img src={getImageUrl(cat.image_url)} className={`object-contain ${className}`} alt={cat.name} />;
+    return <img src={getImageUrl(cat.image_url)} className={`w-full h-full object-cover ${className}`} alt={cat.name} />;
   }
   return (
     <div className={className}>
@@ -89,8 +89,8 @@ export const HomePage = () => {
                             onClick={() => browseCategory(cat.id)}
                             className="block w-full h-full group bg-white dark:bg-[#1f2028] rounded cursor-pointer active:opacity-50 p-1.5 sm:p-2.5 transition-all hover:bg-[#f8f9fa] dark:hover:bg-[#16171d]"
                         >
-                            <div className="mx-auto bg-[#e9ecef] dark:bg-gray-800 rounded-full mt-1 group-hover:bg-[#dee2e6] dark:group-hover:bg-gray-700 transition-all size-10 sm:size-14 flex items-center justify-center p-1.5 sm:p-2.5">
-                                <CategoryIcon cat={cat} className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-300" />
+                            <div className="mx-auto bg-[#e9ecef] dark:bg-gray-800 rounded-full mt-1 group-hover:bg-[#dee2e6] dark:group-hover:bg-gray-700 transition-all size-10 sm:size-14 flex items-center justify-center overflow-hidden">
+                                <CategoryIcon cat={cat} className="w-full h-full group-hover:scale-110 transition-transform duration-300" />
                             </div>
                             <p className="overflow-hidden text-ellipsis mt-1.5 sm:mt-2.5 text-[10px] sm:text-[13px] font-bold text-gray-700 dark:text-gray-300 group-hover:text-blue-600 leading-tight">
                                 {cat.name}

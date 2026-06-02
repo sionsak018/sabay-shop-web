@@ -19,7 +19,7 @@ interface LocalFilters {
 
 const CategoryIcon = ({ cat, className = "" }: { cat: Category, className?: string }) => {
   if (cat.image_url) {
-    return <img src={getImageUrl(cat.image_url)} className={`object-contain ${className}`} alt={cat.name} />;
+    return <img src={getImageUrl(cat.image_url)} className={`w-full h-full object-cover ${className}`} alt={cat.name} />;
   }
   return (
     <div className={className}>
@@ -371,8 +371,8 @@ export const ProductListPage = () => {
                                 onClick={() => setCategory(String(sub.id))}
                                 className="block w-full group transition-all"
                             >
-                                <div className={`mx-auto rounded-full size-11 sm:size-14 flex items-center justify-center p-2 mb-1.5 transition-all ${categoryId === String(sub.id) ? 'bg-blue-50 dark:bg-blue-900/30 ring-2 ring-blue-500' : 'bg-[#f1f2f6] dark:bg-[#16171d] group-hover:bg-[#e9ecef] dark:group-hover:bg-gray-800'}`}>
-                                    <CategoryIcon cat={sub} className="w-full h-full object-contain" />
+                                <div className={`mx-auto rounded-full size-11 sm:size-14 flex items-center justify-center mb-1.5 transition-all overflow-hidden ${categoryId === String(sub.id) ? 'bg-blue-50 dark:bg-blue-900/30 ring-2 ring-blue-500' : 'bg-[#f1f2f6] dark:bg-[#16171d] group-hover:bg-[#e9ecef] dark:group-hover:bg-gray-800'}`}>
+                                    <CategoryIcon cat={sub} className="w-full h-full" />
                                 </div>
                                 <p className={`text-[10px] sm:text-[11.5px] font-bold text-center px-1 truncate ${categoryId === String(sub.id) ? 'text-blue-600 dark:text-blue-400' : 'text-gray-700 dark:text-gray-300 group-hover:text-blue-600 dark:group-hover:text-blue-400'}`}>
                                     {sub.name}
@@ -440,7 +440,7 @@ export const ProductListPage = () => {
                 const options = attr.options || [];
                 const visibleOptions = isExpanded ? options : options.slice(0, 12);
                 const hasMore = options.length > 12;
-                const isCircleStyle = ['Brand', 'Body Type', 'Make'].includes(attr.name);
+                const isCircleStyle = ['Brand', 'Body Type', 'Make', 'Model'].includes(attr.name);
 
                 return (
                     <div key={attr.id} className="bg-white dark:bg-[#1f2028] border border-gray-200 dark:border-gray-800 rounded mb-3 shadow-sm animate-in fade-in slide-in-from-top-2 duration-500 transition-colors">
@@ -460,9 +460,9 @@ export const ProductListPage = () => {
                                             className="group flex flex-col items-center gap-2 transition-all active:scale-95"
                                         >
                                             {isCircleStyle ? (
-                                                <div className={`size-12 sm:size-14 rounded-full flex items-center justify-center p-2.5 border transition-all ${isActive ? 'bg-blue-50 dark:bg-blue-900/30 border-blue-500 ring-2 ring-blue-500/20' : 'bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700 group-hover:border-blue-200 dark:group-hover:border-blue-800 group-hover:bg-blue-50/30 dark:group-hover:bg-blue-900/10'}`}>
+                                                <div className={`size-12 sm:size-14 rounded-full flex items-center justify-center border transition-all overflow-hidden ${isActive ? 'bg-blue-50 dark:bg-blue-900/30 border-blue-500 ring-2 ring-blue-500/20' : 'bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700 group-hover:border-blue-200 dark:group-hover:border-blue-800 group-hover:bg-blue-50/30 dark:group-hover:bg-blue-900/10'}`}>
                                                     {opt.image_url ? (
-                                                        <img src={getImageUrl(opt.image_url)} className="w-full h-full object-contain" alt={opt.value} />
+                                                        <img src={getImageUrl(opt.image_url)} className="w-full h-full object-cover" alt={opt.value} />
                                                     ) : (
                                                         <div className="text-[10px] font-black text-gray-300 dark:text-gray-600 uppercase truncate px-1">{opt.value.substring(0, 3)}</div>
                                                     )}
