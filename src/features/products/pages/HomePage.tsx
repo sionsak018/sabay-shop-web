@@ -22,13 +22,10 @@ const CategoryIcon = ({ cat, className = "" }: { cat: Category, className?: stri
 export const HomePage = () => {
   const navigate = useNavigate();
   const [categories, setCategories] = useState<Category[]>([]);
-  const [provinces, setProvinces] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedProvince, setSelectedProvince] = useState('');
 
   useEffect(() => {
     categoryApi.getAll().then(res => setCategories(Array.isArray(res.data) ? res.data : res.data.data || []));
-    api.get('/provinces').then(res => setProvinces(Array.isArray(res.data) ? res.data : res.data.data || []));
   }, []);
 
   const { products, loading } = useProducts({ page: 1 });
@@ -36,7 +33,6 @@ export const HomePage = () => {
   const handleSearch = () => {
     const params = new URLSearchParams();
     if (searchQuery) params.set('keyword', searchQuery);
-    if (selectedProvince) params.set('province_id', selectedProvince);
     navigate(`/products?${params.toString()}`);
   };
 
@@ -68,20 +64,6 @@ export const HomePage = () => {
             </div>
 
             <div className="flex gap-2 order-2">
-              <div className="flex-1 md:w-56 relative">
-                <select
-                  value={selectedProvince}
-                  onChange={(e) => setSelectedProvince(e.target.value)}
-                  className="w-full px-3 py-2 sm:py-2.5 border border-[#ced4da] rounded-md appearance-none bg-white focus:border-blue-500 outline-none transition text-gray-700 font-bold text-sm"
-                >
-                  <option value="">All Cambodia</option>
-                  {provinces.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-                </select>
-                <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
-                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"/></svg>
-                </div>
-              </div>
-
               <button
                 onClick={handleSearch}
                 className="bg-blue-600 hover:bg-blue-700 text-white px-6 sm:px-8 py-2 sm:py-2.5 rounded-md font-bold transition flex items-center justify-center gap-2 shadow-sm uppercase tracking-wider text-[11px] sm:text-xs min-w-[100px]"
