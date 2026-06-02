@@ -132,40 +132,26 @@ export const HomePage = () => {
     <div className="min-h-screen bg-[#f1f2f6] dark:bg-[#08060d] text-gray-900 dark:text-gray-100 antialiased pb-20 font-sans transition-colors duration-300">
       
       {/* Khmer24 Style Header Search */}
-      <div className="bg-white dark:bg-[#16171d] border-b border-gray-200 dark:border-gray-800 py-3 sm:py-4 sticky top-14 z-40 shadow-sm transition-colors">
-        <div className="container mx-auto px-4 max-w-7xl">
-          <div className="flex flex-col sm:flex-row gap-2">
-            <div className="flex-grow flex gap-2">
-                <button
-                    onClick={() => setIsLocationModalOpen(true)}
-                    className="flex items-center gap-1.5 px-3 py-2 bg-gray-50 dark:bg-[#1f2028] border border-[#ced4da] dark:border-gray-700 rounded-md text-[11px] sm:text-xs font-bold text-gray-700 dark:text-gray-300 transition shrink-0"
-                >
-                    <svg className="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                    <span className="truncate max-w-[80px] sm:max-w-[120px]">{locationName}</span>
-                </button>
-
-                <div className="flex-grow relative">
+      <div className="bg-white dark:bg-[#16171d] border-b border-gray-200 dark:border-gray-800 py-3 shadow-sm sticky top-14 z-40 transition-colors">
+        <div className="container mx-auto px-4 max-w-7xl flex gap-2">
+             <div className="relative flex-1">
                 <input
                     type="text"
-                    placeholder="What are you looking for..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Search in all categories..."
+                    className="w-full bg-[#f8f9fa] dark:bg-[#1f2028] border border-[#dee2e6] dark:border-gray-700 px-4 py-2 rounded focus:bg-white focus:border-blue-500 outline-none text-sm font-medium text-gray-700 dark:text-gray-200 transition-all"
                     onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                    className="w-full pl-4 pr-10 py-2 sm:py-2.5 bg-white dark:bg-[#1f2028] border border-[#ced4da] dark:border-gray-700 rounded-md focus:border-blue-500 focus:ring-0 outline-none transition placeholder:text-gray-400 font-medium text-sm text-gray-900 dark:text-gray-100"
                 />
-                <button onClick={handleSearch} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-blue-600 transition-colors">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                </button>
-                </div>
-            </div>
+                <svg className="w-4 h-4 absolute right-4 top-1/2 -translate-y-1/2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+             </div>
 
-            <button
-              onClick={handleSearch}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 sm:px-8 py-2 sm:py-2.5 rounded-md font-bold transition flex items-center justify-center gap-2 shadow-sm uppercase tracking-wider text-[11px] sm:text-xs shrink-0"
-            >
-              Search
-            </button>
-          </div>
+             <button
+                onClick={handleSearch}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-4 sm:px-8 py-2 rounded font-bold transition flex items-center justify-center shadow-sm uppercase tracking-wider text-[11px] sm:text-xs shrink-0"
+             >
+                Search
+             </button>
         </div>
       </div>
 
