@@ -111,6 +111,16 @@ export const HomePage = () => {
 
   const mainCategoriesToDisplay = categories.filter(c => !c.parent_id);
 
+  // Logic for Khmer24 Step-by-Step visibility
+  const isSubCategorySelected = selectedCategory && selectedCategory.parent_id;
+
+  const brandAttr = dynamicAttributes.find(a => a.name === 'Brand');
+  const modelAttr = dynamicAttributes.find(a => a.name === 'Model');
+  const bodyTypeAttr = dynamicAttributes.find(a => a.name === 'Body Type');
+
+  const selectedBrand = brandAttr ? activeAttributes[`attr_${brandAttr.id}`] : null;
+  const selectedModel = modelAttr ? activeAttributes[`attr_${modelAttr.id}`] : null;
+
   return (
     <div className="min-h-screen bg-[#f1f2f6] dark:bg-[#08060d] text-gray-900 dark:text-gray-100 antialiased pb-20 font-sans transition-colors duration-300">
       
@@ -182,15 +192,14 @@ export const HomePage = () => {
         )}
 
         {/* Browse By Category Section */}
-        <div className="bg-white dark:bg-[#1f2028] border border-gray-200 dark:border-gray-800 rounded-md p-3 sm:p-4 shadow-sm transition-colors mb-3">
-            <h2 className="text-sm sm:text-base font-bold mb-3 sm:mb-4 text-gray-800 dark:text-gray-100">
-                {activeCategoryId ? `Browse in ${selectedCategory?.name}` : 'Browse By Category'}
-            </h2>
+        {(!isSubCategorySelected) && (
+            <div className="bg-white dark:bg-[#1f2028] border border-gray-200 dark:border-gray-800 rounded-md p-3 sm:p-4 shadow-sm transition-colors mb-3">
+                <h2 className="text-sm sm:text-base font-bold mb-3 sm:mb-4 text-gray-800 dark:text-gray-100">
+                    {activeCategoryId ? `Browse in ${selectedCategory?.name}` : 'Browse By Category'}
+                </h2>
 
-            <ul className="text-center grid grid-cols-3 sm:grid-cols-4 md:grid-cols-4 lg:grid-cols-6 gap-1 sm:gap-2">
-                {(!activeCategoryId || (mainCategory && activeCategoryId === mainCategory.id)) ? (
-                    // Show Main Categories OR Subcategories if a main category is selected
-                    (activeCategoryId ? subCategories : mainCategoriesToDisplay).map((cat) => (
+                <ul className="text-center grid grid-cols-3 sm:grid-cols-4 md:grid-cols-4 lg:grid-cols-6 gap-1 sm:gap-2">
+                    {(activeCategoryId ? subCategories : mainCategoriesToDisplay).map((cat) => (
                         <li key={cat.id}>
                             <button
                                 onClick={() => browseCategory(cat.id)}
@@ -204,32 +213,34 @@ export const HomePage = () => {
                                 </p>
                             </button>
                         </li>
-                    ))
-                ) : (
-                    // If a subcategory is selected, show its siblings or just keep it selected
-                    subCategories.map((cat) => (
-                        <li key={cat.id}>
-                            <button
-                                onClick={() => browseCategory(cat.id)}
-                                className={`block w-full h-full group bg-white dark:bg-[#1f2028] rounded cursor-pointer active:opacity-50 p-1.5 sm:p-2.5 transition-all hover:bg-[#f8f9fa] dark:hover:bg-[#16171d] ${activeCategoryId === cat.id ? 'ring-2 ring-blue-500 bg-blue-50 dark:bg-blue-900/10' : ''}`}
-                            >
-                                <div className="mx-auto bg-[#e9ecef] dark:bg-gray-800 rounded-full mt-1 group-hover:bg-[#dee2e6] dark:group-hover:bg-gray-700 transition-all size-10 sm:size-14 flex items-center justify-center overflow-hidden">
-                                    <CategoryIcon cat={cat} className="w-full h-full group-hover:scale-110 transition-transform duration-300" />
-                                </div>
-                                <p className="overflow-hidden text-ellipsis mt-1.5 sm:mt-2.5 text-[10px] sm:text-[13px] font-bold text-gray-700 dark:text-gray-300 group-hover:text-blue-600 leading-tight">
-                                    {cat.name}
-                                </p>
-                            </button>
-                        </li>
-                    ))
-                )}
-            </ul>
-        </div>
+                    ))}
+                </ul>
+            </div>
+        )}
 
-        {/* Dynamic Attributes (Brand, Model, etc. - Khmer24 Style) */}
-        {activeCategoryId && dynamicAttributes.length > 0 && (
+        {/* Dynamic Attributes (Brand, Model, etc. - Khmer24 Style Flow) */}
+        {activeCategoryId && (
             <div className="flex flex-col gap-3 mb-3">
                 {dynamicAttributes.filter(attr => attr.type === 'select').map(attr => {
+                    const isBrand = attr.name === 'Brand';
+                    const isModel = attr.name === 'Model';
+                    const isBodyType = attr.name === 'Body Type';
+
+                    // Khmer24 Hide Logic:
+                    // 1. If it's a Brand: hide if a brand is already selected
+                    if (isBrand && selectedBrand) return null;
+
+                    // 2. If it's a Model: show ONLY if a brand is selected AND no model is selected yet
+                    if (isModel && (!selectedBrand || selectedModel)) return null;
+
+                    // 3. Body Type: always show if it exists (as per user request: "stand by forever")
+
+                    // 4. Other select attributes: show only if brand/model are settled or don't exist
+                    if (!isBrand && !isModel && !isBodyType) {
+                        // If category has Brand/Model, wait until they are picked?
+                        // For now, let's keep it simple: show if not Brand/Model/BodyType
+                    }
+
                     const isExpanded = expandedAttrs[attr.id] || false;
                     const options = attr.options || [];
                     const visibleOptions = isExpanded ? options : options.slice(0, 12);
@@ -238,7 +249,7 @@ export const HomePage = () => {
                     const isCircleStyle = ['Brand', 'Body Type', 'Make', 'Model'].includes(attr.name);
 
                     return (
-                        <div key={attr.id} className="bg-white dark:bg-[#1f2028] border border-gray-200 dark:border-gray-800 rounded-md shadow-sm transition-colors overflow-hidden">
+                        <div key={attr.id} className="bg-white dark:bg-[#1f2028] border border-gray-200 dark:border-gray-800 rounded-md shadow-sm transition-colors overflow-hidden animate-in fade-in slide-in-from-top-1 duration-300">
                             <div className="px-4 py-2.5 border-b border-gray-50 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/50">
                                 <h3 className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.2em]">{attr.name}</h3>
                             </div>
