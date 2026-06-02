@@ -170,14 +170,14 @@ export const ProductListPage = () => {
     <div ref={topRef} className="min-h-screen bg-[#f1f2f6] pb-20 text-left antialiased font-sans relative">
 
       {/* Search Bar - Khmer24 Style */}
-      <div className="bg-white border-b border-gray-200 py-3 shadow-sm sticky top-14 z-30">
+      <div className="bg-white dark:bg-[#16171d] border-b border-gray-200 dark:border-gray-800 py-3 shadow-sm sticky top-14 z-30 transition-colors">
         <div className="container mx-auto px-4 max-w-7xl flex gap-2">
              <div className="relative flex-1">
                 <input
                     type="text"
                     defaultValue={keyword}
                     placeholder="Search in all categories..."
-                    className="w-full bg-[#f8f9fa] border border-[#dee2e6] px-4 py-2 rounded focus:bg-white focus:border-blue-500 outline-none text-sm font-medium text-gray-700 transition-all"
+                    className="w-full bg-[#f8f9fa] dark:bg-[#1f2028] border border-[#dee2e6] dark:border-gray-700 px-4 py-2 rounded focus:bg-white focus:border-blue-500 outline-none text-sm font-medium text-gray-700 dark:text-gray-200 transition-all"
                     onKeyDown={e => {
                         if (e.key === 'Enter') {
                             const params = new URLSearchParams(searchParams);
@@ -284,9 +284,9 @@ export const ProductListPage = () => {
 
       <div className="container mx-auto px-4 max-w-7xl">
         {/* Category Header Box (Khmer24 Style) */}
-        <div className="bg-white border border-gray-200 rounded mb-3 shadow-sm">
-            <div className="px-4 py-3 border-b border-gray-100">
-                <h1 className="text-base sm:text-lg font-bold text-gray-800">
+        <div className="bg-white dark:bg-[#1f2028] border border-gray-200 dark:border-gray-800 rounded mb-3 shadow-sm transition-colors">
+            <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-800">
+                <h1 className="text-base sm:text-lg font-bold text-gray-800 dark:text-gray-100">
                     {selectedCategory ? `${selectedCategory.name} in ${fullLocationName}` :
                      keyword ? `Search results for "${keyword}"` :
                      `Latest Classifieds in ${fullLocationName}`}
@@ -294,11 +294,11 @@ export const ProductListPage = () => {
             </div>
 
             {/* Filter Bar */}
-            <div className="px-4 flex items-center bg-white border-b border-gray-50 overflow-hidden">
+            <div className="px-4 flex items-center bg-white dark:bg-[#16171d] border-b border-gray-50 dark:border-gray-800 overflow-hidden transition-colors">
                 <div className="flex-1 overflow-x-auto scrollbar-hide flex items-center gap-1.5 py-2">
                     <button
                         onClick={() => setIsLocationModalOpen(true)}
-                        className="flex items-center gap-1.5 px-3 py-1.5 bg-[#f8f9fa] hover:bg-[#e9ecef] rounded border border-[#dee2e6] text-[11px] font-bold text-gray-700 transition whitespace-nowrap"
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-[#f8f9fa] dark:bg-gray-800 hover:bg-[#e9ecef] dark:hover:bg-gray-700 rounded border border-[#dee2e6] dark:border-gray-700 text-[11px] font-bold text-gray-700 dark:text-gray-300 transition whitespace-nowrap"
                     >
                         <svg className="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                         {localFilters.province_id ? (districtName ? `${districtName}, ${provinces.find(p => String(p.id) === localFilters.province_id)?.name}` : (provinces.find(p => String(p.id) === localFilters.province_id)?.name || 'Location')) : 'Location: All'}
@@ -308,7 +308,7 @@ export const ProductListPage = () => {
                         <select
                             value={localFilters.sort}
                             onChange={e => applyFilters({ sort: e.target.value })}
-                            className="appearance-none flex items-center gap-1.5 px-3 py-1.5 bg-[#f8f9fa] hover:bg-[#e9ecef] rounded border border-[#dee2e6] text-[11px] font-bold text-gray-700 transition outline-none cursor-pointer pr-7"
+                            className="appearance-none flex items-center gap-1.5 px-3 py-1.5 bg-[#f8f9fa] dark:bg-gray-800 hover:bg-[#e9ecef] dark:hover:bg-gray-700 rounded border border-[#dee2e6] dark:border-gray-700 text-[11px] font-bold text-gray-700 dark:text-gray-300 transition outline-none cursor-pointer pr-7"
                         >
                             <option value="latest">Sort: Newest</option>
                             <option value="price_low">Price: Low</option>
@@ -319,23 +319,23 @@ export const ProductListPage = () => {
 
                     <button
                         onClick={() => setIsMobileFilterOpen(true)}
-                        className="flex items-center gap-1.5 px-3 py-1.5 bg-[#f8f9fa] hover:bg-[#e9ecef] rounded border border-[#dee2e6] text-[11px] font-bold text-gray-700 transition whitespace-nowrap"
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-[#f8f9fa] dark:bg-gray-800 hover:bg-[#e9ecef] dark:hover:bg-gray-700 rounded border border-[#dee2e6] dark:border-gray-700 text-[11px] font-bold text-gray-700 dark:text-gray-300 transition whitespace-nowrap"
                     >
                         Price
                     </button>
                     <button
                         onClick={() => setIsMobileFilterOpen(true)}
-                        className="flex items-center gap-1.5 px-3 py-1.5 bg-[#f8f9fa] hover:bg-[#e9ecef] rounded border border-[#dee2e6] text-[11px] font-bold text-gray-700 transition whitespace-nowrap"
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-[#f8f9fa] dark:bg-gray-800 hover:bg-[#e9ecef] dark:hover:bg-gray-700 rounded border border-[#dee2e6] dark:border-gray-700 text-[11px] font-bold text-gray-700 dark:text-gray-300 transition whitespace-nowrap"
                     >
                         <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg>
                         More Filters
                     </button>
                 </div>
 
-                <div className="flex items-center shrink-0 ml-3 border-l border-gray-100 pl-3 py-2">
+                <div className="flex items-center shrink-0 ml-3 border-l border-gray-100 dark:border-gray-800 pl-3 py-2">
                     <button
                         onClick={() => setViewMode(viewMode === 'grid' ? 'list' : 'grid')}
-                        className="p-1.5 rounded text-gray-500 hover:bg-gray-100 transition-all flex items-center justify-center w-9 h-9"
+                        className="p-1.5 rounded text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all flex items-center justify-center w-9 h-9"
                     >
                         {viewMode === 'grid' ? (
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16"/></svg>

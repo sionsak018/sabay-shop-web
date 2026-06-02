@@ -67,9 +67,9 @@ export const ProductCard = ({ product, onToggleFavorite, isFavorited: initialFav
     return (
       <div
         onClick={() => navigate(`/product/${product.id}`)}
-        className="bg-white border border-gray-100 rounded-lg overflow-hidden hover:shadow-md transition-all duration-200 cursor-pointer flex gap-3 sm:gap-4 p-2 sm:p-3 group"
+        className="bg-white dark:bg-[#1f2028] border border-gray-100 dark:border-gray-800 rounded-lg overflow-hidden hover:shadow-md transition-all duration-200 cursor-pointer flex gap-3 sm:gap-4 p-2 sm:p-3 group"
       >
-        <div className="relative w-32 sm:w-48 aspect-[4/3] overflow-hidden rounded-md bg-[#f8f9fa] shrink-0">
+        <div className="relative w-32 sm:w-48 aspect-[4/3] overflow-hidden rounded-md bg-[#f8f9fa] dark:bg-[#16171d] shrink-0">
           <img
             src={coverImage}
             alt={product.title}
@@ -81,21 +81,21 @@ export const ProductCard = ({ product, onToggleFavorite, isFavorited: initialFav
           </div>
           <button
             onClick={handleLike}
-            className={`absolute top-1 right-1 p-1.5 rounded-full backdrop-blur-sm transition-all z-10 ${isLiked ? 'bg-red-500 text-white' : 'bg-black/10 text-white hover:bg-white hover:text-red-500'}`}
+            className={`absolute top-1 right-1 p-1.5 rounded-full backdrop-blur-sm transition-all z-10 ${isLiked ? 'bg-red-500 text-white shadow-lg' : 'bg-black/10 text-white hover:bg-white hover:text-red-500'}`}
           >
-            <svg className="w-3 h-3 sm:w-4 sm:h-4" fill={isLiked ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.01 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.01 0 00-6.364 0z" /></svg>
+            <svg className="w-3 h-3 sm:w-4 sm:h-4" fill={isLiked ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.01 0 000 6.364L12 20.364l7.682-7.682a4.5 4.01 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.01 0 00-6.364 0z" /></svg>
           </button>
         </div>
 
         <div className="flex flex-col flex-grow min-w-0 py-1">
-          <h3 className="text-sm sm:text-lg font-bold text-gray-800 line-clamp-2 leading-tight mb-2 group-hover:text-blue-600 transition-colors">{product.title}</h3>
+          <h3 className="text-sm sm:text-lg font-bold text-gray-800 dark:text-gray-100 line-clamp-2 leading-tight mb-2 group-hover:text-blue-600 transition-colors">{product.title}</h3>
 
           <div className="flex items-baseline gap-2 mb-2">
             <p className="text-lg sm:text-2xl font-black text-blue-600">${discountPrice || price}</p>
-            {discountPrice && <p className="text-xs sm:text-sm text-gray-400 line-through font-bold">${price}</p>}
+            {discountPrice && <p className="text-xs sm:text-sm text-gray-400 dark:text-gray-500 line-through font-bold">${price}</p>}
           </div>
 
-          <div className="mt-auto pt-2 border-t border-gray-50 flex items-center justify-between text-[10px] sm:text-xs text-gray-500">
+          <div className="mt-auto pt-2 border-t border-gray-50 dark:border-gray-800 flex items-center justify-between text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">
             <div className="flex items-center gap-1 truncate max-w-[70%] hover:text-blue-600 transition-colors" onClick={(e) => { e.stopPropagation(); navigate(`/u/${product.seller?.id}`); }}>
               {showLocation ? (
                 <>
@@ -103,7 +103,7 @@ export const ProductCard = ({ product, onToggleFavorite, isFavorited: initialFav
                   <span className="truncate">{product.province?.name || product.location || 'Cambodia'}</span>
                 </>
               ) : (
-                <span className="font-bold text-gray-400">{product.seller?.name || 'Seller'}</span>
+                <span className="font-bold text-gray-400 dark:text-gray-500">{product.seller?.name || 'Seller'}</span>
               )}
             </div>
             <span className="shrink-0">{timeAgo(product.created_at || new Date().toISOString())}</span>
@@ -116,9 +116,9 @@ export const ProductCard = ({ product, onToggleFavorite, isFavorited: initialFav
   return (
     <div
       onClick={() => navigate(`/product/${product.id}`)}
-      className="bg-white border border-gray-200 rounded sm:rounded-md overflow-hidden hover:shadow-lg transition-all duration-200 cursor-pointer flex flex-col h-full group"
+      className="bg-white dark:bg-[#1f2028] border border-gray-200 dark:border-gray-800 rounded sm:rounded-md overflow-hidden hover:shadow-lg transition-all duration-200 cursor-pointer flex flex-col h-full group"
     >
-      <div className="relative aspect-[4/3] overflow-hidden bg-[#f8f9fa]">
+      <div className="relative aspect-[4/3] overflow-hidden bg-[#f8f9fa] dark:bg-[#16171d]">
         <img
           src={coverImage}
           alt={product.title}
@@ -143,13 +143,13 @@ export const ProductCard = ({ product, onToggleFavorite, isFavorited: initialFav
           className={`absolute top-1 right-1 sm:top-1.5 sm:right-1.5 p-1 rounded-full backdrop-blur-sm transition-all z-10 ${isLiked ? 'bg-red-500 text-white shadow-lg' : 'bg-black/20 text-white hover:bg-white hover:text-red-500'}`}
         >
           <svg className="w-3 sm:w-3.5 h-3 sm:h-3.5" fill={isLiked ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.01 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.01 0 00-6.364 0z" />
+            <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.01 0 000 6.364L12 20.364l7.682-7.682a4.5 4.01 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.01 0 00-6.364 0z" />
           </svg>
         </button>
       </div>
 
       <div className="p-1.5 sm:p-2.5 flex flex-col flex-grow">
-        <h3 className="text-[11px] sm:text-[13px] font-bold text-gray-800 line-clamp-2 leading-tight mb-1 sm:mb-1.5 group-hover:text-blue-600 transition-colors">
+        <h3 className="text-[11px] sm:text-[13px] font-bold text-gray-800 dark:text-gray-100 line-clamp-2 leading-tight mb-1 sm:mb-1.5 group-hover:text-blue-600 transition-colors">
           {product.title}
         </h3>
 
@@ -159,13 +159,13 @@ export const ProductCard = ({ product, onToggleFavorite, isFavorited: initialFav
               ${discountPrice || price}
             </p>
             {discountPrice && (
-              <p className="text-[9px] sm:text-[11px] text-gray-400 line-through font-bold">
+              <p className="text-[9px] sm:text-[11px] text-gray-400 dark:text-gray-500 line-through font-bold">
                 ${price}
               </p>
             )}
           </div>
 
-          <div className="flex items-center justify-between text-[8px] sm:text-[10px] text-gray-500 border-t border-gray-100 pt-1 sm:pt-1.5">
+          <div className="flex items-center justify-between text-[8px] sm:text-[10px] text-gray-500 dark:text-gray-400 border-t border-gray-100 dark:border-gray-800 pt-1 sm:pt-1.5">
             <div className="flex items-center gap-0.5 sm:gap-1 max-w-[65%] hover:text-blue-600 transition-colors" onClick={(e) => { e.stopPropagation(); navigate(`/u/${product.seller?.id}`); }}>
                 {showLocation ? (
                   <>
@@ -175,7 +175,7 @@ export const ProductCard = ({ product, onToggleFavorite, isFavorited: initialFav
                     </span>
                   </>
                 ) : (
-                  <span className="truncate font-bold text-gray-400">
+                  <span className="truncate font-bold text-gray-400 dark:text-gray-500">
                     {product.seller?.name || 'Seller'}
                   </span>
                 )}

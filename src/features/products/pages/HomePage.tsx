@@ -44,10 +44,10 @@ export const HomePage = () => {
   const mainCategories = categories.filter(c => !c.parent_id);
 
   return (
-    <div className="min-h-screen bg-[#f1f2f6] text-gray-900 antialiased pb-20 font-sans">
+    <div className="min-h-screen bg-[#f1f2f6] dark:bg-[#08060d] text-gray-900 dark:text-gray-100 antialiased pb-20 font-sans transition-colors duration-300">
       
       {/* Khmer24 Style Header Search */}
-      <div className="bg-white border-b border-gray-200 py-3 sm:py-4 sticky top-14 z-40 shadow-sm">
+      <div className="bg-white dark:bg-[#16171d] border-b border-gray-200 dark:border-gray-800 py-3 sm:py-4 sticky top-14 z-40 shadow-sm transition-colors">
         <div className="container mx-auto px-4 max-w-7xl">
           <div className="flex flex-row gap-2">
             <div className="flex-grow relative">
@@ -57,9 +57,9 @@ export const HomePage = () => {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                className="w-full pl-4 pr-10 py-2 sm:py-2.5 border border-[#ced4da] rounded-md focus:border-blue-500 focus:ring-0 outline-none transition placeholder:text-gray-400 font-medium text-sm"
+                className="w-full pl-4 pr-10 py-2 sm:py-2.5 bg-white dark:bg-[#1f2028] border border-[#ced4da] dark:border-gray-700 rounded-md focus:border-blue-500 focus:ring-0 outline-none transition placeholder:text-gray-400 font-medium text-sm text-gray-900 dark:text-gray-100"
               />
-              <button onClick={handleSearch} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-blue-600">
+              <button onClick={handleSearch} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-blue-600 transition-colors">
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
               </button>
             </div>
@@ -80,19 +80,19 @@ export const HomePage = () => {
         <HomeSlider />
 
         {/* Browse By Category Section */}
-        <div className="bg-white border border-gray-200 rounded-md p-3 sm:p-4 shadow-sm">
-            <h2 className="text-sm sm:text-base font-bold mb-3 sm:mb-4 text-gray-800">Browse By Category</h2>
+        <div className="bg-white dark:bg-[#1f2028] border border-gray-200 dark:border-gray-800 rounded-md p-3 sm:p-4 shadow-sm transition-colors">
+            <h2 className="text-sm sm:text-base font-bold mb-3 sm:mb-4 text-gray-800 dark:text-gray-100">Browse By Category</h2>
             <ul className="text-center grid grid-cols-3 sm:grid-cols-4 md:grid-cols-4 lg:grid-cols-6 gap-1 sm:gap-2">
                 {mainCategories.map((cat) => (
                     <li key={cat.id}>
                         <button
                             onClick={() => browseCategory(cat.id)}
-                            className="block w-full h-full group bg-white rounded cursor-pointer active:opacity-50 p-1.5 sm:p-2.5 transition-all hover:bg-[#f8f9fa]"
+                            className="block w-full h-full group bg-white dark:bg-[#1f2028] rounded cursor-pointer active:opacity-50 p-1.5 sm:p-2.5 transition-all hover:bg-[#f8f9fa] dark:hover:bg-[#16171d]"
                         >
-                            <div className="mx-auto bg-[#e9ecef] rounded-full mt-1 group-hover:bg-[#dee2e6] transition-all size-10 sm:size-14 flex items-center justify-center p-1.5 sm:p-2.5">
+                            <div className="mx-auto bg-[#e9ecef] dark:bg-gray-800 rounded-full mt-1 group-hover:bg-[#dee2e6] dark:group-hover:bg-gray-700 transition-all size-10 sm:size-14 flex items-center justify-center p-1.5 sm:p-2.5">
                                 <CategoryIcon cat={cat} className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-300" />
                             </div>
-                            <p className="overflow-hidden text-ellipsis mt-1.5 sm:mt-2.5 text-[10px] sm:text-[13px] font-bold text-gray-700 group-hover:text-blue-600 leading-tight">
+                            <p className="overflow-hidden text-ellipsis mt-1.5 sm:mt-2.5 text-[10px] sm:text-[13px] font-bold text-gray-700 dark:text-gray-300 group-hover:text-blue-600 leading-tight">
                                 {cat.name}
                             </p>
                         </button>
@@ -103,8 +103,8 @@ export const HomePage = () => {
 
         {/* Latest Listings */}
         <div className="mt-5">
-            <div className="flex items-center justify-between mb-3 px-1 border-b border-gray-200 pb-1.5">
-                <h2 className="text-sm font-bold text-gray-800 uppercase tracking-tight">Recent Ads</h2>
+            <div className="flex items-center justify-between mb-3 px-1 border-b border-gray-200 dark:border-gray-800 pb-1.5">
+                <h2 className="text-sm font-bold text-gray-800 dark:text-gray-100 uppercase tracking-tight">Recent Ads</h2>
                 <Link to="/products" className="text-xs font-bold text-blue-600 hover:underline">View All</Link>
             </div>
 
