@@ -178,6 +178,7 @@ export const ProductListPage = () => {
   const selectedCategory = categories.find(c => String(c.id) === categoryId);
   const mainCategory = selectedCategory?.parent_id ? categories.find(c => c.id === selectedCategory.parent_id) : selectedCategory;
   const subCategories = mainCategory ? categories.filter(c => c.parent_id === mainCategory.id) : [];
+  const isSubCategorySelected = selectedCategory && selectedCategory.parent_id;
 
   const provinceName = provinces.find(p => String(p.id) === searchParams.get('province_id'))?.name || 'Cambodia';
   const fullLocationName = districtName ? `${districtName}, ${provinceName}` : provinceName;
@@ -361,21 +362,26 @@ export const ProductListPage = () => {
             </div>
             </div>
 
-        {/* Subcategories Bar - Only show when no subcategory is selected (Khmer24 flow) */}
-        {subCategories.length > 0 && !categoryId.split(',').some(id => categories.find(c => String(c.id) === id)?.parent_id) && !selectedCategory?.parent_id && (
+        {/* Browse By Category Section - Khmer24 Style Flow */}
+        {!isSubCategorySelected && (
             <div className="bg-white dark:bg-[#1f2028] border border-gray-200 dark:border-gray-800 rounded mb-3 shadow-sm overflow-hidden transition-colors">
-                <ul className="flex overflow-x-auto scrollbar-hide py-3 px-2">
-                    {subCategories.map((sub) => (
-                        <li key={sub.id} className="shrink-0 w-[95px] sm:w-[110px]">
+                <div className="px-4 py-3 border-b border-gray-50 dark:border-gray-800">
+                    <h2 className="text-sm font-bold text-gray-800 dark:text-gray-100 uppercase tracking-tight">
+                        {selectedCategory ? `Browse in ${selectedCategory.name}` : 'Browse By Category'}
+                    </h2>
+                </div>
+                <ul className="text-center grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 gap-1 sm:gap-2 p-3">
+                    {(selectedCategory ? subCategories : categories.filter(c => !c.parent_id)).map((cat) => (
+                        <li key={cat.id}>
                             <button
-                                onClick={() => setCategory(String(sub.id))}
-                                className="block w-full group transition-all"
+                                onClick={() => setCategory(String(cat.id))}
+                                className={`block w-full h-full group bg-white dark:bg-[#1f2028] rounded cursor-pointer active:opacity-50 p-1.5 sm:p-2.5 transition-all hover:bg-[#f8f9fa] dark:hover:bg-[#16171d] ${categoryId === String(cat.id) ? 'ring-2 ring-blue-500 bg-blue-50 dark:bg-blue-900/10' : ''}`}
                             >
-                                <div className={`mx-auto rounded-full size-11 sm:size-14 flex items-center justify-center mb-1.5 transition-all overflow-hidden ${categoryId === String(sub.id) ? 'bg-blue-50 dark:bg-blue-900/30 ring-2 ring-blue-500' : 'bg-[#f1f2f6] dark:bg-[#16171d] group-hover:bg-[#e9ecef] dark:group-hover:bg-gray-800'}`}>
-                                    <CategoryIcon cat={sub} className="w-full h-full" />
+                                <div className={`mx-auto rounded-full mt-1 transition-all size-10 sm:size-14 flex items-center justify-center overflow-hidden ${categoryId === String(cat.id) ? 'bg-blue-50 dark:bg-blue-900/30 ring-2 ring-blue-500' : 'bg-[#e9ecef] dark:bg-gray-800 group-hover:bg-[#dee2e6] dark:group-hover:bg-gray-700'}`}>
+                                    <CategoryIcon cat={cat} className="w-full h-full group-hover:scale-110 transition-transform duration-300" />
                                 </div>
-                                <p className={`text-[10px] sm:text-[11.5px] font-bold text-center px-1 truncate ${categoryId === String(sub.id) ? 'text-blue-600 dark:text-blue-400' : 'text-gray-700 dark:text-gray-300 group-hover:text-blue-600 dark:group-hover:text-blue-400'}`}>
-                                    {sub.name}
+                                <p className={`overflow-hidden text-ellipsis mt-1.5 sm:mt-2.5 text-[10px] sm:text-[11.5px] font-bold leading-tight ${categoryId === String(cat.id) ? 'text-blue-600 dark:text-blue-400' : 'text-gray-700 dark:text-gray-300 group-hover:text-blue-600'}`}>
+                                    {cat.name}
                                 </p>
                             </button>
                         </li>
