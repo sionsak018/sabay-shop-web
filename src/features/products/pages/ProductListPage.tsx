@@ -58,10 +58,26 @@ export const ProductListPage = () => {
       return initial;
   });
 
+  const [localSearchTerm, setLocalSearchTerm] = useState(keyword);
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [expandedAttrs, setExpandedAttrs] = useState<Record<number, boolean>>({});
   const topRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setLocalSearchTerm(keyword);
+  }, [keyword]);
+
+  const handleSearchButtonClick = () => {
+    const params = new URLSearchParams(searchParams);
+    if (localSearchTerm.trim()) {
+      params.set('keyword', localSearchTerm);
+    } else {
+      params.delete('keyword');
+    }
+    setSearchParams(params);
+    setPage(1);
+  };
 
   // Sync localFilters with searchParams (Crucial for Breadcrumb Back navigation)
   useEffect(() => {
@@ -175,26 +191,24 @@ export const ProductListPage = () => {
              <div className="relative flex-1">
                 <input
                     type="text"
-                    defaultValue={keyword}
+                    value={localSearchTerm}
+                    onChange={e => setLocalSearchTerm(e.target.value)}
                     placeholder="Search in all categories..."
                     className="w-full bg-[#f8f9fa] dark:bg-[#1f2028] border border-[#dee2e6] dark:border-gray-700 px-4 py-2 rounded focus:bg-white focus:border-blue-500 outline-none text-sm font-medium text-gray-700 dark:text-gray-200 transition-all"
                     onKeyDown={e => {
                         if (e.key === 'Enter') {
-                            const params = new URLSearchParams(searchParams);
-                            params.set('keyword', (e.target as HTMLInputElement).value);
-                            setSearchParams(params);
+                            handleSearchButtonClick();
                         }
                     }}
                 />
                 <svg className="w-4 h-4 absolute right-4 top-1/2 -translate-y-1/2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
              </div>
 
-             {/* Filter Toggle */}
              <button
-                onClick={() => setIsMobileFilterOpen(true)}
-                className="p-2.5 bg-blue-600 text-white rounded shadow-md active:scale-95 transition-transform"
+                onClick={handleSearchButtonClick}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-4 sm:px-8 py-2 rounded font-bold transition flex items-center justify-center shadow-sm uppercase tracking-wider text-[11px] sm:text-xs shrink-0"
              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg>
+                Search
              </button>
         </div>
       </div>
@@ -349,7 +363,7 @@ export const ProductListPage = () => {
 
         {/* Subcategories Bar - Only show when no subcategory is selected (Khmer24 flow) */}
         {subCategories.length > 0 && !categoryId.split(',').some(id => categories.find(c => String(c.id) === id)?.parent_id) && !selectedCategory?.parent_id && (
-            <div className="bg-white border border-gray-200 rounded mb-3 shadow-sm overflow-hidden">
+            <div className="bg-white dark:bg-[#1f2028] border border-gray-200 dark:border-gray-800 rounded mb-3 shadow-sm overflow-hidden transition-colors">
                 <ul className="flex overflow-x-auto scrollbar-hide py-3 px-2">
                     {subCategories.map((sub) => (
                         <li key={sub.id} className="shrink-0 w-[95px] sm:w-[110px]">
@@ -357,10 +371,10 @@ export const ProductListPage = () => {
                                 onClick={() => setCategory(String(sub.id))}
                                 className="block w-full group transition-all"
                             >
-                                <div className={`mx-auto rounded-full size-11 sm:size-14 flex items-center justify-center p-2 mb-1.5 transition-all ${categoryId === String(sub.id) ? 'bg-blue-50 ring-2 ring-blue-500' : 'bg-[#f1f2f6] group-hover:bg-[#e9ecef]'}`}>
+                                <div className={`mx-auto rounded-full size-11 sm:size-14 flex items-center justify-center p-2 mb-1.5 transition-all ${categoryId === String(sub.id) ? 'bg-blue-50 dark:bg-blue-900/30 ring-2 ring-blue-500' : 'bg-[#f1f2f6] dark:bg-[#16171d] group-hover:bg-[#e9ecef] dark:group-hover:bg-gray-800'}`}>
                                     <CategoryIcon cat={sub} className="w-full h-full object-contain" />
                                 </div>
-                                <p className={`text-[10px] sm:text-[11.5px] font-bold text-center px-1 truncate ${categoryId === String(sub.id) ? 'text-blue-600' : 'text-gray-700 group-hover:text-blue-600'}`}>
+                                <p className={`text-[10px] sm:text-[11.5px] font-bold text-center px-1 truncate ${categoryId === String(sub.id) ? 'text-blue-600 dark:text-blue-400' : 'text-gray-700 dark:text-gray-300 group-hover:text-blue-600 dark:group-hover:text-blue-400'}`}>
                                     {sub.name}
                                 </p>
                             </button>
@@ -429,9 +443,9 @@ export const ProductListPage = () => {
                 const isCircleStyle = ['Brand', 'Body Type', 'Make'].includes(attr.name);
 
                 return (
-                    <div key={attr.id} className="bg-white border border-gray-200 rounded mb-3 shadow-sm animate-in fade-in slide-in-from-top-2 duration-500">
-                        <div className="px-4 py-3 border-b border-gray-50">
-                            <h2 className="text-sm font-bold text-gray-800 uppercase tracking-tight">{attr.name}</h2>
+                    <div key={attr.id} className="bg-white dark:bg-[#1f2028] border border-gray-200 dark:border-gray-800 rounded mb-3 shadow-sm animate-in fade-in slide-in-from-top-2 duration-500 transition-colors">
+                        <div className="px-4 py-3 border-b border-gray-50 dark:border-gray-800">
+                            <h2 className="text-sm font-bold text-gray-800 dark:text-gray-100 uppercase tracking-tight">{attr.name}</h2>
                         </div>
                         <div className="p-4">
                             <div className={`grid gap-x-2 gap-y-4 ${isCircleStyle ? 'grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10' : 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6'}`}>
@@ -446,20 +460,20 @@ export const ProductListPage = () => {
                                             className="group flex flex-col items-center gap-2 transition-all active:scale-95"
                                         >
                                             {isCircleStyle ? (
-                                                <div className={`size-12 sm:size-14 rounded-full flex items-center justify-center p-2.5 border transition-all ${isActive ? 'bg-blue-50 border-blue-500 ring-2 ring-blue-500/20' : 'bg-white border-gray-100 group-hover:border-blue-200 group-hover:bg-blue-50/30'}`}>
+                                                <div className={`size-12 sm:size-14 rounded-full flex items-center justify-center p-2.5 border transition-all ${isActive ? 'bg-blue-50 dark:bg-blue-900/30 border-blue-500 ring-2 ring-blue-500/20' : 'bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700 group-hover:border-blue-200 dark:group-hover:border-blue-800 group-hover:bg-blue-50/30 dark:group-hover:bg-blue-900/10'}`}>
                                                     {opt.image_url ? (
                                                         <img src={getImageUrl(opt.image_url)} className="w-full h-full object-contain" alt={opt.value} />
                                                     ) : (
-                                                        <div className="text-[10px] font-black text-gray-300 uppercase truncate px-1">{opt.value.substring(0, 3)}</div>
+                                                        <div className="text-[10px] font-black text-gray-300 dark:text-gray-600 uppercase truncate px-1">{opt.value.substring(0, 3)}</div>
                                                     )}
                                                 </div>
                                             ) : (
-                                                <div className={`w-full py-2.5 px-3 rounded border text-center transition-all ${isActive ? 'bg-blue-50 border-blue-200 border-blue-500 text-blue-600 font-bold shadow-sm' : 'bg-gray-50 border-gray-100 group-hover:bg-blue-50 group-hover:border-blue-200 group-hover:text-blue-600 group-hover:font-bold shadow-sm'}`}>
+                                                <div className={`w-full py-2.5 px-3 rounded border text-center transition-all ${isActive ? 'bg-blue-50 dark:bg-blue-900/30 border-blue-200 dark:border-blue-800 border-blue-500 text-blue-600 dark:text-blue-400 font-bold shadow-sm' : 'bg-gray-50 dark:bg-gray-800 border-gray-100 dark:border-gray-700 group-hover:bg-blue-50 dark:group-hover:bg-gray-700 group-hover:border-blue-200 dark:group-hover:border-blue-800 group-hover:text-blue-600 dark:group-hover:text-blue-400 group-hover:font-bold shadow-sm'}`}>
                                                     <span className="text-[11px] truncate block">{opt.value}</span>
                                                 </div>
                                             )}
                                             {isCircleStyle && (
-                                                <span className={`text-[10px] sm:text-[11px] font-bold text-center leading-tight truncate px-1 ${isActive ? 'text-blue-600' : 'text-gray-600 group-hover:text-blue-600'}`}>
+                                                <span className={`text-[10px] sm:text-[11px] font-bold text-center leading-tight truncate px-1 ${isActive ? 'text-blue-600 dark:text-blue-400' : 'text-gray-600 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400'}`}>
                                                     {opt.value}
                                                 </span>
                                             )}
@@ -471,7 +485,7 @@ export const ProductListPage = () => {
                             {hasMore && (
                                 <button
                                     onClick={() => setExpandedAttrs(prev => ({ ...prev, [attr.id]: !isExpanded }))}
-                                    className="w-full mt-6 py-2 bg-gray-100 hover:bg-gray-200 text-gray-500 text-[11px] font-bold uppercase tracking-widest rounded transition-colors flex items-center justify-center gap-1.5"
+                                    className="w-full mt-6 py-2 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400 text-[11px] font-bold uppercase tracking-widest rounded transition-colors flex items-center justify-center gap-1.5"
                                 >
                                     {isExpanded ? 'Show Less' : 'Show More'}
                                     <svg className={`w-3.5 h-3.5 transition-transform ${isExpanded ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M19 9l-7 7-7-7"/></svg>
