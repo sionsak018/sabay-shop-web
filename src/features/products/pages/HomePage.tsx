@@ -48,8 +48,8 @@ export const HomePage = () => {
       {/* Khmer24 Style Header Search */}
       <div className="bg-white border-b border-gray-200 py-3 sm:py-4 sticky top-14 z-40 shadow-sm">
         <div className="container mx-auto px-4 max-w-7xl">
-          <div className="flex flex-col md:flex-row gap-2">
-            <div className="flex-grow relative order-1">
+          <div className="flex flex-row gap-2">
+            <div className="flex-grow relative">
               <input
                 type="text"
                 placeholder="What are you looking for..."
@@ -63,14 +63,12 @@ export const HomePage = () => {
               </button>
             </div>
 
-            <div className="flex gap-2 order-2">
-              <button
-                onClick={handleSearch}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-6 sm:px-8 py-2 sm:py-2.5 rounded-md font-bold transition flex items-center justify-center gap-2 shadow-sm uppercase tracking-wider text-[11px] sm:text-xs min-w-[100px]"
-              >
-                Search
-              </button>
-            </div>
+            <button
+              onClick={handleSearch}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-4 sm:px-8 py-2 sm:py-2.5 rounded-md font-bold transition flex items-center justify-center gap-2 shadow-sm uppercase tracking-wider text-[11px] sm:text-xs shrink-0"
+            >
+              Search
+            </button>
           </div>
         </div>
       </div>
