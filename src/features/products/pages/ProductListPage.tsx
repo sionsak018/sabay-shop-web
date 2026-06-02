@@ -311,8 +311,6 @@ export const ProductListPage = () => {
 
       <div className="container mx-auto px-4 max-w-7xl">
         {/* Category Header Box (Khmer24 Style) */}
-      <div className="container mx-auto px-4 max-w-7xl">
-        {/* Category Header Box (Khmer24 Style) */}
         <div className="bg-white dark:bg-[#1f2028] border border-gray-200 dark:border-gray-800 rounded mb-3 shadow-sm transition-colors">
             <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-800">
                 <h1 className="text-base sm:text-lg font-bold text-gray-800 dark:text-gray-100">
