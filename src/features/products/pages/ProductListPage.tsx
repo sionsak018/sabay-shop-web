@@ -94,6 +94,7 @@ export const ProductListPage = () => {
         if (key.startsWith('attr_')) updated[key] = val;
     });
     setLocalFilters(updated);
+    setLocalSearchTerm(searchParams.get('keyword') || '');
   }, [searchParams]);
 
   useEffect(() => {
