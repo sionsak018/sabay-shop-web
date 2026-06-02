@@ -373,7 +373,6 @@ export const ProductListPage = () => {
                 </div>
             </div>
             </div>
-            </div>
 
         {/* Browse By Category Section - Khmer24 Style Flow */}
         {loadingCategories ? (
