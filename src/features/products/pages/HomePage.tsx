@@ -268,17 +268,19 @@ export const HomePage = () => {
 
         {/* Browse By Category Section */}
         {loadingCategories ? (
-            <div className="bg-white dark:bg-[#1f2028] border border-gray-200 dark:border-gray-800 rounded-md p-3 sm:p-4 shadow-sm transition-colors mb-3 animate-pulse">
-                <div className="h-5 bg-gray-200 dark:bg-gray-800 rounded w-1/4 mb-4" />
-                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-4 lg:grid-cols-6 gap-2">
-                    {[...Array(6)].map((_, i) => (
-                        <div key={i} className="flex flex-col items-center p-2 gap-2">
-                            <div className="size-10 sm:size-14 bg-gray-200 dark:bg-gray-800 rounded-full" />
-                            <div className="h-3 bg-gray-200 dark:bg-gray-800 rounded w-full" />
-                        </div>
-                    ))}
+            !isSubCategorySelected && (
+                <div className="bg-white dark:bg-[#1f2028] border border-gray-200 dark:border-gray-800 rounded-md p-3 sm:p-4 shadow-sm transition-colors mb-3 animate-pulse">
+                    <div className="h-5 bg-gray-200 dark:bg-gray-800 rounded w-1/4 mb-4" />
+                    <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-4 lg:grid-cols-6 gap-2">
+                        {[...Array(6)].map((_, i) => (
+                            <div key={i} className="flex flex-col items-center p-2 gap-2">
+                                <div className="size-10 sm:size-14 bg-gray-200 dark:bg-gray-800 rounded-full" />
+                                <div className="h-3 bg-gray-200 dark:bg-gray-800 rounded w-full" />
+                            </div>
+                        ))}
+                    </div>
                 </div>
-            </div>
+            )
         ) : (!isSubCategorySelected) && (
             <div className="bg-white dark:bg-[#1f2028] border border-gray-200 dark:border-gray-800 rounded-md p-3 sm:p-4 shadow-sm transition-colors mb-3">
                 <h2 className="text-sm sm:text-base font-bold mb-3 sm:mb-4 text-gray-800 dark:text-gray-100">
@@ -308,7 +310,8 @@ export const HomePage = () => {
         {/* Dynamic Attributes (Brand, Model, etc. - Khmer24 Style Flow) */}
         {loadingAttributes ? (
             <div className="flex flex-col gap-3 mb-3">
-                {[...Array(2)].map((_, i) => (
+                {/* Surgical Skeleton: Shows 1 block for brand, or 2 for Model/BodyType based on flow */}
+                {[...Array(selectedBrand ? 2 : 1)].map((_, i) => (
                     <div key={i} className="bg-white dark:bg-[#1f2028] border border-gray-200 dark:border-gray-800 rounded-md shadow-sm overflow-hidden animate-pulse">
                         <div className="px-4 py-2.5 bg-gray-50/50 dark:bg-gray-800/50 h-8 w-1/4 m-4 rounded" />
                         <div className="p-4 grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-4">
