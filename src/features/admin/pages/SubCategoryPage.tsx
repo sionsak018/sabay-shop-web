@@ -98,7 +98,12 @@ export const SubCategoryPage = () => {
     data.append('name', formData.name);
     data.append('slug', formData.slug);
     data.append('parent_id', formData.parent_id);
-    if (imageFile) data.append('image', imageFile);
+
+    if (imageFile) {
+        data.append('image', imageFile);
+    } else if (editingCategory && !imagePreview && editingCategory.image_url) {
+        data.append('remove_image', '1');
+    }
 
     try {
       if (editingCategory) {

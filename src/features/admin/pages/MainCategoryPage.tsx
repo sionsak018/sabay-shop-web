@@ -85,7 +85,12 @@ export const MainCategoryPage = () => {
     const data = new FormData();
     data.append('name', formData.name);
     data.append('slug', formData.slug);
-    if (imageFile) data.append('image', imageFile);
+
+    if (imageFile) {
+        data.append('image', imageFile);
+    } else if (editingCategory && !imagePreview && editingCategory.image_url) {
+        data.append('remove_image', '1');
+    }
 
     try {
       if (editingCategory) {
