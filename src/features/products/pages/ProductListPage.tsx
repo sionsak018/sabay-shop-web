@@ -319,8 +319,10 @@ export const ProductListPage = () => {
                 </h1>
             </div>
 
-            {/* Filter Bar - Sticky on Scroll */}
-            <div className="px-4 flex items-center bg-white dark:bg-[#16171d] border-b border-gray-50 dark:border-gray-800 overflow-hidden transition-colors sticky top-[106px] sm:top-[114px] z-20 shadow-sm">
+            {/* Filter Bar */}
+            <div className="px-4 flex items-center bg-white dark:bg-[#16171d] border-b border-gray-50 dark:border-gray-800 overflow-hidden transition-colors">
+            {/* Filter Bar */}
+            <div className="px-4 flex items-center bg-white dark:bg-[#16171d] border-b border-gray-50 dark:border-gray-800 overflow-hidden transition-colors">
                 <div className="flex-1 overflow-x-auto scrollbar-hide flex items-center gap-1.5 py-2">
                     <button
                         onClick={() => setIsLocationModalOpen(true)}
@@ -370,6 +372,7 @@ export const ProductListPage = () => {
                         )}
                     </button>
                 </div>
+            </div>
             </div>
             </div>
 
