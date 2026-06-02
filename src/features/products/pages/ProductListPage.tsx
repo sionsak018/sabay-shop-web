@@ -321,8 +321,6 @@ export const ProductListPage = () => {
 
             {/* Filter Bar */}
             <div className="px-4 flex items-center bg-white dark:bg-[#16171d] border-b border-gray-50 dark:border-gray-800 overflow-hidden transition-colors">
-            {/* Filter Bar */}
-            <div className="px-4 flex items-center bg-white dark:bg-[#16171d] border-b border-gray-50 dark:border-gray-800 overflow-hidden transition-colors">
                 <div className="flex-1 overflow-x-auto scrollbar-hide flex items-center gap-1.5 py-2">
                     <button
                         onClick={() => setIsLocationModalOpen(true)}
