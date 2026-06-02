@@ -88,9 +88,7 @@ export const HomePage = () => {
   };
 
   const browseCategory = (id: number) => {
-    setActiveCategoryId(id);
-    // Scroll to products section or top? Khmer24 usually shows subcategories
-    window.scrollTo({ top: 400, behavior: 'smooth' });
+    navigate(`/products?category_id=${id}`);
   };
 
   const handleAttributeClick = (attrId: number, value: string) => {

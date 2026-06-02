@@ -410,7 +410,7 @@ export const ProductListPage = () => {
                 // Stage 1: Only show Brand
                 if (brandAttr) displayAttrs.push(brandAttr);
             } else {
-                // Stage 2: Brand hidden, show Model and Body Type (they don't hide)
+                // Stage 2: Brand hidden, show Model and Body Type
                 const modelAttr = dynamicAttributes.find(a => a.name === 'Model');
                 const bodyTypeAttr = dynamicAttributes.find(a => a.name === 'Body Type');
 
