@@ -167,7 +167,7 @@ export const ProductListPage = () => {
   const fullLocationName = districtName ? `${districtName}, ${provinceName}` : provinceName;
 
   return (
-    <div ref={topRef} className="min-h-screen bg-[#f1f2f6] pb-20 text-left antialiased font-sans relative">
+    <div ref={topRef} className="min-h-screen bg-[#f1f2f6] dark:bg-[#08060d] text-gray-900 dark:text-gray-100 pb-20 text-left antialiased font-sans relative transition-colors duration-300">
 
       {/* Search Bar - Khmer24 Style */}
       <div className="bg-white dark:bg-[#16171d] border-b border-gray-200 dark:border-gray-800 py-3 shadow-sm sticky top-14 z-30 transition-colors">

@@ -26,11 +26,11 @@ export const CartPage = () => {
   }, 0);
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-12 antialiased text-left font-sans">
+    <div className="max-w-4xl mx-auto px-4 py-12 antialiased text-left font-sans transition-colors duration-300">
       <div className="flex items-center justify-between mb-10">
         <div>
-            <h1 className="text-3xl font-black text-gray-900 uppercase tracking-tight">Your Cart</h1>
-            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1">{cart.items.length} Items Selected</p>
+            <h1 className="text-3xl font-black text-gray-900 dark:text-gray-100 uppercase tracking-tight">Your Cart</h1>
+            <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mt-1">{cart.items.length} Items Selected</p>
         </div>
         <button onClick={clearCart} className="text-[10px] font-black text-red-500 hover:text-red-600 uppercase tracking-[0.2em] transition-colors flex items-center gap-2">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
@@ -46,50 +46,50 @@ export const CartPage = () => {
           const currentPrice = hasDiscount ? discountVal : originalVal;
 
           return (
-            <div key={item.id} className="flex flex-col sm:flex-row gap-6 bg-white border border-gray-100 p-6 rounded-2xl shadow-sm hover:shadow-md transition-all group">
-              <div className="w-full sm:w-32 h-32 rounded-xl overflow-hidden bg-gray-50 flex-shrink-0 border border-gray-100">
+            <div key={item.id} className="flex flex-col sm:flex-row gap-6 bg-white dark:bg-[#1f2028] border border-gray-100 dark:border-gray-800 p-6 rounded-2xl shadow-sm hover:shadow-md transition-all group">
+              <div className="w-full sm:w-32 h-32 rounded-xl overflow-hidden bg-gray-50 dark:bg-[#16171d] flex-shrink-0 border border-gray-100 dark:border-gray-800">
                 <img src={getImageUrl(item.product.images[0]?.image_url, 'https://placehold.co/200x200?text=No+Image')} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
               </div>
               <div className="flex-1 flex flex-col justify-between">
                 <div>
-                    <h3 className="font-bold text-gray-900 text-lg group-hover:text-blue-600 transition-colors leading-tight mb-1">{item.product.title}</h3>
+                    <h3 className="font-bold text-gray-900 dark:text-gray-100 text-lg group-hover:text-blue-600 transition-colors leading-tight mb-1">{item.product.title}</h3>
                     <div className="flex items-baseline gap-2">
-                        <span className="text-blue-600 font-black text-lg">${currentPrice.toLocaleString()}</span>
+                        <span className="text-blue-600 dark:text-blue-400 font-black text-lg">${currentPrice.toLocaleString()}</span>
                         {hasDiscount && (
-                            <span className="text-gray-400 text-sm line-through font-bold">${originalVal.toLocaleString()}</span>
+                            <span className="text-gray-400 dark:text-gray-600 text-sm line-through font-bold">${originalVal.toLocaleString()}</span>
                         )}
                     </div>
                 </div>
 
                 <div className="flex items-center gap-4 mt-6">
-                  <div className="flex items-center bg-gray-100 rounded-xl p-1">
+                  <div className="flex items-center bg-gray-100 dark:bg-gray-800 rounded-xl p-1">
                       <button
                         onClick={() => updateQuantity(item.id, Math.max(1, item.quantity - 1))}
-                        className="w-8 h-8 flex items-center justify-center text-gray-500 hover:text-gray-900 transition-colors font-black"
+                        className="w-8 h-8 flex items-center justify-center text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors font-black"
                       >-</button>
-                      <span className="w-10 text-center font-black text-sm text-gray-800">{item.quantity}</span>
+                      <span className="w-10 text-center font-black text-sm text-gray-800 dark:text-gray-200">{item.quantity}</span>
                       <button
                         onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                        className="w-8 h-8 flex items-center justify-center text-gray-500 hover:text-gray-900 transition-colors font-black"
+                        className="w-8 h-8 flex items-center justify-center text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors font-black"
                       >+</button>
                   </div>
-                  <button onClick={() => removeItem(item.id)} className="text-[10px] font-black text-gray-400 hover:text-red-500 uppercase tracking-widest transition-colors">Remove</button>
+                  <button onClick={() => removeItem(item.id)} className="text-[10px] font-black text-gray-400 dark:text-gray-500 hover:text-red-500 uppercase tracking-widest transition-colors">Remove</button>
                 </div>
               </div>
-              <div className="sm:text-right flex flex-col justify-between items-end border-t sm:border-t-0 border-gray-50 pt-4 sm:pt-0">
-                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Subtotal</p>
-                <div className="text-xl font-black text-gray-900">${(currentPrice * item.quantity).toLocaleString()}</div>
+              <div className="sm:text-right flex flex-col justify-between items-end border-t sm:border-t-0 border-gray-50 dark:border-gray-800 pt-4 sm:pt-0">
+                <p className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">Subtotal</p>
+                <div className="text-xl font-black text-gray-900 dark:text-gray-100">${(currentPrice * item.quantity).toLocaleString()}</div>
               </div>
             </div>
           );
         })}
       </div>
 
-      <div className="mt-12 bg-white border border-gray-100 p-8 rounded-3xl shadow-xl flex flex-col md:flex-row items-center justify-between gap-8">
+      <div className="mt-12 bg-white dark:bg-[#1f2028] border border-gray-100 dark:border-gray-800 p-8 rounded-3xl shadow-xl flex flex-col md:flex-row items-center justify-between gap-8 transition-colors">
         <div>
-            <p className="text-xs font-bold text-gray-400 uppercase tracking-[0.2em] mb-1 text-center md:text-left">Order Summary</p>
-            <div className="text-4xl font-black text-gray-900 flex items-center gap-4">
-                <span className="text-lg text-gray-300 font-black">TOTAL</span>
+            <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-[0.2em] mb-1 text-center md:text-left">Order Summary</p>
+            <div className="text-4xl font-black text-gray-900 dark:text-gray-100 flex items-center gap-4">
+                <span className="text-lg text-gray-300 dark:text-gray-700 font-black">TOTAL</span>
                 ${total.toLocaleString()}
             </div>
         </div>
