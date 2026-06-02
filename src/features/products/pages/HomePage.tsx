@@ -169,14 +169,19 @@ export const HomePage = () => {
 
         {/* Breadcrumb if category selected */}
         {activeCategoryId && (
-            <div className="mb-3 flex items-center gap-2 overflow-x-auto whitespace-nowrap scrollbar-hide py-1">
-                <button onClick={() => setActiveCategoryId(undefined)} className="text-xs font-bold text-blue-600 hover:underline">All Categories</button>
+            <div className="mb-3 flex items-center gap-2 overflow-x-auto whitespace-nowrap scrollbar-hide py-2 px-1">
+                <button
+                  onClick={() => setActiveCategoryId(undefined)}
+                  className="text-sm sm:text-base font-bold text-blue-600 hover:underline transition-colors"
+                >
+                  All Categories
+                </button>
                 {mainCategory && (
                     <>
-                        <svg className="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"/></svg>
+                        <svg className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 5l7 7-7 7"/></svg>
                         <button
                             onClick={() => setActiveCategoryId(mainCategory.id)}
-                            className={`text-xs font-bold ${activeCategoryId === mainCategory.id ? 'text-gray-500' : 'text-blue-600 hover:underline'}`}
+                            className={`text-sm sm:text-base font-bold transition-colors ${activeCategoryId === mainCategory.id ? 'text-gray-500 cursor-default' : 'text-blue-600 hover:underline'}`}
                         >
                             {mainCategory.name}
                         </button>
@@ -184,8 +189,10 @@ export const HomePage = () => {
                 )}
                 {selectedCategory && selectedCategory.id !== mainCategory?.id && (
                     <>
-                        <svg className="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"/></svg>
-                        <span className="text-xs font-bold text-gray-500">{selectedCategory.name}</span>
+                        <svg className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 5l7 7-7 7"/></svg>
+                        <span className="text-sm sm:text-base font-bold text-gray-500">
+                          {selectedCategory.name}
+                        </span>
                     </>
                 )}
             </div>
@@ -230,8 +237,8 @@ export const HomePage = () => {
                     // 1. If it's a Brand: hide if a brand is already selected
                     if (isBrand && selectedBrand) return null;
 
-                    // 2. If it's a Model: show ONLY if a brand is selected AND no model is selected yet
-                    if (isModel && (!selectedBrand || selectedModel)) return null;
+                    // 2. If it's a Model: show ONLY if a brand is selected (Don't hide if model is already selected)
+                    if (isModel && !selectedBrand) return null;
 
                     // 3. Body Type: always show if it exists (as per user request: "stand by forever")
 
