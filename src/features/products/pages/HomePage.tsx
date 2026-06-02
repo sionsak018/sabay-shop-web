@@ -8,6 +8,7 @@ import { categoryApi } from '../../categories/services/categoryApi';
 import { type Category } from '../../categories/types/category.types';
 import api from '../../../services/api';
 import { getImageUrl } from '../../../utils/imageUrl';
+import { LocationPickerModal } from '../../../components/common/LocationPickerModal';
 
 const CategoryIcon = ({ cat, className = "" }: { cat: Category, className?: string }) => {
   if (cat.image_url) {
@@ -26,14 +27,40 @@ export const HomePage = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeKeyword, setActiveKeyword] = useState('');
 
+  // New Filter States
+  const [activeCategoryId, setActiveCategoryId] = useState<number | undefined>();
+  const [activeProvinceId, setActiveProvinceId] = useState<string>('');
+  const [activeDistrictId, setActiveDistrictId] = useState<string>('');
+  const [locationName, setLocationName] = useState('All Cambodia');
+  const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
+  const [dynamicAttributes, setDynamicAttributes] = useState<any[]>([]);
+  const [activeAttributes, setActiveAttributes] = useState<Record<string, string>>({});
+  const [expandedAttrs, setExpandedAttrs] = useState<Record<number, boolean>>({});
+
   useEffect(() => {
     categoryApi.getAll().then(res => setCategories(Array.isArray(res.data) ? res.data : res.data.data || []));
   }, []);
 
-  const { products, loading, error } = useProducts({
+  // Fetch dynamic attributes when category changes
+  useEffect(() => {
+    if (activeCategoryId) {
+      api.get(`/category-attributes/${activeCategoryId}`).then(res => setDynamicAttributes(res.data));
+    } else {
+      setDynamicAttributes([]);
+    }
+    setActiveAttributes({}); // Reset attributes when category changes
+  }, [activeCategoryId]);
+
+  const productFilters = {
     page: 1,
-    keyword: activeKeyword || undefined
-  });
+    keyword: activeKeyword || undefined,
+    category_id: activeCategoryId?.toString(),
+    province_id: activeProvinceId || undefined,
+    district_id: activeDistrictId || undefined,
+    ...activeAttributes
+  };
+
+  const { products, loading, error } = useProducts(productFilters);
 
   const handleSearch = () => {
     if (searchQuery.trim()) {
@@ -46,13 +73,36 @@ export const HomePage = () => {
   const clearSearch = () => {
     setSearchQuery('');
     setActiveKeyword('');
+    setActiveCategoryId(undefined);
+    setActiveProvinceId('');
+    setActiveDistrictId('');
+    setLocationName('All Cambodia');
+    setActiveAttributes({});
   };
 
   const browseCategory = (id: number) => {
-    navigate(`/products?category_id=${id}`);
+    setActiveCategoryId(id);
+    // Scroll to products section or top? Khmer24 usually shows subcategories
+    window.scrollTo({ top: 400, behavior: 'smooth' });
   };
 
-  const mainCategories = categories.filter(c => !c.parent_id);
+  const handleAttributeClick = (attrId: number, value: string) => {
+    const key = `attr_${attrId}`;
+    setActiveAttributes(prev => {
+        if (prev[key] === value) {
+            const next = { ...prev };
+            delete next[key];
+            return next;
+        }
+        return { ...prev, [key]: value };
+    });
+  };
+
+  const selectedCategory = categories.find(c => c.id === activeCategoryId);
+  const mainCategory = selectedCategory?.parent_id ? categories.find(c => c.id === selectedCategory.parent_id) : selectedCategory;
+  const subCategories = mainCategory ? categories.filter(c => c.parent_id === mainCategory.id) : [];
+
+  const mainCategoriesToDisplay = categories.filter(c => !c.parent_id);
 
   return (
     <div className="min-h-screen bg-[#f1f2f6] dark:bg-[#08060d] text-gray-900 dark:text-gray-100 antialiased pb-20 font-sans transition-colors duration-300">
@@ -60,19 +110,29 @@ export const HomePage = () => {
       {/* Khmer24 Style Header Search */}
       <div className="bg-white dark:bg-[#16171d] border-b border-gray-200 dark:border-gray-800 py-3 sm:py-4 sticky top-14 z-40 shadow-sm transition-colors">
         <div className="container mx-auto px-4 max-w-7xl">
-          <div className="flex flex-row gap-2">
-            <div className="flex-grow relative">
-              <input
-                type="text"
-                placeholder="What are you looking for..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                className="w-full pl-4 pr-10 py-2 sm:py-2.5 bg-white dark:bg-[#1f2028] border border-[#ced4da] dark:border-gray-700 rounded-md focus:border-blue-500 focus:ring-0 outline-none transition placeholder:text-gray-400 font-medium text-sm text-gray-900 dark:text-gray-100"
-              />
-              <button onClick={handleSearch} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-blue-600 transition-colors">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-              </button>
+          <div className="flex flex-col sm:flex-row gap-2">
+            <div className="flex-grow flex gap-2">
+                <button
+                    onClick={() => setIsLocationModalOpen(true)}
+                    className="flex items-center gap-1.5 px-3 py-2 bg-gray-50 dark:bg-[#1f2028] border border-[#ced4da] dark:border-gray-700 rounded-md text-[11px] sm:text-xs font-bold text-gray-700 dark:text-gray-300 transition shrink-0"
+                >
+                    <svg className="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                    <span className="truncate max-w-[80px] sm:max-w-[120px]">{locationName}</span>
+                </button>
+
+                <div className="flex-grow relative">
+                <input
+                    type="text"
+                    placeholder="What are you looking for..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                    className="w-full pl-4 pr-10 py-2 sm:py-2.5 bg-white dark:bg-[#1f2028] border border-[#ced4da] dark:border-gray-700 rounded-md focus:border-blue-500 focus:ring-0 outline-none transition placeholder:text-gray-400 font-medium text-sm text-gray-900 dark:text-gray-100"
+                />
+                <button onClick={handleSearch} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-blue-600 transition-colors">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                </button>
+                </div>
             </div>
 
             <button
@@ -90,27 +150,137 @@ export const HomePage = () => {
         {/* Auto Slider */}
         <HomeSlider />
 
-        {/* Browse By Category Section */}
-        <div className="bg-white dark:bg-[#1f2028] border border-gray-200 dark:border-gray-800 rounded-md p-3 sm:p-4 shadow-sm transition-colors">
-            <h2 className="text-sm sm:text-base font-bold mb-3 sm:mb-4 text-gray-800 dark:text-gray-100">Browse By Category</h2>
-            <ul className="text-center grid grid-cols-3 sm:grid-cols-4 md:grid-cols-4 lg:grid-cols-6 gap-1 sm:gap-2">
-                {mainCategories.map((cat) => (
-                    <li key={cat.id}>
+        {/* Breadcrumb if category selected */}
+        {activeCategoryId && (
+            <div className="mb-3 flex items-center gap-2 overflow-x-auto whitespace-nowrap scrollbar-hide py-1">
+                <button onClick={() => setActiveCategoryId(undefined)} className="text-xs font-bold text-blue-600 hover:underline">All Categories</button>
+                {mainCategory && (
+                    <>
+                        <svg className="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"/></svg>
                         <button
-                            onClick={() => browseCategory(cat.id)}
-                            className="block w-full h-full group bg-white dark:bg-[#1f2028] rounded cursor-pointer active:opacity-50 p-1.5 sm:p-2.5 transition-all hover:bg-[#f8f9fa] dark:hover:bg-[#16171d]"
+                            onClick={() => setActiveCategoryId(mainCategory.id)}
+                            className={`text-xs font-bold ${activeCategoryId === mainCategory.id ? 'text-gray-500' : 'text-blue-600 hover:underline'}`}
                         >
-                            <div className="mx-auto bg-[#e9ecef] dark:bg-gray-800 rounded-full mt-1 group-hover:bg-[#dee2e6] dark:group-hover:bg-gray-700 transition-all size-10 sm:size-14 flex items-center justify-center overflow-hidden">
-                                <CategoryIcon cat={cat} className="w-full h-full group-hover:scale-110 transition-transform duration-300" />
-                            </div>
-                            <p className="overflow-hidden text-ellipsis mt-1.5 sm:mt-2.5 text-[10px] sm:text-[13px] font-bold text-gray-700 dark:text-gray-300 group-hover:text-blue-600 leading-tight">
-                                {cat.name}
-                            </p>
+                            {mainCategory.name}
                         </button>
-                    </li>
-                ))}
+                    </>
+                )}
+                {selectedCategory && selectedCategory.id !== mainCategory?.id && (
+                    <>
+                        <svg className="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"/></svg>
+                        <span className="text-xs font-bold text-gray-500">{selectedCategory.name}</span>
+                    </>
+                )}
+            </div>
+        )}
+
+        {/* Browse By Category Section */}
+        <div className="bg-white dark:bg-[#1f2028] border border-gray-200 dark:border-gray-800 rounded-md p-3 sm:p-4 shadow-sm transition-colors mb-3">
+            <h2 className="text-sm sm:text-base font-bold mb-3 sm:mb-4 text-gray-800 dark:text-gray-100">
+                {activeCategoryId ? `Browse in ${selectedCategory?.name}` : 'Browse By Category'}
+            </h2>
+
+            <ul className="text-center grid grid-cols-3 sm:grid-cols-4 md:grid-cols-4 lg:grid-cols-6 gap-1 sm:gap-2">
+                {(!activeCategoryId || (mainCategory && activeCategoryId === mainCategory.id)) ? (
+                    // Show Main Categories OR Subcategories if a main category is selected
+                    (activeCategoryId ? subCategories : mainCategoriesToDisplay).map((cat) => (
+                        <li key={cat.id}>
+                            <button
+                                onClick={() => browseCategory(cat.id)}
+                                className={`block w-full h-full group bg-white dark:bg-[#1f2028] rounded cursor-pointer active:opacity-50 p-1.5 sm:p-2.5 transition-all hover:bg-[#f8f9fa] dark:hover:bg-[#16171d] ${activeCategoryId === cat.id ? 'ring-2 ring-blue-500 bg-blue-50 dark:bg-blue-900/10' : ''}`}
+                            >
+                                <div className="mx-auto bg-[#e9ecef] dark:bg-gray-800 rounded-full mt-1 group-hover:bg-[#dee2e6] dark:group-hover:bg-gray-700 transition-all size-10 sm:size-14 flex items-center justify-center overflow-hidden">
+                                    <CategoryIcon cat={cat} className="w-full h-full group-hover:scale-110 transition-transform duration-300" />
+                                </div>
+                                <p className="overflow-hidden text-ellipsis mt-1.5 sm:mt-2.5 text-[10px] sm:text-[13px] font-bold text-gray-700 dark:text-gray-300 group-hover:text-blue-600 leading-tight">
+                                    {cat.name}
+                                </p>
+                            </button>
+                        </li>
+                    ))
+                ) : (
+                    // If a subcategory is selected, show its siblings or just keep it selected
+                    subCategories.map((cat) => (
+                        <li key={cat.id}>
+                            <button
+                                onClick={() => browseCategory(cat.id)}
+                                className={`block w-full h-full group bg-white dark:bg-[#1f2028] rounded cursor-pointer active:opacity-50 p-1.5 sm:p-2.5 transition-all hover:bg-[#f8f9fa] dark:hover:bg-[#16171d] ${activeCategoryId === cat.id ? 'ring-2 ring-blue-500 bg-blue-50 dark:bg-blue-900/10' : ''}`}
+                            >
+                                <div className="mx-auto bg-[#e9ecef] dark:bg-gray-800 rounded-full mt-1 group-hover:bg-[#dee2e6] dark:group-hover:bg-gray-700 transition-all size-10 sm:size-14 flex items-center justify-center overflow-hidden">
+                                    <CategoryIcon cat={cat} className="w-full h-full group-hover:scale-110 transition-transform duration-300" />
+                                </div>
+                                <p className="overflow-hidden text-ellipsis mt-1.5 sm:mt-2.5 text-[10px] sm:text-[13px] font-bold text-gray-700 dark:text-gray-300 group-hover:text-blue-600 leading-tight">
+                                    {cat.name}
+                                </p>
+                            </button>
+                        </li>
+                    ))
+                )}
             </ul>
         </div>
+
+        {/* Dynamic Attributes (Brand, Model, etc. - Khmer24 Style) */}
+        {activeCategoryId && dynamicAttributes.length > 0 && (
+            <div className="flex flex-col gap-3 mb-3">
+                {dynamicAttributes.filter(attr => attr.type === 'select').map(attr => {
+                    const isExpanded = expandedAttrs[attr.id] || false;
+                    const options = attr.options || [];
+                    const visibleOptions = isExpanded ? options : options.slice(0, 12);
+                    const hasMore = options.length > 12;
+                    const activeValue = activeAttributes[`attr_${attr.id}`];
+                    const isCircleStyle = ['Brand', 'Body Type', 'Make', 'Model'].includes(attr.name);
+
+                    return (
+                        <div key={attr.id} className="bg-white dark:bg-[#1f2028] border border-gray-200 dark:border-gray-800 rounded-md shadow-sm transition-colors overflow-hidden">
+                            <div className="px-4 py-2.5 border-b border-gray-50 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/50">
+                                <h3 className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.2em]">{attr.name}</h3>
+                            </div>
+                            <div className="p-4">
+                                <div className={`grid gap-x-2 gap-y-4 ${isCircleStyle ? 'grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10' : 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6'}`}>
+                                    {visibleOptions.map((opt: any) => {
+                                        const isActive = activeValue === opt.value;
+                                        return (
+                                            <button
+                                                key={opt.id}
+                                                onClick={() => handleAttributeClick(attr.id, opt.value)}
+                                                className="group flex flex-col items-center gap-1.5 transition-all active:scale-95"
+                                            >
+                                                {isCircleStyle ? (
+                                                    <div className={`size-12 sm:size-14 rounded-full flex items-center justify-center border transition-all overflow-hidden ${isActive ? 'bg-blue-50 dark:bg-blue-900/30 border-blue-500 ring-2 ring-blue-500/20' : 'bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700 group-hover:border-blue-200 dark:group-hover:border-blue-800 group-hover:bg-blue-50/30 dark:group-hover:bg-blue-900/10'}`}>
+                                                        {opt.image_url ? (
+                                                            <img src={getImageUrl(opt.image_url)} className="w-full h-full object-cover" alt={opt.value} />
+                                                        ) : (
+                                                            <div className="text-[10px] font-black text-gray-300 dark:text-gray-600 uppercase truncate px-1">{opt.value.substring(0, 3)}</div>
+                                                        )}
+                                                    </div>
+                                                ) : (
+                                                    <div className={`w-full py-2 px-3 rounded border text-center transition-all ${isActive ? 'bg-blue-50 dark:bg-blue-900/30 border-blue-500 text-blue-600 dark:text-blue-400 font-bold' : 'bg-gray-50 dark:bg-gray-800 border-gray-100 dark:border-gray-700 text-gray-600 dark:text-gray-400 group-hover:bg-blue-50/30 dark:group-hover:bg-gray-700'}`}>
+                                                        <span className="text-[10px] sm:text-[11px] truncate block">{opt.value}</span>
+                                                    </div>
+                                                )}
+                                                {isCircleStyle && (
+                                                    <span className={`text-[9px] sm:text-[10px] font-bold text-center leading-tight truncate w-full px-1 ${isActive ? 'text-blue-600 dark:text-blue-400' : 'text-gray-500 dark:text-gray-400 group-hover:text-blue-600'}`}>
+                                                        {opt.value}
+                                                    </span>
+                                                )}
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                                {hasMore && (
+                                    <button
+                                        onClick={() => setExpandedAttrs(prev => ({ ...prev, [attr.id]: !isExpanded }))}
+                                        className="w-full mt-4 py-1.5 bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-400 text-[10px] font-bold uppercase tracking-widest rounded transition-colors"
+                                    >
+                                        {isExpanded ? 'Show Less' : `Show ${options.length - 12} More`}
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+                    );
+                })}
+            </div>
+        )}
 
         {/* Latest Listings */}
         <div className="mt-5">
@@ -154,6 +324,16 @@ export const HomePage = () => {
         </div>
 
       </div>
+
+      <LocationPickerModal
+        isOpen={isLocationModalOpen}
+        onClose={() => setIsLocationModalOpen(false)}
+        onSelect={(data) => {
+            setActiveProvinceId(data.province_id);
+            setActiveDistrictId(data.district_id);
+            setLocationName(data.locationName || 'All Cambodia');
+        }}
+      />
     </div>
   );
 };
