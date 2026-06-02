@@ -79,11 +79,11 @@ export const HomePage = () => {
   };
 
   const handleSearch = () => {
-    if (searchQuery.trim()) {
-      setActiveKeyword(searchQuery);
-    } else {
-      setActiveKeyword('');
-    }
+    const params = new URLSearchParams();
+    if (searchQuery.trim()) params.set('keyword', searchQuery.trim());
+    if (activeProvinceId) params.set('province_id', activeProvinceId);
+    if (activeDistrictId) params.set('district_id', activeDistrictId);
+    navigate(`/products?${params.toString()}`);
   };
 
   const clearSearch = () => {
