@@ -24,17 +24,28 @@ export const HomePage = () => {
   const navigate = useNavigate();
   const [categories, setCategories] = useState<Category[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [activeKeyword, setActiveKeyword] = useState('');
 
   useEffect(() => {
     categoryApi.getAll().then(res => setCategories(Array.isArray(res.data) ? res.data : res.data.data || []));
   }, []);
 
-  const { products, loading } = useProducts({ page: 1 });
+  const { products, loading, error } = useProducts({
+    page: 1,
+    keyword: activeKeyword || undefined
+  });
 
   const handleSearch = () => {
-    const params = new URLSearchParams();
-    if (searchQuery) params.set('keyword', searchQuery);
-    navigate(`/products?${params.toString()}`);
+    if (searchQuery.trim()) {
+      setActiveKeyword(searchQuery);
+    } else {
+      setActiveKeyword('');
+    }
+  };
+
+  const clearSearch = () => {
+    setSearchQuery('');
+    setActiveKeyword('');
   };
 
   const browseCategory = (id: number) => {
@@ -104,15 +115,34 @@ export const HomePage = () => {
         {/* Latest Listings */}
         <div className="mt-5">
             <div className="flex items-center justify-between mb-3 px-1 border-b border-gray-200 dark:border-gray-800 pb-1.5">
-                <h2 className="text-sm font-bold text-gray-800 dark:text-gray-100 uppercase tracking-tight">Recent Ads</h2>
-                <Link to="/products" className="text-xs font-bold text-blue-600 hover:underline">View All</Link>
+                <h2 className="text-sm font-bold text-gray-800 dark:text-gray-100 uppercase tracking-tight">
+                    {activeKeyword ? `Results for "${activeKeyword}"` : 'Recent Ads'}
+                </h2>
+                {activeKeyword ? (
+                    <button onClick={clearSearch} className="text-xs font-bold text-red-600 hover:underline">Clear Search</button>
+                ) : (
+                    <Link to="/products" className="text-xs font-bold text-blue-600 hover:underline">View All</Link>
+                )}
             </div>
 
-            {loading ? (
+            {error ? (
+                <div className="bg-white dark:bg-[#1f2028] border border-red-100 dark:border-red-900/30 rounded-md p-6 text-center shadow-sm">
+                    <p className="text-red-500 font-bold mb-2">Failed to load products</p>
+                    <button onClick={() => setActiveKeyword(activeKeyword)} className="text-xs text-blue-600 font-bold hover:underline">Try Again</button>
+                </div>
+            ) : loading ? (
                 <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3">
                     {[...Array(10)].map((_, i) => (
                         <ProductSkeleton key={i} />
                     ))}
+                </div>
+            ) : products.length === 0 ? (
+                <div className="bg-white dark:bg-[#1f2028] border border-gray-200 dark:border-gray-800 rounded-md p-10 sm:p-20 text-center shadow-sm transition-colors">
+                    <h3 className="text-base sm:text-lg font-bold text-gray-900 dark:text-gray-100 mb-2 uppercase">No results found</h3>
+                    <p className="text-gray-500 dark:text-gray-400 text-xs sm:text-sm mb-6 sm:mb-8 font-medium">Try different keywords or browse categories.</p>
+                    {activeKeyword && (
+                        <button onClick={clearSearch} className="bg-blue-600 text-white px-8 py-2 rounded font-bold text-xs uppercase shadow-md transition active:scale-95">Show Recent Ads</button>
+                    )}
                 </div>
             ) : (
                 <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3">
