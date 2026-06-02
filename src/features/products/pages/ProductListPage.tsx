@@ -58,6 +58,7 @@ export const ProductListPage = () => {
   });
 
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [expandedAttrs, setExpandedAttrs] = useState<Record<number, boolean>>({});
   const topRef = useRef<HTMLDivElement>(null);
 
@@ -292,53 +293,59 @@ export const ProductListPage = () => {
             </div>
 
             {/* Filter Bar */}
-            <div className="px-4 py-2 flex items-center justify-between bg-white overflow-x-auto scrollbar-hide">
-                    <div className="flex items-center gap-1.5 shrink-0">
-                        <button
-                            onClick={() => setIsLocationModalOpen(true)}
-                            className="flex items-center gap-1.5 px-3 py-1.5 bg-[#f8f9fa] hover:bg-[#e9ecef] rounded border border-[#dee2e6] text-[11px] font-bold text-gray-700 transition whitespace-nowrap"
-                        >
-                            <svg className="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                            {localFilters.province_id ? (districtName ? `${districtName}, ${provinces.find(p => String(p.id) === localFilters.province_id)?.name}` : (provinces.find(p => String(p.id) === localFilters.province_id)?.name || 'Location')) : 'Location: All'}
-                        </button>
-
-                        <div className="relative">
-                            <select
-                                value={localFilters.sort}
-                                onChange={e => applyFilters({ sort: e.target.value })}
-                                className="appearance-none flex items-center gap-1.5 px-3 py-1.5 bg-[#f8f9fa] hover:bg-[#e9ecef] rounded border border-[#dee2e6] text-[11px] font-bold text-gray-700 transition outline-none cursor-pointer pr-7"
-                            >
-                                <option value="latest">Sort: Newest</option>
-                                <option value="price_low">Price: Low</option>
-                                <option value="price_high">Price: High</option>
-                            </select>
-                            <svg className="w-3 h-3 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"/></svg>
-                        </div>
-
-                        <button
-                            onClick={() => setIsMobileFilterOpen(true)}
-                            className="flex items-center gap-1.5 px-3 py-1.5 bg-[#f8f9fa] hover:bg-[#e9ecef] rounded border border-[#dee2e6] text-[11px] font-bold text-gray-700 transition"
-                        >
-                            Price
-                        </button>
-                        <button
-                            onClick={() => setIsMobileFilterOpen(true)}
-                            className="flex items-center gap-1.5 px-3 py-1.5 bg-[#f8f9fa] hover:bg-[#e9ecef] rounded border border-[#dee2e6] text-[11px] font-bold text-gray-700 transition"
-                        >
-                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg>
-                            More Filters
-                        </button>
-                    </div>
-
-                    <div className="flex items-center gap-3 shrink-0 ml-4">
-                         <button className="text-gray-400 hover:text-blue-600 transition">
-                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M7 11h-2c-1.105 0-2 .895-2 2v2c0 1.105.895 2 2 2h2c1.105 0 2-.895 2-2v-2c0-1.105-.895-2-2-2zm0-6h-2c-1.105 0-2 .895-2 2v2c0 1.105.895 2 2 2h2c1.105 0 2-.895 2-2v-2c0-1.105-.895-2-2-2zm6 0h-2c-1.105 0-2 .895-2 2v2c0 1.105.895 2 2 2h2c1.105 0 2-.895 2-2v-2c0-1.105-.895-2-2-2zm0 6h-2c-1.105 0-2 .895-2 2v2c0 1.105.895 2 2 2h2c1.105 0 2-.895 2-2v-2c0-1.105-.895-2-2-2zm6-6h-2c-1.105 0-2 .895-2 2v2c0 1.105.895 2 2 2h2c1.105 0 2-.895 2-2v-2c0-1.105-.895-2-2-2zm0 6h-2c-1.105 0-2 .895-2 2v2c0 1.105.895 2 2 2h2c1.105 0 2-.895 2-2v-2c0-1.105-.895-2-2-2zm-6 6h-2c-1.105 0-2 .895-2 2v2c0 1.105.895 2 2 2h2c1.105 0 2-.895 2-2v-2c0-1.105-.895-2-2-2zm6 0h-2c-1.105 0-2 .895-2 2v2c0 1.105.895 2 2 2h2c1.105 0 2-.895 2-2v-2c0-1.105-.895-2-2-2z"/></svg>
-                         </button>
-                         <button className="text-gray-400 hover:text-blue-600 transition">
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
-                         </button>
-                    </div>
+            <div className="px-4 flex items-center bg-white border-b border-gray-50 overflow-hidden">
+                <div className="flex items-center gap-1 shrink-0 mr-3 border-r border-gray-100 pr-3 py-2">
+                    <button
+                        onClick={() => setViewMode('grid')}
+                        className={`p-1.5 rounded transition-all ${viewMode === 'grid' ? 'text-blue-600 bg-blue-50' : 'text-gray-400 hover:bg-gray-50'}`}
+                    >
+                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M7 11h-2c-1.105 0-2 .895-2 2v2c0 1.105.895 2 2 2h2c1.105 0 2-.895 2-2v-2c0-1.105-.895-2-2-2zm0-6h-2c-1.105 0-2 .895-2 2v2c0 1.105.895 2 2 2h2c1.105 0 2-.895 2-2v-2c0-1.105-.895-2-2-2zm6 0h-2c-1.105 0-2 .895-2 2v2c0 1.105.895 2 2 2h2c1.105 0 2-.895 2-2v-2c0-1.105-.895-2-2-2zm0 6h-2c-1.105 0-2 .895-2 2v2c0 1.105.895 2 2 2h2c1.105 0 2-.895 2-2v-2c0-1.105-.895-2-2-2zm6-6h-2c-1.105 0-2 .895-2 2v2c0 1.105.895 2 2 2h2c1.105 0 2-.895 2-2v-2c0-1.105-.895-2-2-2zm0 6h-2c-1.105 0-2 .895-2 2v2c0 1.105.895 2 2 2h2c1.105 0 2-.895 2-2v-2c0-1.105-.895-2-2-2zm-6 6h-2c-1.105 0-2 .895-2 2v2c0 1.105.895 2 2 2h2c1.105 0 2-.895 2-2v-2c0-1.105-.895-2-2-2zm6 0h-2c-1.105 0-2 .895-2 2v2c0 1.105.895 2 2 2h2c1.105 0 2-.895 2-2v-2c0-1.105-.895-2-2-2z"/></svg>
+                    </button>
+                    <button
+                        onClick={() => setViewMode('list')}
+                        className={`p-1.5 rounded transition-all ${viewMode === 'list' ? 'text-blue-600 bg-blue-50' : 'text-gray-400 hover:bg-gray-50'}`}
+                    >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+                    </button>
                 </div>
+
+                <div className="flex-1 overflow-x-auto scrollbar-hide flex items-center gap-1.5 py-2">
+                    <button
+                        onClick={() => setIsLocationModalOpen(true)}
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-[#f8f9fa] hover:bg-[#e9ecef] rounded border border-[#dee2e6] text-[11px] font-bold text-gray-700 transition whitespace-nowrap"
+                    >
+                        <svg className="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                        {localFilters.province_id ? (districtName ? `${districtName}, ${provinces.find(p => String(p.id) === localFilters.province_id)?.name}` : (provinces.find(p => String(p.id) === localFilters.province_id)?.name || 'Location')) : 'Location: All'}
+                    </button>
+
+                    <div className="relative">
+                        <select
+                            value={localFilters.sort}
+                            onChange={e => applyFilters({ sort: e.target.value })}
+                            className="appearance-none flex items-center gap-1.5 px-3 py-1.5 bg-[#f8f9fa] hover:bg-[#e9ecef] rounded border border-[#dee2e6] text-[11px] font-bold text-gray-700 transition outline-none cursor-pointer pr-7"
+                        >
+                            <option value="latest">Sort: Newest</option>
+                            <option value="price_low">Price: Low</option>
+                            <option value="price_high">Price: High</option>
+                        </select>
+                        <svg className="w-3 h-3 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"/></svg>
+                    </div>
+
+                    <button
+                        onClick={() => setIsMobileFilterOpen(true)}
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-[#f8f9fa] hover:bg-[#e9ecef] rounded border border-[#dee2e6] text-[11px] font-bold text-gray-700 transition"
+                    >
+                        Price
+                    </button>
+                    <button
+                        onClick={() => setIsMobileFilterOpen(true)}
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-[#f8f9fa] hover:bg-[#e9ecef] rounded border border-[#dee2e6] text-[11px] font-bold text-gray-700 transition"
+                    >
+                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg>
+                        More Filters
+                    </button>
+                </div>
+            </div>
             </div>
 
         {/* Subcategories Bar - Only show when no subcategory is selected (Khmer24 flow) */}
@@ -569,8 +576,11 @@ export const ProductListPage = () => {
                     <button onClick={() => navigate('/')} className="bg-blue-600 text-white px-8 py-2 rounded font-bold text-xs uppercase shadow-md transition active:scale-95">Reset Search</button>
                 </div>
              ) : (
-                <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-2 sm:gap-3">
-                   {products.map(p => <ProductCard key={p.id} product={p} />)}
+                <div className={viewMode === 'grid'
+                    ? "grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-2 sm:gap-3"
+                    : "flex flex-col gap-3"
+                }>
+                   {products.map(p => <ProductCard key={p.id} product={p} variant={viewMode} />)}
                 </div>
              )}
 
