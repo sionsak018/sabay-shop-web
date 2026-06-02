@@ -38,8 +38,10 @@ export const ProductListPage = () => {
   const sortParam = searchParams.get('sort') || 'latest';
 
   const [categories, setCategories] = useState<Category[]>([]);
+  const [loadingCategories, setLoadingCategories] = useState(true);
   const [provinces, setProvinces] = useState<any[]>([]);
   const [dynamicAttributes, setDynamicAttributes] = useState<any[]>([]);
+  const [loadingAttributes, setLoadingAttributes] = useState(false);
   const [page, setPage] = useState(1);
   const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
   const [districtName, setDistrictName] = useState('');
@@ -95,7 +97,10 @@ export const ProductListPage = () => {
   }, [searchParams]);
 
   useEffect(() => {
-    categoryApi.getAll().then(res => setCategories(Array.isArray(res.data) ? res.data : res.data.data || []));
+    setLoadingCategories(true);
+    categoryApi.getAll()
+      .then(res => setCategories(Array.isArray(res.data) ? res.data : res.data.data || []))
+      .finally(() => setLoadingCategories(false));
     api.get('/provinces').then(res => setProvinces(Array.isArray(res.data) ? res.data : res.data.data || []));
   }, []);
 
@@ -113,9 +118,13 @@ export const ProductListPage = () => {
 
   useEffect(() => {
     if (categoryId) {
-      api.get(`/category-attributes/${categoryId}`).then(res => setDynamicAttributes(res.data));
+      setLoadingAttributes(true);
+      api.get(`/category-attributes/${categoryId}`)
+        .then(res => setDynamicAttributes(res.data))
+        .finally(() => setLoadingAttributes(false));
     } else {
       setDynamicAttributes([]);
+      setLoadingAttributes(false);
     }
   }, [categoryId]);
 
@@ -363,7 +372,19 @@ export const ProductListPage = () => {
             </div>
 
         {/* Browse By Category Section - Khmer24 Style Flow */}
-        {!isSubCategorySelected && (
+        {loadingCategories ? (
+            <div className="bg-white dark:bg-[#1f2028] border border-gray-200 dark:border-gray-800 rounded mb-3 shadow-sm animate-pulse p-4">
+                <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded w-1/4 mb-6" />
+                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-7 gap-4">
+                    {[...Array(7)].map((_, i) => (
+                        <div key={i} className="flex flex-col items-center gap-2">
+                            <div className="size-10 sm:size-14 bg-gray-200 dark:bg-gray-800 rounded-full" />
+                            <div className="h-2 bg-gray-200 dark:bg-gray-800 rounded w-full" />
+                        </div>
+                    ))}
+                </div>
+            </div>
+        ) : !isSubCategorySelected && (
             <div className="bg-white dark:bg-[#1f2028] border border-gray-200 dark:border-gray-800 rounded mb-3 shadow-sm overflow-hidden transition-colors">
                 <div className="px-4 py-3 border-b border-gray-50 dark:border-gray-800">
                     <h2 className="text-sm font-bold text-gray-800 dark:text-gray-100 uppercase tracking-tight">
@@ -391,7 +412,25 @@ export const ProductListPage = () => {
         )}
 
         {/* Khmer24 Step-by-Step Selection UI */}
-        {(() => {
+        {loadingAttributes ? (
+            <div className="flex flex-col gap-3 mb-3 animate-pulse">
+                {[...Array(2)].map((_, i) => (
+                    <div key={i} className="bg-white dark:bg-[#1f2028] border border-gray-200 dark:border-gray-800 rounded shadow-sm">
+                        <div className="px-4 py-3 border-b border-gray-50 dark:border-gray-800">
+                             <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded w-20" />
+                        </div>
+                        <div className="p-4 grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-4">
+                            {[...Array(10)].map((_, j) => (
+                                <div key={j} className="flex flex-col items-center gap-2">
+                                    <div className="size-12 sm:size-14 bg-gray-200 dark:bg-gray-800 rounded-full" />
+                                    <div className="h-2 bg-gray-200 dark:bg-gray-800 rounded w-full" />
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                ))}
+            </div>
+        ) : (() => {
             if (dynamicAttributes.length === 0) return null;
 
             // Define Logical Order: Brand -> Model -> Others -> Body Type

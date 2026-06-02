@@ -22,7 +22,13 @@ export const HomeSlider = () => {
     return () => clearInterval(interval);
   }, [sliders, currentIndex]);
 
-  if (loading || sliders.length === 0) return null;
+  if (loading) {
+    return (
+      <div className="w-full aspect-[21/9] sm:aspect-[25/7] bg-gray-200 dark:bg-gray-800 rounded-md animate-pulse mb-3" />
+    );
+  }
+
+  if (sliders.length === 0) return null;
 
   return (
     <div className="relative w-full aspect-[21/9] sm:aspect-[25/7] overflow-hidden rounded-md shadow-sm bg-gray-200 group mb-3">

@@ -24,6 +24,7 @@ const CategoryIcon = ({ cat, className = "" }: { cat: Category, className?: stri
 export const HomePage = () => {
   const navigate = useNavigate();
   const [categories, setCategories] = useState<Category[]>([]);
+  const [loadingCategories, setLoadingCategories] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeKeyword, setActiveKeyword] = useState('');
 
@@ -34,19 +35,27 @@ export const HomePage = () => {
   const [locationName, setLocationName] = useState('All Cambodia');
   const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
   const [dynamicAttributes, setDynamicAttributes] = useState<any[]>([]);
+  const [loadingAttributes, setLoadingAttributes] = useState(false);
   const [activeAttributes, setActiveAttributes] = useState<Record<string, string>>({});
   const [expandedAttrs, setExpandedAttrs] = useState<Record<number, boolean>>({});
 
   useEffect(() => {
-    categoryApi.getAll().then(res => setCategories(Array.isArray(res.data) ? res.data : res.data.data || []));
+    setLoadingCategories(true);
+    categoryApi.getAll()
+      .then(res => setCategories(Array.isArray(res.data) ? res.data : res.data.data || []))
+      .finally(() => setLoadingCategories(false));
   }, []);
 
   // Fetch dynamic attributes when category changes
   useEffect(() => {
     if (activeCategoryId) {
-      api.get(`/category-attributes/${activeCategoryId}`).then(res => setDynamicAttributes(res.data));
+      setLoadingAttributes(true);
+      api.get(`/category-attributes/${activeCategoryId}`)
+        .then(res => setDynamicAttributes(res.data))
+        .finally(() => setLoadingAttributes(false));
     } else {
       setDynamicAttributes([]);
+      setLoadingAttributes(false);
     }
     setActiveAttributes({}); // Reset attributes when category changes
   }, [activeCategoryId]);
@@ -258,7 +267,19 @@ export const HomePage = () => {
         )}
 
         {/* Browse By Category Section */}
-        {(!isSubCategorySelected) && (
+        {loadingCategories ? (
+            <div className="bg-white dark:bg-[#1f2028] border border-gray-200 dark:border-gray-800 rounded-md p-3 sm:p-4 shadow-sm transition-colors mb-3 animate-pulse">
+                <div className="h-5 bg-gray-200 dark:bg-gray-800 rounded w-1/4 mb-4" />
+                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-4 lg:grid-cols-6 gap-2">
+                    {[...Array(6)].map((_, i) => (
+                        <div key={i} className="flex flex-col items-center p-2 gap-2">
+                            <div className="size-10 sm:size-14 bg-gray-200 dark:bg-gray-800 rounded-full" />
+                            <div className="h-3 bg-gray-200 dark:bg-gray-800 rounded w-full" />
+                        </div>
+                    ))}
+                </div>
+            </div>
+        ) : (!isSubCategorySelected) && (
             <div className="bg-white dark:bg-[#1f2028] border border-gray-200 dark:border-gray-800 rounded-md p-3 sm:p-4 shadow-sm transition-colors mb-3">
                 <h2 className="text-sm sm:text-base font-bold mb-3 sm:mb-4 text-gray-800 dark:text-gray-100">
                     {activeCategoryId ? `Browse in ${selectedCategory?.name}` : 'Browse By Category'}
@@ -285,7 +306,23 @@ export const HomePage = () => {
         )}
 
         {/* Dynamic Attributes (Brand, Model, etc. - Khmer24 Style Flow) */}
-        {activeCategoryId && (
+        {loadingAttributes ? (
+            <div className="flex flex-col gap-3 mb-3">
+                {[...Array(2)].map((_, i) => (
+                    <div key={i} className="bg-white dark:bg-[#1f2028] border border-gray-200 dark:border-gray-800 rounded-md shadow-sm overflow-hidden animate-pulse">
+                        <div className="px-4 py-2.5 bg-gray-50/50 dark:bg-gray-800/50 h-8 w-1/4 m-4 rounded" />
+                        <div className="p-4 grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-4">
+                            {[...Array(8)].map((_, j) => (
+                                <div key={j} className="flex flex-col items-center gap-2">
+                                    <div className="size-12 sm:size-14 bg-gray-200 dark:bg-gray-800 rounded-full" />
+                                    <div className="h-2 bg-gray-200 dark:bg-gray-800 rounded w-full" />
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                ))}
+            </div>
+        ) : activeCategoryId && (
             <div className="flex flex-col gap-3 mb-3">
                 {dynamicAttributes.filter(attr => attr.type === 'select').map(attr => {
                     const isBrand = attr.name === 'Brand';
