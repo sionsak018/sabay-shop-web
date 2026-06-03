@@ -82,6 +82,8 @@ export const MainCategoryPage = () => {
         return;
     }
 
+    setSaving(true);
+
     const data = new FormData();
     data.append('name', formData.name);
     data.append('slug', formData.slug);
@@ -104,6 +106,8 @@ export const MainCategoryPage = () => {
       fetchCategories();
     } catch (error: any) {
       showAlert({ title: 'Error!', message: error.response?.data?.message || 'Failed to save category', type: 'error' });
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -247,8 +251,10 @@ export const MainCategoryPage = () => {
                 {errors.slug && <p className="text-red-500 text-[10px] font-bold mt-1 ml-1">{errors.slug}</p>}
               </div>
               <div className="pt-4 flex gap-3">
-                <button type="button" onClick={() => setIsModalOpen(false)} className="flex-1 px-4 py-2.5 bg-gray-100 text-gray-600 rounded-lg font-bold text-sm">Cancel</button>
-                <button type="submit" className="flex-1 px-4 py-2.5 bg-blue-600 text-white rounded-lg font-bold text-sm">{editingCategory ? 'Update' : 'Create'}</button>
+                <button type="button" onClick={() => setIsModalOpen(false)} disabled={saving} className="flex-1 px-4 py-2.5 bg-gray-100 text-gray-600 rounded-lg font-bold text-sm disabled:opacity-50">Cancel</button>
+                <button type="submit" disabled={saving} className="flex-1 px-4 py-2.5 bg-blue-600 text-white rounded-lg font-bold text-sm disabled:opacity-50">
+                    {saving ? 'Processing...' : editingCategory ? 'Update' : 'Create'}
+                </button>
               </div>
             </form>
           </div>

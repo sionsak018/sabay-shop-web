@@ -43,6 +43,7 @@ export const EditProductPage = () => {
     poster_email: '',
     poster_phones: ['', '', ''],
     company_name: '',
+    condition: '',
     lat: '',
     lng: '',
   });
@@ -53,6 +54,7 @@ export const EditProductPage = () => {
   const [images, setImages] = useState<File[]>([]);
   const [previews, setPreviews] = useState<string[]>([]);
   const [existingImages, setExistingImages] = useState<any[]>([]);
+  const [deletedImageIds, setDeletedImageIds] = useState<number[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -89,7 +91,7 @@ export const EditProductPage = () => {
           title: p.title,
           description: p.description,
           price: String(p.price),
-          condition: p.condition || 'used',
+          condition: p.condition || '',
           location: p.location,
           category_id: String(p.category?.id || ''),
           province_id: String(p.province_id || ''),
@@ -190,6 +192,12 @@ export const EditProductPage = () => {
     });
   };
 
+  const removeExistingImage = (id: number) => {
+    setDeletedImageIds(prev => [...prev, id]);
+    setExistingImages(prev => prev.filter(img => img.id !== id));
+    if (errors.images) setErrors(prev => ({ ...prev, images: '' }));
+  };
+
   const addPhone = () => {
     if (phones.length < 3) setPhones([...phones, '']);
   };
@@ -219,6 +227,7 @@ export const EditProductPage = () => {
     if (!formData.price) newErrors.price = Msg;
     if (!formData.province_id) newErrors.province_id = Msg;
     if (!formData.district_id) newErrors.district_id = Msg;
+    if (!formData.condition) newErrors.condition = Msg;
     if (!formData.poster_name.trim()) newErrors.poster_name = Msg;
     if (!phones[0]?.trim()) newErrors.phone = Msg;
 
@@ -276,6 +285,7 @@ export const EditProductPage = () => {
 
     submitForm.set('description', description);
     submitForm.append('attributes', JSON.stringify(attributeValues));
+    submitForm.append('deleted_image_ids', JSON.stringify(deletedImageIds));
 
     images.forEach((img) => {
       submitForm.append('images[]', img);
@@ -326,16 +336,29 @@ export const EditProductPage = () => {
             </div>
             <div className="p-8">
               <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-4">
-                {existingImages.map((img, idx) => (
-                  <div key={`exist-${idx}`} className="relative aspect-square rounded-xl overflow-hidden border-2 border-gray-100 group shadow-sm opacity-80">
+                {existingImages.map((img) => (
+                  <div key={`exist-${img.id}`} className="relative aspect-square rounded-xl overflow-hidden border-2 border-gray-100 group shadow-sm">
                     <img src={getImageUrl(img.image_url)} className="w-full h-full object-cover" />
+                    <button
+                      type="button"
+                      onClick={() => removeExistingImage(img.id)}
+                      className="absolute top-1.5 right-1.5 bg-red-500/90 hover:bg-red-600 text-white p-1.5 rounded-full shadow-lg transition-all z-20"
+                      title="Remove Image"
+                    >
+                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
                   </div>
                 ))}
                 {previews.map((src, idx) => (
                   <div key={`new-${idx}`} className="relative aspect-square rounded-xl overflow-hidden border-2 border-blue-100 group shadow-sm">
                     <img src={src} className="w-full h-full object-cover" />
-                    <button type="button" onClick={() => removeNewImage(idx)} className="absolute top-2 right-2 bg-black/50 text-white p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
+                    <button
+                      type="button"
+                      onClick={() => removeNewImage(idx)}
+                      className="absolute top-1.5 right-1.5 bg-black/60 hover:bg-black/80 text-white p-1.5 rounded-full shadow-lg transition-all z-20"
+                      title="Remove Image"
+                    >
+                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
                     </button>
                   </div>
                 ))}
@@ -361,18 +384,22 @@ export const EditProductPage = () => {
                 {/* Condition Field - Fixed */}
                 <div>
                   <label className="block text-[11px] font-black text-gray-400 uppercase mb-3 tracking-widest">Condition <span className="text-red-500">*</span></label>
-                  <div className="flex p-1 bg-gray-100 rounded-xl gap-1">
+                  <div className={`flex p-1 bg-gray-100 rounded-xl gap-1 border transition-colors ${errors.condition ? 'border-red-300' : 'border-transparent'}`}>
                     {['New', 'Used'].map(c => (
                       <button
                           key={c}
                           type="button"
-                          onClick={() => setFormData((prev: any) => ({...prev, condition: c.toLowerCase()}))}
+                          onClick={() => {
+                              setFormData((prev: any) => ({...prev, condition: c.toLowerCase()}));
+                              if (errors.condition) setErrors(prev => ({ ...prev, condition: '' }));
+                          }}
                           className={`flex-1 py-3 rounded-lg font-black text-[10px] uppercase tracking-widest transition-all ${formData.condition === c.toLowerCase() ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
                       >
                         {c}
                       </button>
                     ))}
                   </div>
+                  {errors.condition && <p className="text-red-500 text-[10px] font-bold mt-1.5 ml-1">{errors.condition}</p>}
                 </div>
 
                 {dynamicAttributes.map(attr => (

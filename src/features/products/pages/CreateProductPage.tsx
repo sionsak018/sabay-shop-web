@@ -41,7 +41,7 @@ export const CreateProductPage = () => {
     address: '',
     poster_name: '',
     poster_email: '',
-    condition: 'used',
+    condition: '',
     company_name: '',
     lat: '',
     lng: '',
@@ -182,6 +182,7 @@ export const CreateProductPage = () => {
     if (!formData.price) newErrors.price = Msg;
     if (!formData.province_id) newErrors.province_id = Msg;
     if (!formData.district_id) newErrors.district_id = Msg;
+    if (!formData.condition) newErrors.condition = Msg;
     if (!formData.poster_name.trim()) newErrors.poster_name = Msg;
     if (!phones[0]?.trim()) newErrors.phone = Msg;
 
@@ -465,18 +466,22 @@ export const CreateProductPage = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8 p-6 border border-gray-100 rounded-2xl bg-gray-50/30">
                         <div>
                             <label className="block text-[11px] font-black text-gray-400 uppercase mb-3 tracking-widest ml-1">Condition <span className="text-red-500">*</span></label>
-                            <div className="flex p-1 bg-gray-100 rounded-xl gap-1">
+                            <div className={`flex p-1 bg-gray-100 rounded-xl gap-1 border transition-colors ${errors.condition ? 'border-red-300' : 'border-transparent'}`}>
                                 {['New', 'Used'].map(c => (
                                     <button
                                         key={c}
                                         type="button"
-                                        onClick={() => setFormData((prev: any) => ({...prev, condition: c.toLowerCase()}))}
+                                        onClick={() => {
+                                            setFormData((prev: any) => ({...prev, condition: c.toLowerCase()}));
+                                            if (errors.condition) setErrors(prev => ({ ...prev, condition: '' }));
+                                        }}
                                         className={`flex-1 py-3 rounded-lg font-black text-[10px] uppercase tracking-widest transition-all ${formData.condition === c.toLowerCase() ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
                                     >
                                         {c}
                                     </button>
                                 ))}
                             </div>
+                            {errors.condition && <p className="text-red-500 text-[10px] font-bold mt-1.5 ml-1">{errors.condition}</p>}
                         </div>
 
                         {dynamicAttributes.map(attr => (

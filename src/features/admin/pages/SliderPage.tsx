@@ -9,6 +9,7 @@ export const SliderPage = () => {
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingSlider, setEditingSlider] = useState<Slider | null>(null);
+  const [saving, setSaving] = useState(false);
   const [formData, setFormData] = useState({ title: '', link_url: '', sort_order: '0' });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -57,6 +58,13 @@ export const SliderPage = () => {
     }
   };
 
+  const handleRemoveImage = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setImageFile(null);
+    setImagePreview(null);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const newErrors: Record<string, string> = {};
@@ -69,11 +77,17 @@ export const SliderPage = () => {
         return;
     }
 
+    setSaving(true);
+
     const data = new FormData();
     data.append('title', formData.title);
     data.append('link_url', formData.link_url);
     data.append('sort_order', formData.sort_order);
-    if (imageFile) data.append('image', imageFile);
+    if (imageFile) {
+        data.append('image', imageFile);
+    } else if (editingSlider && !imagePreview && editingSlider.image_url) {
+        data.append('remove_image', '1');
+    }
 
     try {
       if (editingSlider) {
@@ -87,6 +101,8 @@ export const SliderPage = () => {
       fetchSliders();
     } catch (error: any) {
       showAlert({ title: 'Error!', message: error.response?.data?.message || 'Failed to save slider', type: 'error' });
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -152,9 +168,18 @@ export const SliderPage = () => {
             </div>
             <form onSubmit={handleSubmit} noValidate className="p-6 space-y-6">
               <div className="flex justify-center">
-                <label className={`relative w-full aspect-[21/9] rounded-xl border-2 border-dashed flex flex-col items-center justify-center cursor-pointer transition overflow-hidden ${errors.image ? 'border-red-300 bg-red-50' : 'border-gray-200 hover:border-blue-400 hover:bg-blue-50'}`}>
+                <label className={`relative w-full aspect-[21/9] rounded-xl border-2 border-dashed flex flex-col items-center justify-center cursor-pointer transition overflow-hidden group ${errors.image ? 'border-red-300 bg-red-50' : 'border-gray-200 hover:border-blue-400 hover:bg-blue-50'}`}>
                   {imagePreview ? (
-                    <img src={imagePreview} className="w-full h-full object-cover" />
+                    <div className="relative w-full h-full">
+                        <img src={imagePreview} className="w-full h-full object-cover" />
+                        <button
+                            type="button"
+                            onClick={handleRemoveImage}
+                            className="absolute top-2 right-2 z-10 w-8 h-8 bg-red-500 text-white rounded-full flex items-center justify-center shadow-lg hover:bg-red-600 transition-all scale-0 group-hover:scale-100"
+                        >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
+                        </button>
+                    </div>
                   ) : (
                     <>
                       <svg className={`w-10 h-10 ${errors.image ? 'text-red-400' : 'text-gray-300'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
@@ -183,8 +208,10 @@ export const SliderPage = () => {
                 <input type="text" value={formData.link_url} onChange={(e) => setFormData({ ...formData, link_url: e.target.value })} className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold focus:bg-white focus:border-blue-500 transition-all outline-none" placeholder="https://..." />
               </div>
               <div className="pt-4 flex gap-4">
-                <button type="button" onClick={() => setIsModalOpen(false)} className="flex-1 px-4 py-3 bg-gray-100 text-gray-600 rounded-xl font-bold text-sm">Cancel</button>
-                <button type="submit" className="flex-1 px-4 py-3 bg-blue-600 text-white rounded-xl font-bold text-sm shadow-lg shadow-blue-600/20 active:scale-95 transition-all">{editingSlider ? 'Update Slider' : 'Create Slider'}</button>
+                <button type="button" onClick={() => setIsModalOpen(false)} disabled={saving} className="flex-1 px-4 py-3 bg-gray-100 text-gray-600 rounded-xl font-bold text-sm disabled:opacity-50">Cancel</button>
+                <button type="submit" disabled={saving} className="flex-1 px-4 py-3 bg-blue-600 text-white rounded-xl font-bold text-sm shadow-lg shadow-blue-600/20 active:scale-95 transition-all disabled:opacity-50">
+                    {saving ? 'Processing...' : editingSlider ? 'Update Slider' : 'Create Slider'}
+                </button>
               </div>
             </form>
           </div>
