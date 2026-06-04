@@ -126,8 +126,8 @@ export const SliderPage = () => {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-800">Home Sliders</h1>
-        <button onClick={() => handleOpenModal()} className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-bold text-sm flex items-center gap-2">
+        <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100">Home Sliders</h1>
+        <button onClick={() => handleOpenModal()} className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-bold text-sm flex items-center gap-2 shadow-lg shadow-blue-600/20 transition active:scale-95">
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4"/></svg>
           Add Slider
         </button>
@@ -135,11 +135,18 @@ export const SliderPage = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {loading ? (
-            [...Array(3)].map((_, i) => <div key={i} className="h-48 bg-gray-100 rounded-xl animate-pulse" />)
+            [...Array(3)].map((_, i) => <div key={i} className="h-48 bg-gray-100 dark:bg-gray-800 rounded-xl animate-pulse" />)
         ) : sliders.map((slider) => (
-          <div key={slider.id} className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden group">
-            <div className="relative aspect-[21/9] bg-gray-100">
-              <img src={getImageUrl(slider.image_url)} className="w-full h-full object-cover" alt={slider.title || 'Slider'} />
+          <div key={slider.id} className="bg-white dark:bg-[#16171d] rounded-xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden group transition-colors">
+            <div className="relative aspect-[21/9] bg-gray-100 dark:bg-gray-800">
+              <img
+                src={getImageUrl(slider.image_url)}
+                className="w-full h-full object-cover"
+                alt={slider.title || 'Slider'}
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = 'https://placehold.co/800x400?text=Image+Not+Found';
+                }}
+              />
               <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                 <button onClick={() => handleOpenModal(slider)} className="p-2 bg-white text-blue-600 rounded-full hover:bg-blue-50 transition">
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-5M18.364 5.364a2.121 2.121 0 013 3L12 18l-4 1 1-4 9.364-9.364z"/></svg>
@@ -150,28 +157,34 @@ export const SliderPage = () => {
               </div>
             </div>
             <div className="p-4">
-              <p className="font-bold text-gray-800 text-sm truncate">{slider.title || 'No Title'}</p>
-              <p className="text-[10px] text-gray-400 font-bold uppercase mt-1">Order: {slider.sort_order}</p>
+              <p className="font-bold text-gray-800 dark:text-gray-200 text-sm truncate">{slider.title || 'No Title'}</p>
+              <p className="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase mt-1">Order: {slider.sort_order}</p>
             </div>
           </div>
         ))}
       </div>
 
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden">
-            <div className="bg-gray-50 px-6 py-4 border-b flex justify-between items-center">
-              <h2 className="text-sm font-bold text-gray-800 uppercase tracking-widest">{editingSlider ? 'Edit Slider' : 'New Slider'}</h2>
-              <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-gray-600">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+          <div className="bg-white dark:bg-[#1c1c1d] rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden border dark:border-gray-800 animate-in zoom-in-95 duration-200">
+            <div className="bg-gray-50 dark:bg-gray-800/50 px-6 py-4 border-b dark:border-gray-800 flex justify-between items-center">
+              <h2 className="text-sm font-bold text-gray-800 dark:text-gray-100 uppercase tracking-widest">{editingSlider ? 'Edit Slider' : 'New Slider'}</h2>
+              <button onClick={() => setIsModalOpen(false)} className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
               </button>
             </div>
             <form onSubmit={handleSubmit} noValidate className="p-6 space-y-6">
               <div className="flex justify-center">
-                <label className={`relative w-full aspect-[21/9] rounded-xl border-2 border-dashed flex flex-col items-center justify-center cursor-pointer transition overflow-hidden group ${errors.image ? 'border-red-300 bg-red-50' : 'border-gray-200 hover:border-blue-400 hover:bg-blue-50'}`}>
+                <label className={`relative w-full aspect-[21/9] rounded-xl border-2 border-dashed flex flex-col items-center justify-center cursor-pointer transition overflow-hidden group ${errors.image ? 'border-red-300 bg-red-50 dark:bg-red-900/10' : 'border-gray-200 dark:border-gray-800 hover:border-blue-400 dark:hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/10'}`}>
                   {imagePreview ? (
                     <div className="relative w-full h-full">
-                        <img src={imagePreview} className="w-full h-full object-cover" />
+                        <img
+                          src={imagePreview}
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src = 'https://placehold.co/800x400?text=Preview+Not+Found';
+                          }}
+                        />
                         <button
                             type="button"
                             onClick={handleRemoveImage}
@@ -182,8 +195,8 @@ export const SliderPage = () => {
                     </div>
                   ) : (
                     <>
-                      <svg className={`w-10 h-10 ${errors.image ? 'text-red-400' : 'text-gray-300'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                      <span className={`text-xs font-bold uppercase mt-2 ${errors.image ? 'text-red-500' : 'text-gray-400'}`}>Upload Banner (21:9 ratio recommended)</span>
+                      <svg className={`w-10 h-10 ${errors.image ? 'text-red-400' : 'text-gray-300 dark:text-gray-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                      <span className={`text-xs font-bold uppercase mt-2 ${errors.image ? 'text-red-500' : 'text-gray-400 dark:text-gray-500'}`}>Upload Banner (21:9 ratio recommended)</span>
                     </>
                   )}
                   <input type="file" className="hidden" onChange={(e) => {
@@ -195,20 +208,20 @@ export const SliderPage = () => {
               {errors.image && <p className="text-red-500 text-[10px] font-bold -mt-4 ml-1">{errors.image}</p>}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-xs font-bold text-gray-400 uppercase mb-2">Title (Optional)</label>
-                  <input type="text" value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold focus:bg-white focus:border-blue-500 transition-all outline-none" placeholder="Promo title" />
+                  <label className="block text-xs font-bold text-gray-400 dark:text-gray-500 uppercase mb-2 tracking-widest">Title (Optional)</label>
+                  <input type="text" value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} className="w-full px-4 py-2.5 bg-gray-50 dark:bg-[#08060d] border border-gray-200 dark:border-gray-800 rounded-xl text-sm font-bold focus:bg-white dark:focus:bg-[#08060d] focus:border-blue-500 dark:focus:border-blue-400 transition-all outline-none dark:text-gray-200" placeholder="Promo title" />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-gray-400 uppercase mb-2">Sort Order</label>
-                  <input type="number" value={formData.sort_order} onChange={(e) => setFormData({ ...formData, sort_order: e.target.value })} className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold focus:bg-white focus:border-blue-500 transition-all outline-none" />
+                  <label className="block text-xs font-bold text-gray-400 dark:text-gray-500 uppercase mb-2 tracking-widest">Sort Order</label>
+                  <input type="number" value={formData.sort_order} onChange={(e) => setFormData({ ...formData, sort_order: e.target.value })} className="w-full px-4 py-2.5 bg-gray-50 dark:bg-[#08060d] border border-gray-200 dark:border-gray-800 rounded-xl text-sm font-bold focus:bg-white dark:focus:bg-[#08060d] focus:border-blue-500 dark:focus:border-blue-400 transition-all outline-none dark:text-gray-200" />
                 </div>
               </div>
               <div>
-                <label className="block text-xs font-bold text-gray-400 uppercase mb-2">Link URL (Optional)</label>
-                <input type="text" value={formData.link_url} onChange={(e) => setFormData({ ...formData, link_url: e.target.value })} className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold focus:bg-white focus:border-blue-500 transition-all outline-none" placeholder="https://..." />
+                <label className="block text-xs font-bold text-gray-400 dark:text-gray-500 uppercase mb-2 tracking-widest">Link URL (Optional)</label>
+                <input type="text" value={formData.link_url} onChange={(e) => setFormData({ ...formData, link_url: e.target.value })} className="w-full px-4 py-2.5 bg-gray-50 dark:bg-[#08060d] border border-gray-200 dark:border-gray-800 rounded-xl text-sm font-bold focus:bg-white dark:focus:bg-[#08060d] focus:border-blue-500 dark:focus:border-blue-400 transition-all outline-none dark:text-gray-200" placeholder="https://..." />
               </div>
               <div className="pt-4 flex gap-4">
-                <button type="button" onClick={() => setIsModalOpen(false)} disabled={saving} className="flex-1 px-4 py-3 bg-gray-100 text-gray-600 rounded-xl font-bold text-sm disabled:opacity-50">Cancel</button>
+                <button type="button" onClick={() => setIsModalOpen(false)} disabled={saving} className="flex-1 px-4 py-3 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 rounded-xl font-bold text-sm disabled:opacity-50">Cancel</button>
                 <button type="submit" disabled={saving} className="flex-1 px-4 py-3 bg-blue-600 text-white rounded-xl font-bold text-sm shadow-lg shadow-blue-600/20 active:scale-95 transition-all disabled:opacity-50">
                     {saving ? 'Processing...' : editingSlider ? 'Update Slider' : 'Create Slider'}
                 </button>

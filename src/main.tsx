@@ -5,6 +5,7 @@ import { BrowserRouter } from 'react-router-dom';
 import { AuthProvider } from './features/auth/context/AuthContext';
 import { AlertProvider } from './context/AlertContext';
 import { ThemeProvider } from './context/ThemeContext';
+import './i18n';
 import App from './App';
 import './index.css';
 

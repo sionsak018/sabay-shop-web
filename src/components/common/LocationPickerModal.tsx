@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../services/api';
+import { useTranslation } from 'react-i18next';
 
 interface LocationPickerModalProps {
     isOpen: boolean;
@@ -9,6 +10,7 @@ interface LocationPickerModalProps {
 }
 
 export const LocationPickerModal: React.FC<LocationPickerModalProps> = ({ isOpen, onClose, onSelect, initialData }) => {
+    const { t } = useTranslation();
     const [step, setStep] = useState(1); // 1: Province, 2: District, 3: Commune, 4: Village
     const [provinces, setProvinces] = useState<any[]>([]);
     const [districts, setDistricts] = useState<any[]>([]);
@@ -119,7 +121,7 @@ export const LocationPickerModal: React.FC<LocationPickerModalProps> = ({ isOpen
         setSelectedProvince(null);
         setSelectedDistrict(null);
         setSelectedCommune(null);
-        onSelect({ province_id: '', district_id: '', commune_id: '', village_id: '', locationName: 'All Cambodia' });
+        onSelect({ province_id: '', district_id: '', commune_id: '', village_id: '', locationName: '' });
         onClose();
     };
 
@@ -146,7 +148,7 @@ export const LocationPickerModal: React.FC<LocationPickerModalProps> = ({ isOpen
                                             onClick={() => setStep(1)}
                                             className={`text-sm font-bold uppercase tracking-tight ${step === 1 ? 'text-blue-600' : 'text-gray-400 hover:text-gray-600'}`}
                                         >
-                                            Choose Location
+                                            {t('create_product.select_location')}
                                         </button>
                                     </li>
                                     {selectedProvince && (
@@ -189,7 +191,7 @@ export const LocationPickerModal: React.FC<LocationPickerModalProps> = ({ isOpen
                             onClick={handleClear}
                             className="px-4 py-1.5 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-full text-xs font-black uppercase tracking-widest transition-colors shrink-0"
                         >
-                            Clear
+                            {t('common.clear_filters')}
                         </button>
                     </div>
                 </div>
@@ -199,7 +201,7 @@ export const LocationPickerModal: React.FC<LocationPickerModalProps> = ({ isOpen
                     {loading ? (
                         <div className="flex flex-col items-center justify-center py-20 gap-4">
                             <div className="w-10 h-10 border-4 border-blue-600/20 border-t-blue-600 rounded-full animate-spin"></div>
-                            <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Fetching data...</p>
+                            <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">{t('create_product.processing')}</p>
                         </div>
                     ) : (
                         <ul className="divide-y divide-gray-100">
@@ -208,7 +210,7 @@ export const LocationPickerModal: React.FC<LocationPickerModalProps> = ({ isOpen
                                     onClick={handleClear}
                                     className="flex items-center justify-between px-6 py-4 hover:bg-blue-50 cursor-pointer transition-colors group"
                                 >
-                                    <span className="text-sm font-black text-blue-600 uppercase tracking-widest">All Cambodia</span>
+                                    <span className="text-sm font-black text-blue-600 uppercase tracking-widest">{t('common.all_cambodia')}</span>
                                     <svg className="w-4 h-4 text-blue-400 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 5l7 7-7 7"/></svg>
                                 </li>
                             )}

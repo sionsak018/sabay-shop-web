@@ -9,6 +9,7 @@ import { type Category } from '../../categories/types/category.types';
 import api from '../../../services/api';
 import { getImageUrl } from '../../../utils/imageUrl';
 import { LocationPickerModal } from '../../../components/common/LocationPickerModal';
+import { useTranslation } from 'react-i18next';
 
 const CategoryIcon = ({ cat, className = "" }: { cat: Category, className?: string }) => {
   if (cat.image_url) {
@@ -23,16 +24,15 @@ const CategoryIcon = ({ cat, className = "" }: { cat: Category, className?: stri
 
 export const HomePage = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [categories, setCategories] = useState<Category[]>([]);
   const [loadingCategories, setLoadingCategories] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [activeKeyword, setActiveKeyword] = useState('');
 
   // New Filter States
   const [activeCategoryId, setActiveCategoryId] = useState<number | undefined>();
   const [activeProvinceId, setActiveProvinceId] = useState<string>('');
   const [activeDistrictId, setActiveDistrictId] = useState<string>('');
-  const [locationName, setLocationName] = useState('All Cambodia');
+  const [locationName, setLocationName] = useState('');
   const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
   const [dynamicAttributes, setDynamicAttributes] = useState<any[]>([]);
   const [loadingAttributes, setLoadingAttributes] = useState(false);
@@ -62,7 +62,6 @@ export const HomePage = () => {
 
   const productFilters = {
     page: 1,
-    keyword: activeKeyword || undefined,
     category_id: activeCategoryId?.toString(),
     province_id: activeProvinceId || undefined,
     district_id: activeDistrictId || undefined,
@@ -72,27 +71,16 @@ export const HomePage = () => {
   const { products, loading, error } = useProducts(productFilters);
 
   const getResultsTitle = () => {
-    if (activeKeyword) return `Results for "${activeKeyword}"`;
-    if (activeCategoryId) return `Results in ${selectedCategory?.name}`;
-    if (activeProvinceId !== '') return `Results in ${locationName}`;
-    return 'Recent Ads';
-  };
-
-  const handleSearch = () => {
-    const params = new URLSearchParams();
-    if (searchQuery.trim()) params.set('keyword', searchQuery.trim());
-    if (activeProvinceId) params.set('province_id', activeProvinceId);
-    if (activeDistrictId) params.set('district_id', activeDistrictId);
-    navigate(`/products?${params.toString()}`);
+    if (activeCategoryId) return t('home.results_in_cat', { name: selectedCategory?.name });
+    if (activeProvinceId !== '') return t('home.results_in_loc', { name: locationName || t('common.all_cambodia') });
+    return t('home.recent_ads');
   };
 
   const clearSearch = () => {
-    setSearchQuery('');
-    setActiveKeyword('');
     setActiveCategoryId(undefined);
     setActiveProvinceId('');
     setActiveDistrictId('');
-    setLocationName('All Cambodia');
+    setLocationName('');
     setActiveAttributes({});
   };
 
@@ -118,7 +106,7 @@ export const HomePage = () => {
 
   const mainCategoriesToDisplay = categories.filter(c => !c.parent_id);
 
-  // Logic for Khmer24 Step-by-Step visibility
+  // Logic for Step-by-Step visibility
   const isSubCategorySelected = selectedCategory && selectedCategory.parent_id;
 
   const brandAttr = dynamicAttributes.find(a => a.name === 'Brand');
@@ -131,30 +119,6 @@ export const HomePage = () => {
   return (
     <div className="min-h-screen bg-[#f1f2f6] dark:bg-[#08060d] text-gray-900 dark:text-gray-100 antialiased pb-20 font-sans transition-colors duration-300">
       
-      {/* Khmer24 Style Header Search */}
-      <div className="bg-white dark:bg-[#16171d] border-b border-gray-200 dark:border-gray-800 py-3 shadow-sm sticky top-14 z-40 transition-colors">
-        <div className="container mx-auto px-4 max-w-7xl flex gap-2">
-             <div className="relative flex-1">
-                <input
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search in all categories..."
-                    className="w-full bg-[#f8f9fa] dark:bg-[#1f2028] border border-[#dee2e6] dark:border-gray-700 px-4 py-2 rounded focus:bg-white focus:border-blue-500 outline-none text-sm font-medium text-gray-700 dark:text-gray-200 transition-all"
-                    onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                />
-                <svg className="w-4 h-4 absolute right-4 top-1/2 -translate-y-1/2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-             </div>
-
-             <button
-                onClick={handleSearch}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-4 sm:px-8 py-2 rounded font-bold transition flex items-center justify-center shadow-sm uppercase tracking-wider text-[11px] sm:text-xs shrink-0"
-             >
-                Search
-             </button>
-        </div>
-      </div>
-
       <div className="container mx-auto px-4 max-w-7xl mt-2 sm:mt-3">
 
         {/* Auto Slider */}
@@ -170,7 +134,7 @@ export const HomePage = () => {
                   }}
                   className="text-sm sm:text-base font-bold text-blue-600 hover:underline transition-colors"
                 >
-                  All Categories
+                  {t('common.all_categories')}
                 </button>
                 {mainCategory && (
                     <>
@@ -255,7 +219,7 @@ export const HomePage = () => {
         {/* Browse By Category Section */}
         {loadingCategories ? (
             !isSubCategorySelected && (
-                <div className="bg-white dark:bg-[#1f2028] border border-gray-200 dark:border-gray-800 rounded-md p-3 sm:p-4 shadow-sm transition-colors mb-3 animate-pulse">
+                <div className="bg-white dark:bg-[#16171d] border border-gray-200 dark:border-gray-800 rounded-md p-3 sm:p-4 shadow-sm transition-colors mb-3 animate-pulse">
                     <div className="h-5 bg-gray-200 dark:bg-gray-800 rounded w-1/4 mb-4" />
                     <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-4 lg:grid-cols-6 gap-2">
                         {[...Array(6)].map((_, i) => (
@@ -268,9 +232,9 @@ export const HomePage = () => {
                 </div>
             )
         ) : (!isSubCategorySelected) && (
-            <div className="bg-white dark:bg-[#1f2028] border border-gray-200 dark:border-gray-800 rounded-md p-3 sm:p-4 shadow-sm transition-colors mb-3">
+            <div className="bg-white dark:bg-[#16171d] border border-gray-200 dark:border-gray-800 rounded-md p-3 sm:p-4 shadow-sm transition-colors mb-3">
                 <h2 className="text-sm sm:text-base font-bold mb-3 sm:mb-4 text-gray-800 dark:text-gray-100">
-                    {activeCategoryId ? `Browse in ${selectedCategory?.name}` : 'Browse By Category'}
+                    {activeCategoryId ? t('home.browse_in', { name: selectedCategory?.name }) : t('home.browse_by_category')}
                 </h2>
 
                 <ul className="text-center grid grid-cols-3 sm:grid-cols-4 md:grid-cols-4 lg:grid-cols-6 gap-1 sm:gap-2">
@@ -278,7 +242,7 @@ export const HomePage = () => {
                         <li key={cat.id}>
                             <button
                                 onClick={() => browseCategory(cat.id)}
-                                className={`block w-full h-full group bg-white dark:bg-[#1f2028] rounded cursor-pointer active:opacity-50 p-1.5 sm:p-2.5 transition-all hover:bg-[#f8f9fa] dark:hover:bg-[#16171d] ${activeCategoryId === cat.id ? 'ring-2 ring-blue-500 bg-blue-50 dark:bg-blue-900/10' : ''}`}
+                                className={`block w-full h-full group bg-white dark:bg-[#16171d] rounded cursor-pointer active:opacity-50 p-1.5 sm:p-2.5 transition-all hover:bg-[#f8f9fa] dark:hover:bg-[#1f2028] ${activeCategoryId === cat.id ? 'ring-2 ring-blue-500 bg-blue-50 dark:bg-blue-900/10' : ''}`}
                             >
                                 <div className="mx-auto bg-[#e9ecef] dark:bg-gray-800 rounded-full mt-1 group-hover:bg-[#dee2e6] dark:group-hover:bg-gray-700 transition-all size-10 sm:size-14 flex items-center justify-center overflow-hidden">
                                     <CategoryIcon cat={cat} className="w-full h-full group-hover:scale-110 transition-transform duration-300" />
@@ -293,7 +257,7 @@ export const HomePage = () => {
             </div>
         )}
 
-        {/* Dynamic Attributes (Brand, Model, etc. - Khmer24 Style Flow) */}
+        {/* Dynamic Attributes (Brand, Model, etc. -  Style Flow) */}
         {loadingAttributes ? (
             <div className="flex flex-col gap-3 mb-3">
                 {/* Surgical Skeleton: Shows 1 block for brand, or 2 for Model/BodyType based on flow */}
@@ -318,7 +282,7 @@ export const HomePage = () => {
                     const isModel = attr.name === 'Model';
                     const isBodyType = attr.name === 'Body Type';
 
-                    // Khmer24 Hide Logic:
+                    //  Hide Logic:
                     // 1. If it's a Brand: hide if a brand is already selected
                     if (isBrand && selectedBrand) return null;
 
@@ -341,7 +305,7 @@ export const HomePage = () => {
                     const isCircleStyle = ['Brand', 'Body Type', 'Make', 'Model'].includes(attr.name);
 
                     return (
-                        <div key={attr.id} className="bg-white dark:bg-[#1f2028] border border-gray-200 dark:border-gray-800 rounded-md shadow-sm transition-colors overflow-hidden animate-in fade-in slide-in-from-top-1 duration-300">
+                        <div key={attr.id} className="bg-white dark:bg-[#16171d] border border-gray-200 dark:border-gray-800 rounded-md shadow-sm transition-colors overflow-hidden animate-in fade-in slide-in-from-top-1 duration-300">
                             <div className="px-4 py-2.5 border-b border-gray-50 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/50">
                                 <h3 className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.2em]">{attr.name}</h3>
                             </div>
@@ -382,7 +346,7 @@ export const HomePage = () => {
                                         onClick={() => setExpandedAttrs(prev => ({ ...prev, [attr.id]: !isExpanded }))}
                                         className="w-full mt-4 py-1.5 bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-400 text-[10px] font-bold uppercase tracking-widest rounded transition-colors"
                                     >
-                                        {isExpanded ? 'Show Less' : `Show ${options.length - 12} More`}
+                                        {isExpanded ? t('common.show_less') : t('common.show_more', { count: options.length - 12 })}
                                     </button>
                                 )}
                             </div>
@@ -398,17 +362,17 @@ export const HomePage = () => {
                 <h2 className="text-sm font-bold text-gray-800 dark:text-gray-100 uppercase tracking-tight">
                     {getResultsTitle()}
                 </h2>
-                {(activeKeyword || activeCategoryId || activeProvinceId) ? (
-                    <button onClick={clearSearch} className="text-xs font-bold text-red-600 hover:underline">Clear Filters</button>
+                {(activeCategoryId || activeProvinceId) ? (
+                    <button onClick={clearSearch} className="text-xs font-bold text-red-600 hover:underline">{t('common.clear_filters')}</button>
                 ) : (
-                    <Link to="/products" className="text-xs font-bold text-blue-600 hover:underline">View All</Link>
+                    <Link to="/products" className="text-xs font-bold text-blue-600 hover:underline">{t('common.view_all')}</Link>
                 )}
             </div>
 
             {error ? (
-                <div className="bg-white dark:bg-[#1f2028] border border-red-100 dark:border-red-900/30 rounded-md p-6 text-center shadow-sm">
+                <div className="bg-white dark:bg-[#16171d] border border-red-100 dark:border-red-900/30 rounded-md p-6 text-center shadow-sm">
                     <p className="text-red-500 font-bold mb-2">Failed to load products</p>
-                    <button onClick={() => setActiveKeyword(activeKeyword)} className="text-xs text-blue-600 font-bold hover:underline">Try Again</button>
+                    <button onClick={() => navigate(0)} className="text-xs text-blue-600 dark:text-blue-400 font-bold hover:underline">Try Again</button>
                 </div>
             ) : loading ? (
                 <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3">
@@ -417,12 +381,9 @@ export const HomePage = () => {
                     ))}
                 </div>
             ) : products.length === 0 ? (
-                <div className="bg-white dark:bg-[#1f2028] border border-gray-200 dark:border-gray-800 rounded-md p-10 sm:p-20 text-center shadow-sm transition-colors">
-                    <h3 className="text-base sm:text-lg font-bold text-gray-900 dark:text-gray-100 mb-2 uppercase">No results found</h3>
-                    <p className="text-gray-500 dark:text-gray-400 text-xs sm:text-sm mb-6 sm:mb-8 font-medium">Try different keywords or browse categories.</p>
-                    {activeKeyword && (
-                        <button onClick={clearSearch} className="bg-blue-600 text-white px-8 py-2 rounded font-bold text-xs uppercase shadow-md transition active:scale-95">Show Recent Ads</button>
-                    )}
+                <div className="bg-white dark:bg-[#16171d] border border-gray-200 dark:border-gray-800 rounded-md p-10 sm:p-20 text-center shadow-sm transition-colors">
+                    <h3 className="text-base sm:text-lg font-bold text-gray-900 dark:text-gray-100 mb-2 uppercase">{t('home.no_results')}</h3>
+                    <p className="text-gray-500 dark:text-gray-400 text-xs sm:text-sm mb-6 sm:mb-8 font-medium">{t('home.try_browsing')}</p>
                 </div>
             ) : (
                 <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3">
@@ -441,7 +402,7 @@ export const HomePage = () => {
         onSelect={(data) => {
             setActiveProvinceId(data.province_id);
             setActiveDistrictId(data.district_id);
-            setLocationName(data.locationName || 'All Cambodia');
+            setLocationName(data.locationName || '');
         }}
       />
     </div>

@@ -108,8 +108,8 @@ export const ProvincePage = () => {
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-            <h1 className="text-2xl font-bold text-gray-800 tracking-tight">Province Management</h1>
-            <p className="text-sm text-gray-500 font-bold uppercase tracking-widest mt-1">Found {pagination.total} Provinces</p>
+            <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100 tracking-tight">Province Management</h1>
+            <p className="text-sm text-gray-500 dark:text-gray-400 font-bold uppercase tracking-widest mt-1">Found {pagination.total} Provinces</p>
         </div>
         <div className="flex items-center gap-3">
             <form onSubmit={handleSearch} className="relative group">
@@ -118,9 +118,9 @@ export const ProvincePage = () => {
                     placeholder="Search province..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="bg-white border border-gray-200 px-10 py-2 rounded-lg text-sm font-bold outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all w-64 shadow-sm"
+                    className="bg-white dark:bg-[#16171d] border border-gray-200 dark:border-gray-800 px-10 py-2 rounded-lg text-sm font-bold outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10 transition-all w-64 shadow-sm dark:text-gray-200"
                 />
-                <svg className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                <svg className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
             </form>
             <button onClick={() => handleOpenModal()} className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg font-black text-xs shadow-lg shadow-blue-600/20 flex items-center gap-2 transition active:scale-95 uppercase tracking-widest">
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M12 4v16m8-8H4"/></svg>
@@ -129,30 +129,30 @@ export const ProvincePage = () => {
         </div>
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden flex flex-col">
+      <div className="bg-white dark:bg-[#16171d] rounded-xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden flex flex-col transition-colors">
         <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-            <thead className="bg-gray-50 border-b border-gray-100">
+            <table className="w-full text-left border-collapse min-w-[500px]">
+            <thead className="bg-gray-50 dark:bg-gray-800/50 border-b border-gray-100 dark:border-gray-800">
                 <tr>
-                <th className="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">ID</th>
-                <th className="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Name</th>
-                <th className="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Code</th>
-                <th className="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">Actions</th>
+                <th className="px-6 py-4 text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">ID</th>
+                <th className="px-6 py-4 text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">Name</th>
+                <th className="px-6 py-4 text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">Code</th>
+                <th className="px-6 py-4 text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest text-right">Actions</th>
                 </tr>
             </thead>
-            <tbody className="divide-y divide-gray-50">
+            <tbody className="divide-y divide-gray-50 dark:divide-gray-800">
                 {loading ? (
-                <tr><td colSpan={4} className="px-6 py-12 text-center text-gray-400 font-bold uppercase animate-pulse">Loading data...</td></tr>
+                <tr><td colSpan={4} className="px-6 py-12 text-center text-gray-400 dark:text-gray-500 font-bold uppercase animate-pulse">Loading data...</td></tr>
                 ) : provinces.length === 0 ? (
-                <tr><td colSpan={4} className="px-6 py-12 text-center text-gray-400 font-bold uppercase">No provinces found</td></tr>
+                <tr><td colSpan={4} className="px-6 py-12 text-center text-gray-400 dark:text-gray-500 font-bold uppercase">No provinces found</td></tr>
                 ) : provinces.map((p) => (
-                <tr key={p.id} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-6 py-4 text-sm font-bold text-gray-400">#{p.id}</td>
-                    <td className="px-6 py-4 text-sm font-black text-gray-800">{p.name}</td>
-                    <td className="px-6 py-4 text-sm font-bold text-gray-500">{p.code}</td>
+                <tr key={p.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                    <td className="px-6 py-4 text-sm font-bold text-gray-400 dark:text-gray-500">#{p.id}</td>
+                    <td className="px-6 py-4 text-sm font-black text-gray-800 dark:text-gray-200">{p.name}</td>
+                    <td className="px-6 py-4 text-sm font-bold text-gray-500 dark:text-gray-400">{p.code}</td>
                     <td className="px-6 py-4 text-right space-x-2">
-                        <button onClick={() => handleOpenModal(p)} className="p-2 text-blue-600 hover:bg-blue-50 rounded-md transition"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-5M18.364 5.364a2.121 2.121 0 013 3L12 18l-4 1 1-4 9.364-9.364z"/></svg></button>
-                        <button onClick={() => handleDelete(p.id)} className="p-2 text-red-600 hover:bg-red-50 rounded-md transition"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>
+                        <button onClick={() => handleOpenModal(p)} className="p-2 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/10 rounded-md transition-colors"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-5M18.364 5.364a2.121 2.121 0 013 3L12 18l-4 1 1-4 9.364-9.364z"/></svg></button>
+                        <button onClick={() => handleDelete(p.id)} className="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/10 rounded-md transition-colors"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>
                     </td>
                 </tr>
                 ))}
@@ -168,15 +168,15 @@ export const ProvincePage = () => {
       </div>
 
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-          <div className="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
-            <div className="bg-gray-50 px-6 py-4 border-b flex justify-between items-center">
-              <h2 className="text-sm font-bold text-gray-800 uppercase tracking-widest">{editingProv ? 'Edit Province' : 'New Province'}</h2>
-              <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-gray-600"><svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12"/></svg></button>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+          <div className="bg-white dark:bg-[#1c1c1d] rounded-xl shadow-2xl w-full max-w-md overflow-hidden border dark:border-gray-800 animate-in zoom-in-95 duration-200">
+            <div className="bg-gray-50 dark:bg-gray-800/50 px-6 py-4 border-b dark:border-gray-800 flex justify-between items-center">
+              <h2 className="text-sm font-bold text-gray-800 dark:text-gray-100 uppercase tracking-widest">{editingProv ? 'Edit Province' : 'New Province'}</h2>
+              <button onClick={() => setIsModalOpen(false)} className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"><svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12"/></svg></button>
             </div>
             <form onSubmit={handleSubmit} noValidate className="p-6 space-y-4">
               <div>
-                <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Province Name <span className="text-red-500">*</span></label>
+                <label className="block text-xs font-bold text-gray-400 dark:text-gray-500 uppercase mb-1">Province Name <span className="text-red-500">*</span></label>
                 <input
                     type="text"
                     value={formData.name}
@@ -184,13 +184,13 @@ export const ProvincePage = () => {
                         setFormData({ ...formData, name: e.target.value });
                         if (errors.name) setErrors(prev => ({ ...prev, name: '' }));
                     }}
-                    className={`w-full px-4 py-2.5 border rounded-lg text-sm font-bold outline-none transition-all ${errors.name ? 'border-red-300' : 'border-gray-200 focus:border-blue-500'}`}
+                    className={`w-full px-4 py-2.5 border rounded-lg text-sm font-bold outline-none transition-all bg-white dark:bg-[#08060d] dark:text-gray-200 ${errors.name ? 'border-red-300' : 'border-gray-200 dark:border-gray-800 focus:border-blue-500 dark:focus:border-blue-400'}`}
                     placeholder="e.g. Phnom Penh"
                 />
                 {errors.name && <p className="text-red-500 text-[10px] font-bold mt-1 ml-1">{errors.name}</p>}
               </div>
               <div>
-                <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Code <span className="text-red-500">*</span></label>
+                <label className="block text-xs font-bold text-gray-400 dark:text-gray-500 uppercase mb-1">Code <span className="text-red-500">*</span></label>
                 <input
                     type="text"
                     value={formData.code}
@@ -198,13 +198,13 @@ export const ProvincePage = () => {
                         setFormData({ ...formData, code: e.target.value });
                         if (errors.code) setErrors(prev => ({ ...prev, code: '' }));
                     }}
-                    className={`w-full px-4 py-2.5 border rounded-lg text-sm font-medium outline-none transition-all ${errors.code ? 'border-red-300' : 'border-gray-200 focus:border-blue-500'}`}
+                    className={`w-full px-4 py-2.5 border rounded-lg text-sm font-medium outline-none transition-all bg-white dark:bg-[#08060d] dark:text-gray-200 ${errors.code ? 'border-red-300' : 'border-gray-200 dark:border-gray-800 focus:border-blue-500 dark:focus:border-blue-400'}`}
                     placeholder="e.g. PP"
                 />
                 {errors.code && <p className="text-red-500 text-[10px] font-bold mt-1 ml-1">{errors.code}</p>}
               </div>
               <div className="pt-4 flex gap-3">
-                <button type="button" onClick={() => setIsModalOpen(false)} className="flex-1 px-4 py-2.5 bg-gray-100 text-gray-600 rounded-lg font-bold text-sm">Cancel</button>
+                <button type="button" onClick={() => setIsModalOpen(false)} className="flex-1 px-4 py-2.5 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 rounded-lg font-bold text-sm">Cancel</button>
                 <button type="submit" className="flex-1 px-4 py-2.5 bg-blue-600 text-white rounded-lg font-bold text-sm shadow-lg shadow-blue-600/20">{editingProv ? 'Update' : 'Create'}</button>
               </div>
             </form>

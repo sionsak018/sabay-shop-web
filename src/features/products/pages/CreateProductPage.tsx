@@ -9,6 +9,7 @@ import { LocationPickerModal } from '../../../components/common/LocationPickerMo
 import { MapView } from '../../../components/common/MapView';
 import { getImageUrl } from '../../../utils/imageUrl';
 import { useAlert } from '../../../context/AlertContext';
+import { useTranslation } from 'react-i18next';
 
 // Toast UI Editor
 import '@toast-ui/editor/dist/toastui-editor.css';
@@ -17,6 +18,7 @@ import { Editor } from '@toast-ui/react-editor';
 export const CreateProductPage = () => {
   const navigate = useNavigate();
   const { showAlert } = useAlert();
+  const { t } = useTranslation();
   const editorRef = useRef<any>(null);
 
   const [step, setStep] = useState(1); // 1: Category, 2: Information
@@ -174,7 +176,7 @@ export const CreateProductPage = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const newErrors: Record<string, string> = {};
-    const Msg = 'ព័ត៌មាននេះត្រូវបានទាមទារ';
+    const Msg = t('create_product.required');
 
     if (!formData.category_id) newErrors.category_id = Msg;
     if (images.length === 0) newErrors.images = Msg;
@@ -189,7 +191,7 @@ export const CreateProductPage = () => {
     if (!formData.poster_email.trim()) {
         newErrors.poster_email = Msg;
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.poster_email)) {
-        newErrors.poster_email = 'អាសយដ្ឋានអ៊ីមែលមិនត្រឹមត្រូវ';
+        newErrors.poster_email = t('create_product.invalid_email', { defaultValue: 'Invalid email address' });
     }
 
     if (!formData.company_name.trim()) newErrors.company_name = Msg;
@@ -212,7 +214,7 @@ export const CreateProductPage = () => {
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
-      setError('សូមពិនិត្យមើលទិន្នន័យដែលខ្វះខាត');
+      setError(t('create_product.check_data', { defaultValue: 'Please check the missing data' }));
       window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
@@ -251,16 +253,16 @@ export const CreateProductPage = () => {
     try {
       await productApi.create(submitForm);
       showAlert({
-        title: 'ជោគជ័យ!',
-        message: 'ការផ្សព្វផ្សាយរបស់អ្នកត្រូវបានដាក់បញ្ជូនដោយជោគជ័យ។',
+        title: t('create_product.success_title'),
+        message: t('create_product.success_message'),
         type: 'success',
         onClose: () => navigate('/', { replace: true })
       });
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to post ad. Please try again.');
+      setError(err.response?.data?.message || t('create_product.failed_to_post', { defaultValue: 'Failed to post ad. Please try again.' }));
       showAlert({
-        title: 'មានបញ្ហា!',
-        message: err.response?.data?.message || 'មិនអាចដាក់បញ្ជូនការផ្សព្វផ្សាយបានទេ សូមព្យាយាមម្តងទៀត។',
+        title: t('create_product.error_title', { defaultValue: 'Problem!' }),
+        message: err.response?.data?.message || t('create_product.failed_to_post', { defaultValue: 'Cannot submit the ad, please try again.' }),
         type: 'error'
       });
     } finally {
@@ -271,45 +273,45 @@ export const CreateProductPage = () => {
   const mainCategories = categories.filter(c => !c.parent_id);
 
   return (
-    <div className="min-h-screen bg-gray-50 py-10 antialiased text-left font-sans">
-      <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 bg-white py-5 mb-32 border border-gray-200 rounded shadow-sm">
+    <div className="min-h-screen bg-gray-50 dark:bg-[#08060d] py-10 antialiased text-left font-sans transition-colors duration-300">
+      <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 bg-white dark:bg-[#16171d] py-5 mb-32 border border-gray-200 dark:border-gray-800 rounded shadow-sm">
 
         {/* Step Header */}
-        <div className="flex items-center border-b border-gray-200 mb-4 pb-4">
+        <div className="flex items-center border-b border-gray-200 dark:border-gray-800 mb-4 pb-4">
           <div className="flex-1">
-            <h1 className="font-semibold text-2xl mb-4">Post an Ad</h1>
+            <h1 className="font-semibold text-2xl mb-4 text-gray-900 dark:text-gray-100">{t('create_product.title')}</h1>
             <div className="flex gap-4 items-center text-md">
-              <div className={`flex items-center gap-2 ${step === 1 ? 'text-blue-600 font-bold' : 'text-gray-500'}`}>
-                <span className={`rounded-full w-5 h-5 flex items-center justify-center text-[10px] ${step === 1 ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-500'}`}>1</span>
-                Choose a category
+              <div className={`flex items-center gap-2 ${step === 1 ? 'text-blue-600 font-bold' : 'text-gray-50'}`}>
+                <span className={`rounded-full w-5 h-5 flex items-center justify-center text-[10px] ${step === 1 ? 'bg-blue-600 text-white' : 'bg-gray-200 dark:bg-gray-800 text-gray-50'}`}>1</span>
+                {t('create_product.step_1')}
               </div>
-              <svg className="w-4 h-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M9 5l7 7-7 7"/></svg>
-              <div className={`flex items-center gap-2 ${step === 2 ? 'text-blue-600 font-bold' : 'text-gray-400'}`}>
-                <span className={`rounded-full w-5 h-5 flex items-center justify-center text-[10px] ${step === 2 ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-400'}`}>2</span>
-                Fill Information
+              <svg className="w-4 h-4 text-gray-300 dark:text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M9 5l7 7-7 7"/></svg>
+              <div className={`flex items-center gap-2 ${step === 2 ? 'text-blue-600 font-bold' : 'text-gray-400 dark:text-gray-600'}`}>
+                <span className={`rounded-full w-5 h-5 flex items-center justify-center text-[10px] ${step === 2 ? 'bg-blue-600 text-white' : 'bg-gray-200 dark:bg-gray-800 text-gray-400'}`}>2</span>
+                {t('create_product.step_2')}
               </div>
             </div>
           </div>
           {limitInfo && (
             <div className="text-right hidden sm:block">
-              <div className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Ad Usage</div>
+              <div className="text-[10px] font-black text-gray-400 dark:text-gray-600 uppercase tracking-widest mb-1">Ad Usage</div>
               <div className="flex items-center gap-2 justify-end">
                 <span className={`text-lg font-black ${limitInfo.limit_reached ? 'text-red-500' : 'text-blue-600'}`}>{limitInfo.active_count}/{limitInfo.post_limit}</span>
-                <span className="px-2 py-0.5 bg-gray-100 rounded text-[9px] font-bold text-gray-500 uppercase">{limitInfo.account_type}</span>
+                <span className="px-2 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-[9px] font-bold text-gray-500 dark:text-gray-400 uppercase">{limitInfo.account_type}</span>
               </div>
             </div>
           )}
         </div>
 
         {limitInfo?.limit_reached && (
-          <div className="bg-red-50 border border-red-100 p-8 rounded-2xl flex flex-col md:flex-row items-start gap-6 mb-8 animate-in slide-in-from-top-4 duration-500">
-             <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center text-red-600 shrink-0 shadow-inner">
+          <div className="bg-red-50 dark:bg-red-900/10 border border-red-100 dark:border-red-900/30 p-8 rounded-2xl flex flex-col md:flex-row items-start gap-6 mb-8 animate-in slide-in-from-top-4 duration-500">
+             <div className="w-16 h-16 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center text-red-600 dark:text-red-500 shrink-0 shadow-inner">
                 <svg className="w-9 h-9" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
              </div>
              <div className="flex-1">
-                <h3 className="font-black text-red-900 text-xl uppercase tracking-tight mb-2">Ad Limit Reached</h3>
-                <p className="text-red-700 text-base font-bold">You have used all your active ad slots ({limitInfo.active_count}/{limitInfo.post_limit}).</p>
-                <p className="text-red-600/80 text-sm mt-3 leading-relaxed max-w-2xl">
+                <h3 className="font-black text-red-900 dark:text-red-400 text-xl uppercase tracking-tight mb-2">Ad Limit Reached</h3>
+                <p className="text-red-700 dark:text-red-500 text-base font-bold">You have used all your active ad slots ({limitInfo.active_count}/{limitInfo.post_limit}).</p>
+                <p className="text-red-600/80 dark:text-red-400/80 text-sm mt-3 leading-relaxed max-w-2xl">
                     To continue posting, you can either delete your old or sold items to free up slots, or upgrade your account to a <b>Store Member</b> for unlimited postings and more features.
                 </p>
 
@@ -338,7 +340,7 @@ export const CreateProductPage = () => {
 
         {step === 1 && (
           <div className="animate-in fade-in duration-500">
-            <h2 className="font-semibold text-lg mt-6 mb-4">Category</h2>
+            <h2 className="font-semibold text-lg mt-6 mb-4">{t('common.categories')}</h2>
 
             {/* Split Category Selection */}
             <div className="grid grid-cols-1 md:grid-cols-2 border border-gray-200 rounded-lg overflow-hidden h-[500px] sm:h-[600px]">
@@ -347,7 +349,7 @@ export const CreateProductPage = () => {
               <div className="bg-white border-r border-gray-200 flex flex-col h-full overflow-hidden">
                 <div className="px-4 py-3 bg-gray-50 border-b border-gray-200 flex items-center gap-2 text-xs font-bold text-gray-500 uppercase tracking-widest shrink-0">
                   <span className="w-5 h-5 bg-gray-200 rounded-full flex items-center justify-center text-[10px] text-gray-600">1</span>
-                  Choose a category
+                  {t('create_product.step_1')}
                 </div>
                 <div className="overflow-y-auto flex-1 custom-scrollbar py-1 min-h-0">
                   <ul className="divide-y divide-gray-50">
@@ -377,7 +379,7 @@ export const CreateProductPage = () => {
               <div className="bg-white flex flex-col h-full overflow-hidden">
                 <div className="px-4 py-3 bg-gray-50 border-b border-gray-200 flex items-center gap-2 text-xs font-bold text-gray-500 uppercase tracking-widest shrink-0">
                   <span className="w-5 h-5 bg-gray-200 rounded-full flex items-center justify-center text-[10px] text-gray-600">2</span>
-                  Select a subcategory
+                  {t('create_product.select_sub_category', { defaultValue: 'Select a subcategory' })}
                 </div>
                 <div className="overflow-y-auto flex-1 custom-scrollbar py-1 min-h-0">
                   {!selectedMainCat ? (
@@ -385,7 +387,7 @@ export const CreateProductPage = () => {
                         <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center">
                             <svg className="w-10 h-10 text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
                         </div>
-                        <p className="text-gray-400 text-xs font-bold uppercase tracking-widest">Please choose a main category first</p>
+                        <p className="text-gray-400 text-xs font-bold uppercase tracking-widest">{t('create_product.choose_main_first', { defaultValue: 'Please choose a main category first' })}</p>
                     </div>
                   ) : (
                     <ul className="divide-y divide-gray-50 animate-in slide-in-from-right-4 duration-300">
@@ -419,27 +421,27 @@ export const CreateProductPage = () => {
           <form onSubmit={handleSubmit} noValidate className="animate-in fade-in duration-500">
 
             <div className="flex items-center justify-between mb-8">
-                <button type="button" onClick={() => setStep(1)} className="text-xs font-black text-blue-600 hover:underline flex items-center gap-1 uppercase tracking-widest">
+                <button type="button" onClick={() => setStep(1)} className="text-xs font-black text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1 uppercase tracking-widest">
                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M15 19l-7-7 7-7"/></svg>
-                   Change Category
+                   {t('create_product.change_category')}
                 </button>
-                <div className="px-4 py-2 bg-blue-50 text-blue-600 rounded-lg text-xs font-black uppercase tracking-widest border border-blue-100">
+                <div className="px-4 py-2 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-lg text-xs font-black uppercase tracking-widest border border-blue-100 dark:border-blue-900/30">
                    {selectedMainCat?.name} {'>'} {categories.find(c => String(c.id) === formData.category_id)?.name}
                 </div>
             </div>
 
-            {error && <div className="bg-red-50 border border-red-100 text-red-600 px-6 py-4 rounded-xl text-sm font-bold mb-8">{error}</div>}
+            {error && <div className="bg-red-50 dark:bg-red-900/10 border border-red-100 dark:border-red-900/30 text-red-600 dark:text-red-500 px-6 py-4 rounded-xl text-sm font-bold mb-8">{error}</div>}
 
             <div className="space-y-12">
                 {/* Photos Section */}
                 <div className="space-y-6">
-                    <h2 className="text-lg font-bold text-gray-800 flex items-center gap-3">
-                        <span className="w-1.5 h-6 bg-blue-600 rounded-full"></span>
-                        Ad Photos
+                    <h2 className="text-base font-bold text-gray-800 dark:text-gray-200 flex items-center gap-3">
+                        <span className="w-1.5 h-5 bg-blue-600 rounded-full"></span>
+                        {t('create_product.ad_photos')}
                     </h2>
                     <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-4">
                         {previews.map((src, idx) => (
-                            <div key={idx} className="relative aspect-square rounded-xl overflow-hidden border border-gray-200 group shadow-sm">
+                            <div key={idx} className="relative aspect-square rounded-xl overflow-hidden border border-gray-200 dark:border-gray-800 group shadow-sm">
                                 <img src={src} className="w-full h-full object-cover" />
                                 <button type="button" onClick={() => removeImage(idx)} className="absolute top-2 right-2 bg-black/50 text-white p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
                                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
@@ -447,9 +449,9 @@ export const CreateProductPage = () => {
                             </div>
                         ))}
                         {images.length < 10 && (
-                            <label className={`aspect-square flex flex-col items-center justify-center border-2 border-dashed rounded-xl cursor-pointer transition-all bg-gray-50/50 ${errors.images ? 'border-red-300 bg-red-50/30 text-red-400' : 'border-gray-200 text-gray-400 hover:border-blue-400 hover:bg-blue-50 hover:text-blue-600'}`}>
+                            <label className={`aspect-square flex flex-col items-center justify-center border-2 border-dashed rounded-xl cursor-pointer transition-all bg-gray-50/50 dark:bg-gray-800/50 ${errors.images ? 'border-red-300 bg-red-50/30 text-red-400' : 'border-gray-200 dark:border-gray-800 text-gray-400 hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/10 hover:text-blue-600 dark:hover:text-blue-400'}`}>
                                 <svg className="w-10 h-10 mb-2 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M12 4v16m8-8H4"/></svg>
-                                <span className="text-[10px] font-black uppercase tracking-widest">Add Photo</span>
+                                <span className="text-[10px] font-black uppercase tracking-widest">{t('create_product.add_photo')}</span>
                                 <input type="file" multiple accept="image/*" className="hidden" onChange={handleImageChange} />
                             </label>
                         )}
@@ -459,14 +461,14 @@ export const CreateProductPage = () => {
 
                 {/* Specifications Section */}
                 <div className="space-y-6">
-                    <h2 className="text-lg font-bold text-gray-800 flex items-center gap-3">
+                    <h2 className="text-lg font-bold text-gray-800 dark:text-gray-200 flex items-center gap-3">
                         <span className="w-1.5 h-6 bg-blue-600 rounded-full"></span>
-                        Item Specifications
+                        {t('create_product.specifications')}
                     </h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8 p-6 border border-gray-100 rounded-2xl bg-gray-50/30">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8 p-6 border border-gray-100 dark:border-gray-800 rounded-2xl bg-gray-50/30 dark:bg-gray-800/20">
                         <div>
-                            <label className="block text-[11px] font-black text-gray-400 uppercase mb-3 tracking-widest ml-1">Condition <span className="text-red-500">*</span></label>
-                            <div className={`flex p-1 bg-gray-100 rounded-xl gap-1 border transition-colors ${errors.condition ? 'border-red-300' : 'border-transparent'}`}>
+                            <label className="block text-[11px] font-black text-gray-400 dark:text-gray-500 uppercase mb-3 tracking-widest ml-1">{t('create_product.condition')} <span className="text-red-500">*</span></label>
+                            <div className={`flex p-1 bg-gray-100 dark:bg-gray-800 rounded-xl gap-1 border transition-colors ${errors.condition ? 'border-red-300' : 'border-transparent'}`}>
                                 {['New', 'Used'].map(c => (
                                     <button
                                         key={c}
@@ -475,9 +477,9 @@ export const CreateProductPage = () => {
                                             setFormData((prev: any) => ({...prev, condition: c.toLowerCase()}));
                                             if (errors.condition) setErrors(prev => ({ ...prev, condition: '' }));
                                         }}
-                                        className={`flex-1 py-3 rounded-lg font-black text-[10px] uppercase tracking-widest transition-all ${formData.condition === c.toLowerCase() ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                                        className={`flex-1 py-3 rounded-lg font-black text-[10px] uppercase tracking-widest transition-all ${formData.condition === c.toLowerCase() ? 'bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'}`}
                                     >
-                                        {c}
+                                        {c === 'New' ? t('create_product.new') : t('create_product.used')}
                                     </button>
                                 ))}
                             </div>
@@ -486,7 +488,7 @@ export const CreateProductPage = () => {
 
                         {dynamicAttributes.map(attr => (
                             <div key={attr.id}>
-                                <label className="block text-[11px] font-black text-gray-400 uppercase mb-3 tracking-widest ml-1">
+                                <label className="block text-[11px] font-black text-gray-400 dark:text-gray-500 uppercase mb-3 tracking-widest ml-1">
                                     {attr.name} {attr.pivot.is_required && <span className="text-red-500">*</span>}
                                 </label>
                                 {attr.type === 'select' ? (
@@ -496,9 +498,9 @@ export const CreateProductPage = () => {
                                         setAttributeValues({ ...attributeValues, [attr.id]: e.target.value });
                                         if (errors[`attr_${attr.id}`]) setErrors(prev => ({ ...prev, [`attr_${attr.id}`]: '' }));
                                     }}
-                                    className={`w-full px-5 py-3.5 bg-white border rounded-xl outline-none transition font-bold text-gray-800 shadow-sm ${errors[`attr_${attr.id}`] ? 'border-red-300' : 'border-gray-200 focus:border-blue-500'}`}
+                                    className={`w-full px-5 py-3.5 bg-white dark:bg-[#08060d] border rounded-xl outline-none transition font-bold text-gray-800 dark:text-gray-200 shadow-sm ${errors[`attr_${attr.id}`] ? 'border-red-300' : 'border-gray-200 dark:border-gray-800 focus:border-blue-500 dark:focus:border-blue-400'}`}
                                 >
-                                    <option value="">Select {attr.name}</option>
+                                    <option value="">{t('create_product.select_attr', { defaultValue: 'Select {{name}}', name: attr.name })}</option>
                                     {attr.options?.map((o: any) => <option key={o.id} value={o.value}>{o.value}</option>)}
                                 </select>
                             ) : (
@@ -513,8 +515,8 @@ export const CreateProductPage = () => {
                                         setAttributeValues({ ...attributeValues, [attr.id]: val });
                                         if (errors[`attr_${attr.id}`]) setErrors(prev => ({ ...prev, [`attr_${attr.id}`]: '' }));
                                     }}
-                                    className={`w-full px-5 py-3.5 bg-white border rounded-xl outline-none transition font-bold text-gray-800 shadow-sm ${errors[`attr_${attr.id}`] ? 'border-red-300' : 'border-gray-200 focus:border-blue-500'}`}
-                                    placeholder={`Enter ${attr.name.toLowerCase()}`}
+                                    className={`w-full px-5 py-3.5 bg-white dark:bg-[#08060d] border rounded-xl outline-none transition font-bold text-gray-800 dark:text-gray-200 shadow-sm ${errors[`attr_${attr.id}`] ? 'border-red-300' : 'border-gray-200 dark:border-gray-800 focus:border-blue-500 dark:focus:border-blue-400'}`}
+                                    placeholder={t('create_product.enter_attr', { defaultValue: 'Enter {{name}}', name: attr.name.toLowerCase() })}
                                 />
                             )}
                             {errors[`attr_${attr.id}`] && <p className="text-red-500 text-[10px] font-bold mt-1.5 ml-1">{errors[`attr_${attr.id}`]}</p>}
@@ -525,28 +527,28 @@ export const CreateProductPage = () => {
 
                 {/* General Info */}
                 <div className="space-y-6">
-                    <h2 className="text-lg font-bold text-gray-800 flex items-center gap-3">
+                    <h2 className="text-lg font-bold text-gray-800 dark:text-gray-200 flex items-center gap-3">
                         <span className="w-1.5 h-6 bg-blue-600 rounded-full"></span>
-                        Basic Information
+                        {t('create_product.basic_info')}
                     </h2>
                     <div className="space-y-8">
                         <div>
-                            <label className="block text-[11px] font-black text-gray-400 uppercase mb-3 tracking-widest ml-1">Ad Title <span className="text-red-500">*</span></label>
+                            <label className="block text-[11px] font-black text-gray-400 dark:text-gray-500 uppercase mb-3 tracking-widest ml-1">{t('create_product.ad_title')} <span className="text-red-500">*</span></label>
                             <input
                                 type="text"
-                                placeholder="e.g. iPhone 15 Pro Max 256GB Gold"
+                                placeholder={t('create_product.ad_title_placeholder', { defaultValue: 'e.g. iPhone 15 Pro Max 256GB Gold' })}
                                 value={formData.title}
                                 onChange={e => {
                                     setFormData({...formData, title: e.target.value});
                                     if (errors.title) setErrors(prev => ({ ...prev, title: '' }));
                                 }}
-                                className={`w-full px-6 py-4 border rounded-2xl focus:bg-white outline-none transition font-bold text-gray-800 shadow-sm ${errors.title ? 'border-red-300' : 'border-gray-200 focus:border-blue-500'}`}
+                                className={`w-full px-6 py-4 border rounded-2xl focus:bg-white dark:focus:bg-[#08060d] outline-none transition font-bold text-gray-800 dark:text-gray-200 shadow-sm bg-white dark:bg-[#08060d] ${errors.title ? 'border-red-300' : 'border-gray-200 dark:border-gray-800 focus:border-blue-500 dark:focus:border-blue-400'}`}
                             />
                             {errors.title && <p className="text-red-500 text-[10px] font-bold mt-2 ml-1">{errors.title}</p>}
                         </div>
 
                         <div>
-                            <label className="block text-[11px] font-black text-gray-400 uppercase mb-3 tracking-widest ml-1">Price ($) <span className="text-red-500">*</span></label>
+                            <label className="block text-[11px] font-black text-gray-400 dark:text-gray-500 uppercase mb-3 tracking-widest ml-1">{t('create_product.price')} ($) <span className="text-red-500">*</span></label>
                             <div className="relative">
                                 <span className={`absolute left-6 top-1/2 -translate-y-1/2 font-black text-lg ${errors.price ? 'text-red-300' : 'text-gray-400'}`}>$</span>
                                 <input
@@ -557,19 +559,19 @@ export const CreateProductPage = () => {
                                         setFormData({...formData, price: e.target.value});
                                         if (errors.price) setErrors(prev => ({ ...prev, price: '' }));
                                     }}
-                                    className={`w-full pl-12 pr-6 py-4 border rounded-2xl focus:bg-white outline-none transition font-black text-gray-800 text-lg shadow-sm ${errors.price ? 'border-red-300' : 'border-gray-200 focus:border-blue-500'}`}
+                                    className={`w-full pl-12 pr-6 py-4 border rounded-2xl focus:bg-white dark:focus:bg-[#08060d] outline-none transition font-black text-gray-800 dark:text-gray-100 text-lg shadow-sm bg-white dark:bg-[#08060d] ${errors.price ? 'border-red-300' : 'border-gray-200 dark:border-gray-800 focus:border-blue-500 dark:focus:border-blue-400'}`}
                                 />
                             </div>
                             {errors.price && <p className="text-red-500 text-[10px] font-bold mt-2 ml-1">{errors.price}</p>}
                         </div>
 
                         <div>
-                            <label className="block text-[11px] font-black text-gray-400 uppercase mb-3 tracking-widest ml-1">Description <span className="text-red-500">*</span></label>
-                            <div className={`border rounded-2xl overflow-hidden shadow-sm ${errors.description ? 'border-red-300' : 'border-gray-200'}`}>
+                            <label className="block text-[11px] font-black text-gray-400 dark:text-gray-500 uppercase mb-3 tracking-widest ml-1">{t('create_product.description')} <span className="text-red-500">*</span></label>
+                            <div className={`border rounded-2xl overflow-hidden shadow-sm ${errors.description ? 'border-red-300' : 'border-gray-200 dark:border-gray-800'}`}>
                                 <Editor
                                     ref={editorRef}
                                     initialValue=""
-                                    placeholder="Tell buyers about your item (specs, warranty, features...)"
+                                    placeholder={t('create_product.description_placeholder', { defaultValue: 'Tell buyers about your item (specs, warranty, features...)' })}
                                     previewStyle="vertical"
                                     height="400px"
                                     initialEditType="wysiwyg"
@@ -590,23 +592,23 @@ export const CreateProductPage = () => {
 
                 {/* Location Section */}
                 <div className="space-y-6">
-                    <h2 className="text-lg font-bold text-gray-800 flex items-center gap-3">
+                    <h2 className="text-lg font-bold text-gray-800 dark:text-gray-200 flex items-center gap-3">
                         <span className="w-1.5 h-6 bg-blue-600 rounded-full"></span>
-                        Item Location
+                        {t('create_product.location_section')}
                     </h2>
-                    <div className="space-y-8 p-6 border border-gray-100 rounded-2xl bg-gray-50/30">
+                    <div className="space-y-8 p-6 border border-gray-100 dark:border-gray-800 rounded-2xl bg-gray-50/30 dark:bg-gray-800/20">
 
                         <div>
-                            <label className="block text-[11px] font-black text-gray-400 uppercase mb-3 tracking-widest ml-1">Select Location <span className="text-red-500">*</span></label>
+                            <label className="block text-[11px] font-black text-gray-400 dark:text-gray-500 uppercase mb-3 tracking-widest ml-1">{t('create_product.select_location')} <span className="text-red-500">*</span></label>
                             <button
                                 type="button"
                                 onClick={() => setIsLocationModalOpen(true)}
-                                className={`w-full flex items-center justify-between px-6 py-4 bg-white border rounded-2xl transition-all text-left group shadow-sm ${errors.province_id || errors.district_id ? 'border-red-300' : 'border-gray-200 hover:border-blue-500'}`}
+                                className={`w-full flex items-center justify-between px-6 py-4 bg-white dark:bg-[#08060d] border rounded-2xl transition-all text-left group shadow-sm ${errors.province_id || errors.district_id ? 'border-red-300' : 'border-gray-200 dark:border-gray-800 hover:border-blue-500 dark:hover:border-blue-400'}`}
                             >
                                 {formData.province_id ? (
                                     <div className="flex flex-col">
-                                        <span className={`text-[10px] font-black uppercase tracking-widest mb-0.5 ${errors.province_id || errors.district_id ? 'text-red-500' : 'text-blue-600'}`}>Current Selection</span>
-                                        <span className="text-sm font-bold text-gray-800">
+                                        <span className={`text-[10px] font-black uppercase tracking-widest mb-0.5 ${errors.province_id || errors.district_id ? 'text-red-500' : 'text-blue-600'}`}>{t('create_product.current_selection')}</span>
+                                        <span className="text-sm font-bold text-gray-800 dark:text-gray-200">
                                             {provinces.find(p => String(p.id) === formData.province_id)?.name}
                                             {formData.district_id && ` > ${districts.find(d => String(d.id) === formData.district_id)?.name}`}
                                             {formData.commune_id && ` > ${communes.find(c => String(c.id) === formData.commune_id)?.name}`}
@@ -614,9 +616,9 @@ export const CreateProductPage = () => {
                                         </span>
                                     </div>
                                 ) : (
-                                    <span className="text-sm font-bold text-gray-400">Tap to choose province, district, commune...</span>
+                                    <span className="text-sm font-bold text-gray-400 dark:text-gray-600">{t('create_product.tap_to_choose')}</span>
                                 )}
-                                <svg className={`w-5 h-5 transition-colors ${errors.province_id || errors.district_id ? 'text-red-300' : 'text-gray-300 group-hover:text-blue-500'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7"/></svg>
+                                <svg className={`w-5 h-5 transition-colors ${errors.province_id || errors.district_id ? 'text-red-300' : 'text-gray-300 dark:text-gray-700 group-hover:text-blue-500 dark:group-hover:text-blue-400'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7"/></svg>
                             </button>
                             {(errors.province_id || errors.district_id) && <p className="text-red-500 text-[10px] font-bold mt-2 ml-1">{errors.province_id || errors.district_id}</p>}
 
@@ -639,36 +641,36 @@ export const CreateProductPage = () => {
                         </div>
 
                         <div>
-                            <label className="block text-[11px] font-black text-gray-400 uppercase mb-3 tracking-widest ml-1">Detail Address <span className="text-red-500">*</span></label>
+                            <label className="block text-[11px] font-black text-gray-400 dark:text-gray-500 uppercase mb-3 tracking-widest ml-1">{t('create_product.detail_address')} <span className="text-red-500">*</span></label>
                             <input
                                 type="text"
-                                placeholder="House number, Street name, or Landmarks..."
+                                placeholder={t('create_product.detail_address_placeholder', { defaultValue: 'House number, Street name, or Landmarks...' })}
                                 value={formData.address}
                                 onChange={e => {
                                     setFormData({...formData, address: e.target.value});
                                     if (errors.address) setErrors(prev => ({ ...prev, address: '' }));
                                 }}
-                                className={`w-full px-6 py-4 border rounded-2xl focus:bg-white outline-none transition font-bold text-gray-800 shadow-sm ${errors.address ? 'border-red-300' : 'border-gray-200 focus:border-blue-500'}`}
+                                className={`w-full px-6 py-4 border rounded-2xl focus:bg-white dark:focus:bg-[#08060d] outline-none transition font-bold text-gray-800 dark:text-gray-200 shadow-sm bg-white dark:bg-[#08060d] ${errors.address ? 'border-red-300' : 'border-gray-200 dark:border-gray-800 focus:border-blue-500 dark:focus:border-blue-400'}`}
                             />
                             {errors.address && <p className="text-red-500 text-[10px] font-bold mt-2 ml-1">{errors.address}</p>}
                         </div>
 
                         <div>
-                            <label className="block text-[11px] font-black text-gray-400 uppercase mb-3 tracking-widest ml-1">Location on Map <span className="text-red-500">*</span></label>
+                            <label className="block text-[11px] font-black text-gray-400 dark:text-gray-500 uppercase mb-3 tracking-widest ml-1">{t('create_product.location_on_map')} <span className="text-red-500">*</span></label>
                             <button
                                 type="button"
                                 onClick={() => setIsMapModalOpen(true)}
-                                className={`w-full h-48 bg-gray-50 border rounded-2xl overflow-hidden relative group transition-all shadow-sm ${errors.lat ? 'border-red-300' : 'border-gray-200 hover:border-blue-400'}`}
+                                className={`w-full h-48 bg-gray-50 dark:bg-gray-800 border rounded-2xl overflow-hidden relative group transition-all shadow-sm ${errors.lat ? 'border-red-300' : 'border-gray-200 dark:border-gray-800 hover:border-blue-400 dark:hover:border-blue-400'}`}
                             >
-                                <div className="absolute inset-0 pointer-events-none opacity-50 group-hover:opacity-100 transition-opacity">
+                                <div className="absolute inset-0 pointer-events-none opacity-50 dark:opacity-30 group-hover:opacity-100 transition-opacity">
                                     <MapView lat={formData.lat} lng={formData.lng} />
                                 </div>
-                                <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-white/40 backdrop-blur-[1px] group-hover:bg-white/5 transition-all">
-                                    <div className="p-3 bg-white rounded-full shadow-lg text-blue-600 transform group-hover:scale-110 transition-transform">
+                                <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-white/40 dark:bg-black/40 backdrop-blur-[1px] group-hover:bg-white/5 transition-all">
+                                    <div className="p-3 bg-white dark:bg-gray-900 rounded-full shadow-lg text-blue-600 transform group-hover:scale-110 transition-transform">
                                         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                                     </div>
-                                    <span className="text-[10px] font-black text-gray-700 bg-white/95 px-4 py-1.5 rounded-full uppercase tracking-widest shadow-md">
-                                        Tap to Pin Exact Location
+                                    <span className="text-[10px] font-black text-gray-700 dark:text-gray-300 bg-white/95 dark:bg-gray-900/95 px-4 py-1.5 rounded-full uppercase tracking-widest shadow-md">
+                                        {t('create_product.pin_location')}
                                     </span>
                                 </div>
                             </button>
@@ -689,28 +691,28 @@ export const CreateProductPage = () => {
 
                 {/* Contact Info */}
                 <div className="space-y-6">
-                    <h2 className="text-lg font-bold text-gray-800 flex items-center gap-3">
+                    <h2 className="text-lg font-bold text-gray-800 dark:text-gray-200 flex items-center gap-3">
                         <span className="w-1.5 h-6 bg-blue-600 rounded-full"></span>
-                        Contact Details
+                        {t('create_product.contact_details')}
                     </h2>
-                    <div className="p-6 border border-gray-100 rounded-2xl bg-gray-50/30 space-y-8">
+                    <div className="p-6 border border-gray-100 dark:border-gray-800 rounded-2xl bg-gray-50/30 dark:bg-gray-800/20 space-y-8">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                             <div>
-                                <label className="block text-[11px] font-black text-gray-400 uppercase mb-3 tracking-widest ml-1">Poster Name <span className="text-red-500">*</span></label>
+                                <label className="block text-[11px] font-black text-gray-400 dark:text-gray-500 uppercase mb-3 tracking-widest ml-1">{t('create_product.poster_name')} <span className="text-red-500">*</span></label>
                                 <input
                                     type="text"
-                                                                        placeholder="Enter your name"
+                                                                        placeholder={t('create_product.poster_name_placeholder', { defaultValue: 'Enter your name' })}
                                     value={formData.poster_name}
                                     onChange={e => {
                                         setFormData({...formData, poster_name: e.target.value});
                                         if (errors.poster_name) setErrors(prev => ({ ...prev, poster_name: '' }));
                                     }}
-                                    className={`w-full px-6 py-4 border rounded-2xl focus:bg-white outline-none transition font-bold text-gray-800 shadow-sm ${errors.poster_name ? 'border-red-300' : 'border-gray-200 focus:border-blue-500'}`}
+                                    className={`w-full px-6 py-4 border rounded-2xl focus:bg-white dark:focus:bg-[#08060d] outline-none transition font-bold text-gray-800 dark:text-gray-200 shadow-sm bg-white dark:bg-[#08060d] ${errors.poster_name ? 'border-red-300' : 'border-gray-200 dark:border-gray-800 focus:border-blue-500 dark:focus:border-blue-400'}`}
                                 />
                                 {errors.poster_name && <p className="text-red-500 text-[10px] font-bold mt-2 ml-1">{errors.poster_name}</p>}
                             </div>
                             <div>
-                                <label className="block text-[11px] font-black text-gray-400 uppercase mb-3 tracking-widest ml-1">Email Address <span className="text-red-500">*</span></label>
+                                <label className="block text-[11px] font-black text-gray-400 dark:text-gray-500 uppercase mb-3 tracking-widest ml-1">{t('create_product.email')} <span className="text-red-500">*</span></label>
                                 <input
                                     type="email"
                                     placeholder="email@example.com"
@@ -719,7 +721,7 @@ export const CreateProductPage = () => {
                                         setFormData({...formData, poster_email: e.target.value});
                                         if (errors.poster_email) setErrors(prev => ({ ...prev, poster_email: '' }));
                                     }}
-                                    className={`w-full px-6 py-4 border rounded-2xl focus:bg-white outline-none transition font-bold text-gray-800 shadow-sm ${errors.poster_email ? 'border-red-300' : 'border-gray-200 focus:border-blue-500'}`}
+                                    className={`w-full px-6 py-4 border rounded-2xl focus:bg-white dark:focus:bg-[#08060d] outline-none transition font-bold text-gray-800 dark:text-gray-200 shadow-sm bg-white dark:bg-[#08060d] ${errors.poster_email ? 'border-red-300' : 'border-gray-200 dark:border-gray-800 focus:border-blue-500 dark:focus:border-blue-400'}`}
                                 />
                                 {errors.poster_email && <p className="text-red-500 text-[10px] font-bold mt-2 ml-1">{errors.poster_email}</p>}
                             </div>
@@ -727,11 +729,11 @@ export const CreateProductPage = () => {
 
                         <div>
                             <div className="flex items-center justify-between mb-3 ml-1">
-                                <label className="block text-[11px] font-black text-gray-400 uppercase tracking-widest">Phone Numbers (Max 3) <span className="text-red-500">*</span></label>
+                                <label className="block text-[11px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">{t('create_product.phone_numbers')} (Max 3) <span className="text-red-500">*</span></label>
                                 {phones.length < 3 && (
-                                    <button type="button" onClick={addPhone} className="text-[10px] font-black text-blue-600 hover:text-blue-700 uppercase tracking-widest flex items-center gap-1">
+                                    <button type="button" onClick={addPhone} className="text-[10px] font-black text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 uppercase tracking-widest flex items-center gap-1">
                                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M12 4v16m8-8H4"/></svg>
-                                        Add Phone
+                                        {t('create_product.add_phone')}
                                     </button>
                                 )}
                             </div>
@@ -739,11 +741,11 @@ export const CreateProductPage = () => {
                                 {phones.map((phone, idx) => (
                                     <div key={idx} className="flex gap-2">
                                         <div className="relative flex-grow">
-                                            <div className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center gap-2 border-r border-gray-200 pr-3">
-                                                <svg className={`w-4 h-4 ${idx === 0 && errors.phone ? 'text-red-400' : 'text-gray-400'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
-                                                <span className={`text-[10px] font-black ${idx === 0 && errors.phone ? 'text-red-400' : 'text-gray-400'}`}>{idx + 1}</span>
+                                            <div className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center gap-2 border-r border-gray-200 dark:border-gray-800 pr-3">
+                                                <svg className={`w-4 h-4 ${idx === 0 && errors.phone ? 'text-red-400' : 'text-gray-400 dark:text-gray-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
+                                                <span className={`text-[10px] font-black ${idx === 0 && errors.phone ? 'text-red-400' : 'text-gray-400 dark:text-gray-600'}`}>{idx + 1}</span>
                                             </div>
-                                            <input type="tel" placeholder="012 345 678" value={phone} onChange={e => handlePhoneValueChange(idx, e.target.value)} className={`w-full pl-16 pr-4 py-4 border rounded-2xl focus:bg-white outline-none transition font-bold text-gray-800 shadow-sm ${idx === 0 && errors.phone ? 'border-red-300' : 'border-gray-200 focus:border-blue-500'}`} />
+                                            <input type="tel" placeholder="012 345 678" value={phone} onChange={e => handlePhoneValueChange(idx, e.target.value)} className={`w-full pl-16 pr-4 py-4 border rounded-2xl focus:bg-white dark:focus:bg-[#08060d] outline-none transition font-bold text-gray-800 dark:text-gray-200 shadow-sm bg-white dark:bg-[#08060d] ${idx === 0 && errors.phone ? 'border-red-300' : 'border-gray-200 dark:border-gray-800 focus:border-blue-500 dark:focus:border-blue-400'}`} />
                                         </div>
                                         {phones.length > 1 && (
                                             <button type="button" onClick={() => removePhoneField(idx)} className="p-4 text-gray-400 hover:text-red-500 transition-colors">
@@ -757,16 +759,16 @@ export const CreateProductPage = () => {
                         </div>
 
                         <div>
-                            <label className="block text-[11px] font-black text-gray-400 uppercase mb-3 tracking-widest ml-1">Business/Company Name <span className="text-red-500">*</span></label>
+                            <label className="block text-[11px] font-black text-gray-400 dark:text-gray-500 uppercase mb-3 tracking-widest ml-1">{t('create_product.company_name')} <span className="text-red-500">*</span></label>
                             <input
                                 type="text"
-                                placeholder="Enter company name if applicable"
+                                placeholder={t('create_product.company_name_placeholder', { defaultValue: 'Enter company name if applicable' })}
                                 value={formData.company_name}
                                 onChange={e => {
                                     setFormData({...formData, company_name: e.target.value});
                                     if (errors.company_name) setErrors(prev => ({ ...prev, company_name: '' }));
                                 }}
-                                className={`w-full px-6 py-4 border rounded-2xl focus:bg-white outline-none transition font-bold text-gray-800 shadow-sm ${errors.company_name ? 'border-red-300' : 'border-gray-200 focus:border-blue-500'}`}
+                                className={`w-full px-6 py-4 border rounded-2xl focus:bg-white dark:focus:bg-[#08060d] outline-none transition font-bold text-gray-800 dark:text-gray-200 shadow-sm bg-white dark:bg-[#08060d] ${errors.company_name ? 'border-red-300' : 'border-gray-200 dark:border-gray-800 focus:border-blue-500 dark:focus:border-blue-400'}`}
                             />
                             {errors.company_name && <p className="text-red-500 text-[10px] font-bold mt-2 ml-1">{errors.company_name}</p>}
                         </div>
@@ -775,7 +777,7 @@ export const CreateProductPage = () => {
 
             </div>
 
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-8 pt-12 mt-12 border-t border-gray-100">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-8 pt-12 mt-12 border-t border-gray-100 dark:border-gray-800 transition-colors">
               <div className="flex flex-col gap-2 max-w-md">
                 <div className="flex items-start gap-3">
                     <input
@@ -785,10 +787,10 @@ export const CreateProductPage = () => {
                             setAgreedToTerms(e.target.checked);
                             if (errors.terms) setErrors(prev => ({ ...prev, terms: '' }));
                         }}
-                        className={`mt-1 w-4 h-4 rounded text-blue-600 focus:ring-blue-500 ${errors.terms ? 'border-red-300' : 'border-gray-300'}`}
+                        className={`mt-1 w-4 h-4 rounded text-blue-600 focus:ring-blue-500 bg-white dark:bg-gray-800 ${errors.terms ? 'border-red-300' : 'border-gray-300 dark:border-gray-700'}`}
                     />
-                    <p className={`text-[11px] leading-relaxed font-bold uppercase tracking-tight ${errors.terms ? 'text-red-500' : 'text-gray-500'}`}>
-                    I agree to the <span className="text-blue-600 hover:underline cursor-pointer">Terms and Conditions</span> and <span className="text-blue-600 hover:underline cursor-pointer">Safety Guidelines</span> of Sabay Shop.
+                    <p className={`text-[11px] leading-relaxed font-bold uppercase tracking-tight ${errors.terms ? 'text-red-500' : 'text-gray-500 dark:text-gray-400'}`}>
+                    {t('create_product.agree_terms')}
                     </p>
                 </div>
                 {errors.terms && <p className="text-red-500 text-[10px] font-bold ml-7">{errors.terms}</p>}
@@ -798,7 +800,7 @@ export const CreateProductPage = () => {
                 disabled={loading || limitInfo?.limit_reached}
                 className="w-full sm:w-auto min-w-[300px] bg-blue-600 hover:bg-blue-700 text-white px-10 py-5 rounded-2xl font-black uppercase tracking-[0.2em] transition-all shadow-2xl shadow-blue-600/30 active:scale-95 disabled:opacity-50"
               >
-                {loading ? 'Processing...' : limitInfo?.limit_reached ? 'Limit Reached' : 'Post Ad Now'}
+                {loading ? t('create_product.processing') : limitInfo?.limit_reached ? t('create_product.limit_reached') : t('create_product.post_now')}
               </button>
             </div>
           </form>

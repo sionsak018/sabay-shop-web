@@ -8,6 +8,7 @@ import { type Category } from '../../categories/types/category.types';
 import api from '../../../services/api';
 import { getImageUrl } from '../../../utils/imageUrl';
 import { LocationPickerModal } from '../../../components/common/LocationPickerModal';
+import { useTranslation } from 'react-i18next';
 
 interface LocalFilters {
   min_price: string;
@@ -29,6 +30,7 @@ const CategoryIcon = ({ cat, className = "" }: { cat: Category, className?: stri
 };
 
 export const ProductListPage = () => {
+  const { t } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const categoryId = searchParams.get('category_id') || '';
@@ -198,7 +200,7 @@ export const ProductListPage = () => {
   return (
     <div ref={topRef} className="min-h-screen bg-[#f1f2f6] dark:bg-[#08060d] text-gray-900 dark:text-gray-100 pb-20 text-left antialiased font-sans relative transition-colors duration-300">
 
-      {/* Search Bar - Khmer24 Style */}
+      {/* Search Bar -  Style */}
       <div className="bg-white dark:bg-[#16171d] border-b border-gray-200 dark:border-gray-800 py-3 shadow-sm transition-colors">
         <div className="container mx-auto px-4 max-w-7xl flex gap-2">
              <div className="relative flex-1">
@@ -206,7 +208,7 @@ export const ProductListPage = () => {
                     type="text"
                     value={localSearchTerm}
                     onChange={e => setLocalSearchTerm(e.target.value)}
-                    placeholder="Search in all categories..."
+                    placeholder={t('product_list.search_placeholder', { defaultValue: 'Search in all categories...' })}
                     className="w-full bg-[#f8f9fa] dark:bg-[#1f2028] border border-[#dee2e6] dark:border-gray-700 px-4 py-2 rounded focus:bg-white focus:border-blue-500 outline-none text-sm font-medium text-gray-700 dark:text-gray-200 transition-all"
                     onKeyDown={e => {
                         if (e.key === 'Enter') {
@@ -221,7 +223,7 @@ export const ProductListPage = () => {
                 onClick={handleSearchButtonClick}
                 className="bg-blue-600 hover:bg-blue-700 text-white px-4 sm:px-8 py-2 rounded font-bold transition flex items-center justify-center shadow-sm uppercase tracking-wider text-[11px] sm:text-xs shrink-0"
              >
-                Search
+                {t('common.search')}
              </button>
         </div>
       </div>

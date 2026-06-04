@@ -2,10 +2,12 @@ import { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../features/auth/hooks/useAuth';
 import { useTheme } from '../../context/ThemeContext';
+import { useTranslation } from 'react-i18next';
 
 export const Header = () => {
   const { user, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -21,6 +23,10 @@ export const Header = () => {
   };
 
   const isActive = (path: string) => location.pathname === path;
+
+  const changeLanguage = (lng: string) => {
+    i18n.changeLanguage(lng);
+  };
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -42,7 +48,7 @@ export const Header = () => {
   }, [location.pathname]);
 
   return (
-    <header className="bg-white dark:bg-[#16171d] border-b border-gray-200 dark:border-gray-800 sticky top-0 z-50 h-14 flex items-center transition-colors duration-300">
+    <header className="bg-white dark:bg-[#16171d] border-b border-gray-200 dark:border-gray-800 h-14 flex items-center transition-colors duration-300">
       <div className="container mx-auto px-4 max-w-7xl flex justify-between items-center">
         
         <div className="flex items-center gap-4">
@@ -72,20 +78,20 @@ export const Header = () => {
         <div className="flex items-center gap-2 sm:gap-5">
           <nav className="hidden md:flex items-center gap-5">
             <Link to="/" className={`text-xs font-bold ${isActive('/') ? 'text-blue-600' : 'text-gray-600 dark:text-gray-400 hover:text-blue-600'} transition uppercase tracking-widest`}>
-              HOME
+              {t('common.home')}
             </Link>
             <Link to="/products" className={`text-xs font-bold ${isActive('/products') ? 'text-blue-600' : 'text-gray-600 dark:text-gray-400 hover:text-blue-600'} transition uppercase tracking-widest`}>
-              MARKETPLACE
+              {t('common.marketplace')}
             </Link>
           </nav>
 
           <div className="h-5 w-px bg-gray-200 dark:bg-gray-800 hidden md:block" />
 
           <div className="flex items-center gap-2 sm:gap-3">
-            {/* Dark Mode Toggle - Improved UI */}
+            {/* Dark Mode Toggle - Hidden on Mobile, moved to Sidebar */}
             <button
               onClick={toggleTheme}
-              className="relative flex items-center h-9 p-1 rounded-full bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 transition-all duration-500 hover:ring-4 hover:ring-blue-500/10 group overflow-hidden w-9 md:hover:w-24 shrink-0"
+              className="relative hidden md:flex items-center h-9 p-1 rounded-full bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 transition-all duration-500 hover:ring-4 hover:ring-blue-500/10 group overflow-hidden w-9 md:hover:w-24 shrink-0"
             >
               <div className={`flex items-center justify-center size-7 rounded-full shadow-md transition-all duration-500 z-10 ${theme === 'dark' ? 'md:group-hover:translate-x-[56px] bg-gray-700 text-yellow-300' : 'translate-x-0 bg-white text-orange-500'}`}>
                 {theme === 'light' ? (
@@ -98,6 +104,22 @@ export const Header = () => {
                 {theme === 'light' ? 'Light' : 'Dark'}
               </span>
             </button>
+
+            {/* Language Switcher - Hidden on Mobile, moved to Sidebar */}
+            <div className="hidden md:flex bg-gray-100 dark:bg-gray-800 p-1 rounded-full border border-gray-200 dark:border-gray-700">
+              <button
+                onClick={() => changeLanguage('km')}
+                className={`px-2 py-1 rounded-full text-[10px] font-black transition-all ${i18n.resolvedLanguage === 'km' ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-200'}`}
+              >
+                KH
+              </button>
+              <button
+                onClick={() => changeLanguage('en')}
+                className={`px-2 py-1 rounded-full text-[10px] font-black transition-all ${i18n.resolvedLanguage === 'en' ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-200'}`}
+              >
+                EN
+              </button>
+            </div>
 
             {user ? (
               <div className="relative" ref={dropdownRef}>
@@ -121,7 +143,7 @@ export const Header = () => {
                   </svg>
                 </button>
 
-                {/* Khmer24 Style Dropdown */}
+                {/* Style Dropdown */}
                 {isProfileOpen && (
                   <div className="absolute right-0 mt-2 w-64 bg-white dark:bg-[#1f2028] border border-gray-100 dark:border-gray-800 rounded-xl shadow-2xl py-2 z-50 animate-in fade-in zoom-in-95 duration-150 origin-top-right">
                     <div className="px-4 py-3 border-b border-gray-50 dark:border-gray-800 mb-1">
@@ -131,17 +153,17 @@ export const Header = () => {
 
                     <Link to="/profile" onClick={() => setIsProfileOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm font-bold text-gray-600 dark:text-gray-400 hover:bg-blue-50 dark:hover:bg-gray-800 hover:text-blue-600 transition-colors">
                       <svg className="w-5 h-5 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
-                      My Dashboard
+                      {t('common.dashboard')}
                     </Link>
 
                     <Link to="/profile?tab=ads" onClick={() => setIsProfileOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm font-bold text-gray-600 dark:text-gray-400 hover:bg-blue-50 dark:hover:bg-gray-800 hover:text-blue-600 transition-colors">
                       <svg className="w-5 h-5 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
-                      My Ads Management
+                      {t('common.my_ads')}
                     </Link>
 
                     <Link to="/inbox" onClick={() => setIsProfileOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm font-bold text-gray-600 dark:text-gray-400 hover:bg-blue-50 dark:hover:bg-gray-800 hover:text-blue-600 transition-colors">
                       <svg className="w-5 h-5 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>
-                      Messages
+                      {t('common.messages')}
                     </Link>
 
                     {user.role === 'admin' && (
@@ -158,7 +180,7 @@ export const Header = () => {
                       className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-bold text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors"
                     >
                       <svg className="w-5 h-5 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 01-3-3h4a3 3 0 013 3v1"/></svg>
-                      Sign Out
+                      {t('common.logout')}
                     </button>
                   </div>
                 )}
@@ -166,22 +188,22 @@ export const Header = () => {
             ) : (
               <div className="flex items-center gap-2 sm:gap-4 mr-1 sm:mr-0">
                 <Link to="/login" className="text-[11px] sm:text-xs font-black text-gray-600 dark:text-gray-400 hover:text-blue-600 transition uppercase tracking-widest">
-                  LOGIN
+                  {t('common.login')}
                 </Link>
                 <div className="h-4 w-px bg-gray-200 dark:bg-gray-800 hidden xs:block" />
                 <Link to="/register" className="text-[11px] sm:text-xs font-black text-gray-600 dark:text-gray-400 hover:text-blue-600 transition uppercase tracking-widest hidden xs:block">
-                  REGISTER
+                  {t('common.register')}
                 </Link>
               </div>
             )}
 
             <Link
               to="/sell"
-              className="bg-blue-600 hover:bg-blue-700 text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-md font-black text-[10px] sm:text-[11px] shadow-lg shadow-blue-600/20 transition active:scale-95 flex items-center gap-1.5 uppercase tracking-widest"
+              className="bg-blue-600 hover:bg-blue-700 text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-md font-black text-[10px] sm:text-[11px] shadow-lg shadow-blue-600/20 transition active:scale-90 flex items-center gap-1.5 uppercase tracking-widest"
             >
               <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M12 4v16m8-8H4"/></svg>
-              <span className="hidden xs:inline">POST AD</span>
-              <span className="xs:hidden">SELL</span>
+              <span className="hidden xs:inline">{t('common.post_ad')}</span>
+              <span className="xs:hidden">{t('common.sell')}</span>
             </Link>
           </div>
         </div>
@@ -193,9 +215,9 @@ export const Header = () => {
           <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[60] md:hidden animate-in fade-in duration-200" onClick={() => setIsMobileMenuOpen(false)} />
           <div
             ref={mobileMenuRef}
-            className="fixed inset-y-0 left-0 w-[280px] bg-white z-[70] md:hidden flex flex-col shadow-2xl animate-in slide-in-from-left duration-300"
+            className="fixed inset-y-0 left-0 w-[280px] bg-white dark:bg-[#16171d] z-[70] md:hidden flex flex-col shadow-2xl animate-in slide-in-from-left duration-300 transition-colors"
           >
-            <div className="p-4 border-b border-gray-100 flex items-center justify-between bg-blue-600 text-white">
+            <div className="p-4 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between bg-blue-600 text-white">
               <div className="flex items-center gap-2 italic font-black text-lg">
                 SABAY SHOP
               </div>
@@ -205,46 +227,75 @@ export const Header = () => {
             </div>
 
             <div className="flex-1 overflow-y-auto py-2">
-              <div className="px-4 py-2 text-[10px] font-black text-gray-400 uppercase tracking-widest">Main Menu</div>
-              <Link to="/" className={`flex items-center gap-3 px-6 py-3.5 font-bold text-sm ${isActive('/') ? 'bg-blue-50 text-blue-600 border-r-4 border-blue-600' : 'text-gray-600'}`}>
+              {/* Mobile Quick Toggles (Language & Theme) */}
+              <div className="px-4 py-4 flex items-center justify-between border-b border-gray-50 dark:border-gray-800 mb-2">
+                <div className="flex bg-gray-100 dark:bg-gray-800 p-1 rounded-lg border border-gray-200 dark:border-gray-700">
+                    <button
+                        onClick={() => changeLanguage('km')}
+                        className={`px-4 py-1.5 rounded-md text-xs font-black transition-all ${i18n.resolvedLanguage === 'km' ? 'bg-blue-600 text-white shadow-md' : 'text-gray-400'}`}
+                    >
+                        KH
+                    </button>
+                    <button
+                        onClick={() => changeLanguage('en')}
+                        className={`px-4 py-1.5 rounded-md text-xs font-black transition-all ${i18n.resolvedLanguage === 'en' ? 'bg-blue-600 text-white shadow-md' : 'text-gray-400'}`}
+                    >
+                        EN
+                    </button>
+                </div>
+
+                <button
+                    onClick={toggleTheme}
+                    className="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 transition-colors"
+                >
+                    {theme === 'light' ? (
+                        <svg className="w-5 h-5 text-orange-500" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z"/></svg>
+                    ) : (
+                        <svg className="w-5 h-5 text-yellow-300" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/></svg>
+                    )}
+                    <span className="text-[10px] font-black uppercase tracking-widest">{theme}</span>
+                </button>
+              </div>
+              <div className="px-4 py-2 text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">Main Menu</div>
+              <Link to="/" className={`flex items-center gap-3 px-6 py-3.5 font-bold text-sm transition-colors ${isActive('/') ? 'bg-blue-50 dark:bg-blue-900/10 text-blue-600 dark:text-blue-400 border-r-4 border-blue-600' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'}`}>
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
-                Home
+                {t('common.home')}
               </Link>
-              <Link to="/products" className={`flex items-center gap-3 px-6 py-3.5 font-bold text-sm ${isActive('/products') ? 'bg-blue-50 text-blue-600 border-r-4 border-blue-600' : 'text-gray-600'}`}>
+              <Link to="/products" className={`flex items-center gap-3 px-6 py-3.5 font-bold text-sm transition-colors ${isActive('/products') ? 'bg-blue-50 dark:bg-blue-900/10 text-blue-600 dark:text-blue-400 border-r-4 border-blue-600' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'}`}>
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h12l1 12H4L5 9z"/></svg>
-                Marketplace
+                {t('common.marketplace')}
               </Link>
 
               {user ? (
                 <>
-                  <div className="px-4 mt-6 py-2 text-[10px] font-black text-gray-400 uppercase tracking-widest">My Account</div>
-                  <Link to="/profile" className={`flex items-center gap-3 px-6 py-3.5 font-bold text-sm ${isActive('/profile') ? 'bg-blue-50 text-blue-600 border-r-4 border-blue-600' : 'text-gray-600'}`}>
+                  <div className="px-4 mt-6 py-2 text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">{t('common.account')}</div>
+                  <Link to="/profile" className={`flex items-center gap-3 px-6 py-3.5 font-bold text-sm transition-colors ${isActive('/profile') ? 'bg-blue-50 dark:bg-blue-900/10 text-blue-600 dark:text-blue-400 border-r-4 border-blue-600' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'}`}>
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-                    My Dashboard
+                    {t('common.dashboard')}
                   </Link>
-                  <Link to="/profile?tab=ads" className="flex items-center gap-3 px-6 py-3.5 font-bold text-sm text-gray-600">
+                  <Link to="/profile?tab=ads" className="flex items-center gap-3 px-6 py-3.5 font-bold text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
-                    Manage My Ads
+                    {t('common.my_ads')}
                   </Link>
-                  <Link to="/inbox" className={`flex items-center gap-3 px-6 py-3.5 font-bold text-sm ${isActive('/inbox') ? 'bg-blue-50 text-blue-600 border-r-4 border-blue-600' : 'text-gray-600'}`}>
+                  <Link to="/inbox" className={`flex items-center gap-3 px-6 py-3.5 font-bold text-sm transition-colors ${isActive('/inbox') ? 'bg-blue-50 dark:bg-blue-900/10 text-blue-600 dark:text-blue-400 border-r-4 border-blue-600' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'}`}>
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>
-                    Messages
+                    {t('common.messages')}
                   </Link>
-                  <button onClick={handleLogout} className="w-full flex items-center gap-3 px-6 py-3.5 font-bold text-sm text-red-500 mt-4">
+                  <button onClick={handleLogout} className="w-full flex items-center gap-3 px-6 py-3.5 font-bold text-sm text-red-500 mt-4 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors">
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 01-3-3h4a3 3 0 013 3v1"/></svg>
-                    Sign Out
+                    {t('common.logout')}
                   </button>
                 </>
               ) : (
                 <div className="px-6 py-6 space-y-3">
-                  <Link to="/login" className="block w-full bg-blue-600 text-white text-center py-3 rounded-lg font-bold shadow-lg shadow-blue-600/20">Login</Link>
-                  <Link to="/register" className="block w-full border border-gray-200 text-gray-700 text-center py-3 rounded-lg font-bold">Register</Link>
+                  <Link to="/login" className="block w-full bg-blue-600 text-white text-center py-3 rounded-lg font-bold shadow-lg shadow-blue-600/20 active:scale-95 transition-transform">{t('common.login')}</Link>
+                  <Link to="/register" className="block w-full border border-gray-200 dark:border-gray-800 text-gray-700 dark:text-gray-300 text-center py-3 rounded-lg font-bold hover:bg-gray-50 dark:hover:bg-gray-800 active:scale-95 transition-all">{t('common.register')}</Link>
                 </div>
               )}
             </div>
 
-            <div className="p-4 bg-gray-50 border-t border-gray-100 mt-auto">
-              <p className="text-[10px] font-black text-gray-400 uppercase text-center tracking-widest">&copy; 2026 SABAY SHOP. ALL RIGHTS RESERVED.</p>
+            <div className="p-4 bg-gray-50 dark:bg-gray-800/50 border-t border-gray-100 dark:border-gray-800 mt-auto transition-colors">
+              <p className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase text-center tracking-widest">&copy; 2026 SABAY SHOP. ALL RIGHTS RESERVED.</p>
             </div>
           </div>
         </>

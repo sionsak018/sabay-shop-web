@@ -4,6 +4,13 @@
   --color-dark-bg: #08060d;
   --color-dark-card: #16171d;
   --color-dark-border: #1f2028;
+
+  /* Semantic colors that switch based on theme variables */
+  --color-bg-primary: var(--bg);
+  --color-card-primary: var(--card);
+  --color-text-primary: var(--text);
+  --color-text-heading: var(--text-h);
+  --color-border-primary: var(--border);
 }
 
 /* Enable class-based dark mode for Tailwind v4 */
@@ -67,5 +74,13 @@
   }
   .dark .custom-scrollbar::-webkit-scrollbar-thumb {
     background: #2e303a;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
 }

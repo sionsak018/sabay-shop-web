@@ -54,25 +54,25 @@ export const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 antialiased p-4">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 dark:bg-[#08060d] antialiased p-4 transition-colors duration-300">
 
       {/* Logo Branding */}
       <Link to="/" className="flex items-center gap-2 mb-8 group">
         <div className="bg-blue-600 text-white font-black px-2 py-1 rounded text-2xl italic group-hover:bg-blue-700 transition">
           SABAY
         </div>
-        <span className="text-2xl font-bold text-gray-800 tracking-tight">SHOP</span>
+        <span className="text-2xl font-bold text-gray-800 dark:text-gray-100 tracking-tight">SHOP</span>
       </Link>
 
-      <div className="max-w-md w-full bg-white border border-gray-200 rounded-md shadow-sm overflow-hidden">
-        <div className="bg-gray-50 px-8 py-4 border-b border-gray-200">
-          <h2 className="text-sm font-bold text-gray-700 uppercase text-center tracking-widest">Login to your account</h2>
+      <div className="max-w-md w-full bg-white dark:bg-[#16171d] border border-gray-200 dark:border-gray-800 rounded-md shadow-sm overflow-hidden">
+        <div className="bg-gray-50 dark:bg-[#1f2028]/50 px-8 py-4 border-b border-gray-200 dark:border-gray-800">
+          <h2 className="text-sm font-bold text-gray-700 dark:text-gray-300 uppercase text-center tracking-widest">Login to your account</h2>
         </div>
 
         <div className="p-8">
           <form onSubmit={handleSubmit} noValidate className="space-y-5">
             <div>
-              <label className="block text-xs font-bold text-gray-500 uppercase mb-2 tracking-wider">Email Address</label>
+              <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase mb-2 tracking-wider">Email Address</label>
               <input
                 type="email"
                 placeholder="your@email.com"
@@ -81,14 +81,14 @@ export const LoginPage = () => {
                   setEmail(e.target.value);
                   if (errors.email) setErrors(prev => ({ ...prev, email: '' }));
                 }}
-                className={`w-full px-4 py-3 border rounded focus:border-blue-500 outline-none transition text-sm ${errors.email ? 'border-red-300' : 'border-gray-300'}`}
+                className={`w-full px-4 py-3 border rounded focus:border-blue-500 outline-none transition text-sm bg-white dark:bg-[#08060d] text-gray-800 dark:text-gray-200 ${errors.email ? 'border-red-300' : 'border-gray-300 dark:border-gray-700'}`}
               />
               {errors.email && <p className="text-red-500 text-[10px] font-bold mt-1.5 ml-1">{errors.email}</p>}
             </div>
 
             <div>
               <div className="flex justify-between items-center mb-2">
-                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider">Password</label>
+                <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Password</label>
                 <Link to="#" className="text-[11px] font-bold text-blue-600 hover:underline">Forgot?</Link>
               </div>
               <div className="relative">
@@ -100,7 +100,7 @@ export const LoginPage = () => {
                     setPassword(e.target.value);
                     if (errors.password) setErrors(prev => ({ ...prev, password: '' }));
                   }}
-                  className={`w-full px-4 py-3 pr-10 border rounded focus:border-blue-500 outline-none transition text-sm ${errors.password ? 'border-red-300' : 'border-gray-300'}`}
+                  className={`w-full px-4 py-3 pr-10 border rounded focus:border-blue-500 outline-none transition text-sm bg-white dark:bg-[#08060d] text-gray-800 dark:text-gray-200 ${errors.password ? 'border-red-300' : 'border-gray-300 dark:border-gray-700'}`}
                 />
                 <button
                   type="button"
@@ -126,8 +126,8 @@ export const LoginPage = () => {
             </button>
           </form>
 
-          <div className="mt-8 pt-6 border-t border-gray-100 text-center">
-            <p className="text-sm text-gray-500">
+          <div className="mt-8 pt-6 border-t border-gray-100 dark:border-gray-800 text-center transition-colors">
+            <p className="text-sm text-gray-500 dark:text-gray-400">
               New to Sabay Shop?{' '}
               <Link to="/register" className="font-bold text-blue-600 hover:underline">Register Now</Link>
             </p>
@@ -135,7 +135,7 @@ export const LoginPage = () => {
         </div>
       </div>
 
-      <p className="mt-8 text-xs text-gray-400">
+      <p className="mt-8 text-xs text-gray-400 dark:text-gray-600">
         &copy; {new Date().getFullYear()} Sabay Shop Marketplace. All rights reserved.
       </p>
     </div>

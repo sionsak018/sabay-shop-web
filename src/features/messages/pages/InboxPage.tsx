@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, Fragment } from 'react';
 import { format, isToday, isYesterday, formatDistanceToNow } from 'date-fns';
 import { useAuth } from '../../auth/hooks/useAuth';
 import { messageApi } from '../services/messageApi';
@@ -20,6 +20,8 @@ export const InboxPage = () => {
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
   const [audioChunks, setAudioChunks] = useState<Blob[]>([]);
   const [isDragOver, setIsDragOver] = useState(false);
+  const [msgToDelete, setMsgToDelete] = useState<Message | null>(null);
+  const [deleteForBoth, setDeleteForBoth] = useState(true);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -179,10 +181,15 @@ export const InboxPage = () => {
     } catch (error) {}
   };
 
-  const handleDeleteMessage = async (msgId: number) => {
-    if (!window.confirm('Delete this message?')) return;
+  const handleDeleteMessage = (msg: Message) => {
+    setMsgToDelete(msg);
+  };
+
+  const confirmDelete = async () => {
+    if (!msgToDelete) return;
     try {
-        await messageApi.deleteMessage(msgId);
+        await messageApi.deleteMessage(msgToDelete.id);
+        setMsgToDelete(null);
         fetchMessages(true);
     } catch (error) {
         alert('Failed to delete message');
@@ -202,16 +209,16 @@ export const InboxPage = () => {
   };
 
   return (
-    <div className="bg-[#f0f2f5] min-h-[calc(100vh-56px)] flex items-center justify-center p-0 md:p-6 antialiased">
+    <div className="bg-[#e7ebf0] dark:bg-[#08060d] h-[calc(100dvh-64px)] md:min-h-[calc(100vh-56px)] flex items-start justify-center p-0 md:p-4 antialiased transition-colors duration-300">
       <div
         onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }}
         onDragLeave={() => setIsDragOver(false)}
         onDrop={onDrop}
-        className={`w-full max-w-7xl h-full md:h-[800px] bg-white md:rounded-2xl shadow-2xl flex overflow-hidden border border-gray-200 relative ${isDragOver ? 'ring-4 ring-blue-500 ring-inset' : ''}`}
+        className={`w-full max-w-6xl h-full md:h-[calc(100vh-100px)] bg-white dark:bg-[#16171d] md:rounded-lg shadow-xl flex overflow-hidden border border-gray-200 dark:border-gray-800 relative transition-colors ${isDragOver ? 'ring-4 ring-blue-500 ring-inset' : ''}`}
       >
         {isDragOver && (
             <div className="absolute inset-0 z-50 bg-blue-600/20 backdrop-blur-sm flex items-center justify-center pointer-events-none">
-                <div className="bg-white p-8 rounded-3xl shadow-2xl flex flex-col items-center gap-4 animate-bounce">
+                <div className="bg-white dark:bg-gray-800 p-8 rounded-3xl shadow-2xl flex flex-col items-center gap-4 animate-bounce">
                     <svg className="w-16 h-16 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
                     <p className="text-xl font-black text-blue-600 uppercase tracking-widest">Drop to upload</p>
                 </div>
@@ -219,36 +226,34 @@ export const InboxPage = () => {
         )}
 
         {/* Sidebar */}
-        <div className={`w-full md:w-80 lg:w-96 border-r border-gray-100 flex flex-col bg-white ${selectedPartnerId ? 'hidden md:flex' : 'flex'}`}>
-          <div className="p-4 space-y-4">
-            <div className="flex items-center justify-between">
-              <h1 className="text-xl font-black text-gray-900 tracking-tight">Chats</h1>
-              <button className="p-2 text-blue-600 hover:bg-blue-50 rounded-full transition-colors">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M11 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-5M18.364 5.364a2.121 2.121 0 013 3L12 18l-4 1 1-4 9.364-9.364z"/></svg>
+        <div className={`w-full md:w-80 lg:w-[320px] border-r border-gray-100 dark:border-gray-800 flex flex-col bg-white dark:bg-[#16171d] ${selectedPartnerId ? 'hidden md:flex' : 'flex'}`}>
+          <div className="p-3.5">
+            <div className="flex items-center gap-3 w-full">
+              <button className="p-2 text-gray-400 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors md:hidden">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
               </button>
-            </div>
-
-            <div className="relative">
-              <input
-                type="text"
-                placeholder="Search conversations"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-gray-100 border-none rounded-xl px-10 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 transition-all placeholder:text-gray-400 font-medium"
-              />
-              <svg className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+              <div className="relative flex-1">
+                <input
+                  type="text"
+                  placeholder="Search"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full bg-[#f1f1f1] dark:bg-[#08060d] border-none rounded-full px-10 py-2 text-[14px] focus:ring-2 focus:ring-blue-400 dark:focus:ring-blue-500/30 transition-all placeholder:text-gray-400 dark:placeholder:text-gray-600 text-gray-800 dark:text-gray-200"
+                />
+                <svg className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+              </div>
             </div>
           </div>
 
           <div className="flex-1 overflow-y-auto custom-scrollbar">
             {loading && messages.length === 0 ? (
                <div className="p-4 space-y-4">
-                  {[...Array(6)].map((_, i) => (
+                  {[...Array(8)].map((_, i) => (
                     <div key={i} className="flex gap-3 animate-pulse">
-                      <div className="w-14 h-14 bg-gray-100 rounded-full shrink-0" />
-                      <div className="flex-1 space-y-3 py-1">
-                        <div className="h-3 bg-gray-100 rounded w-1/2" />
-                        <div className="h-2 bg-gray-100 rounded w-full" />
+                      <div className="w-12 h-12 bg-gray-100 dark:bg-gray-800 rounded-full shrink-0" />
+                      <div className="flex-1 space-y-2 py-1">
+                        <div className="h-3.5 bg-gray-100 dark:bg-gray-800 rounded w-1/2" />
+                        <div className="h-2.5 bg-gray-100 dark:bg-gray-800 rounded w-full" />
                       </div>
                     </div>
                   ))}
@@ -262,35 +267,47 @@ export const InboxPage = () => {
                 <button
                   key={partnerId}
                   onClick={() => setSelectedPartnerId(Number(partnerId))}
-                  className={`w-full flex items-center gap-3 p-4 transition-all ${
-                    isActive ? 'bg-blue-600' : 'hover:bg-gray-50'
+                  className={`w-full flex items-center gap-3 px-3 py-2.5 transition-all ${
+                    isActive ? 'bg-[#3390ec] dark:bg-blue-600' : 'hover:bg-[#f4f4f5] dark:hover:bg-[#1f2028]'
                   }`}
                 >
                   <div className="relative shrink-0">
-                    <div className={`w-14 h-14 rounded-full flex items-center justify-center text-xl font-black shadow-inner border-2 ${isActive ? 'bg-blue-500 border-blue-400 text-white' : 'bg-gray-100 border-white text-blue-600'}`}>
+                    <div className={`w-14 h-14 rounded-full flex items-center justify-center text-xl font-bold overflow-hidden ${isActive ? 'ring-0' : ''}`}>
                        {partner.avatar ? (
-                         <img src={getImageUrl(partner.avatar)} className="w-full h-full object-cover rounded-full" />
-                       ) : partner.name.charAt(0).toUpperCase()}
+                         <img src={getImageUrl(partner.avatar)} className="w-full h-full object-cover" />
+                       ) : (
+                         <div className={`w-full h-full flex items-center justify-center text-white ${isActive ? 'bg-blue-400' : 'bg-gradient-to-br from-blue-400 to-blue-600'}`}>
+                            {partner.name.charAt(0).toUpperCase()}
+                         </div>
+                       )}
                     </div>
-                    <div className={`absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full border-2 border-white bg-green-500 ${isActive ? 'border-blue-600' : ''}`} />
                   </div>
 
-                  <div className="flex-1 min-w-0">
+                  <div className="flex-1 min-w-0 pr-1">
                     <div className="flex justify-between items-baseline mb-0.5">
-                      <span className={`text-[15px] font-bold truncate ${isActive ? 'text-white' : 'text-gray-900'}`}>
+                      <span className={`text-[15px] font-bold truncate ${isActive ? 'text-white' : 'text-gray-900 dark:text-gray-100'}`}>
                         {partner.name}
                       </span>
-                      <span className={`text-[11px] whitespace-nowrap ml-2 ${isActive ? 'text-blue-100' : 'text-gray-400'}`}>
+                      <span className={`text-[12px] whitespace-nowrap ml-2 ${isActive ? 'text-blue-50' : 'text-gray-400 dark:text-gray-500'}`}>
                         {formatMessageTime(lastMsg.created_at)}
                       </span>
                     </div>
-                    <div className="flex justify-between items-center gap-2">
-                       <p className={`text-[13px] truncate flex-1 ${isActive ? 'text-blue-50' : 'text-gray-500'}`}>
-                          {lastMsg.from_user_id === user.id && <span className={isActive ? 'text-blue-200' : 'text-blue-500'}>You: </span>}
-                          {lastMsg.type === 'text' ? lastMsg.message : `[${lastMsg.type.toUpperCase()}]`}
+                    <div className="flex justify-between items-start gap-2">
+                       <p className={`text-[14px] truncate flex-1 leading-tight ${isActive ? 'text-white/90' : 'text-gray-500 dark:text-gray-400'}`}>
+                          {lastMsg.from_user_id === user.id && (
+                            <svg className={`inline-block w-4 h-4 mr-0.5 -mt-0.5 ${isActive ? 'text-blue-100' : 'text-blue-500 dark:text-blue-400'}`} viewBox="0 0 24 24" fill="currentColor">
+                                <path d={lastMsg.is_read ? "M18 7l-1.41-1.41-6.34 6.34 1.41 1.41L18 7zm4.24-1.41L11.66 16.17 7.48 12l-1.41 1.41L11.66 19l12-12-1.42-1.41zM.41 13.41L6 19l1.41-1.41L1.83 12 .41 13.41z" : "M9 16.17L4.83 12l-1.42 1.41L9 17.58l12-12-1.41-1.41z"}/>
+                            </svg>
+                          )}
+                          {lastMsg.type === 'text' ? lastMsg.message : (
+                            <span className="italic flex items-center gap-1">
+                                {lastMsg.type === 'image' && <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>}
+                                {lastMsg.type.charAt(0).toUpperCase() + lastMsg.type.slice(1)}
+                            </span>
+                          )}
                        </p>
                        {unreadCount > 0 && !isActive && (
-                         <span className="bg-blue-600 text-white text-[10px] font-black min-w-[20px] h-5 px-1.5 rounded-full flex items-center justify-center">
+                         <span className="bg-[#4caf50] text-white text-[11px] font-bold min-w-[20px] h-5 px-1.5 rounded-full flex items-center justify-center shadow-sm">
                             {unreadCount}
                          </span>
                        )}
@@ -303,50 +320,47 @@ export const InboxPage = () => {
         </div>
 
         {/* Chat Window */}
-        <div className={`flex-1 flex flex-col bg-white relative ${!selectedPartnerId ? 'hidden md:flex' : 'flex'}`}>
+        <div className={`flex-1 flex flex-col bg-[#e7ebf0] dark:bg-[#08060d] relative ${!selectedPartnerId ? 'hidden md:flex' : 'flex'}`}>
           {selectedConversation ? (
             <>
               {/* Header */}
-              <div className="h-16 px-4 border-b border-gray-100 flex items-center justify-between bg-white/95 backdrop-blur-md sticky top-0 z-20">
+              <div className="h-[56px] px-4 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between bg-white dark:bg-[#16171d] sticky top-0 z-20 transition-colors">
                 <div className="flex items-center gap-3">
-                  <button onClick={() => setSelectedPartnerId(null)} className="md:hidden p-2 -ml-2 text-gray-400 hover:text-blue-600">
+                  <button onClick={() => setSelectedPartnerId(null)} className="md:hidden p-2 -ml-2 text-gray-400 dark:text-gray-500 hover:text-blue-600">
                     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M15 19l-7-7 7-7"/></svg>
                   </button>
-                  <div className="relative cursor-pointer" onClick={() => navigate(`/u/${selectedConversation.partner.id}`)}>
-                    <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-black text-sm border-2 border-white shadow-sm overflow-hidden">
-                       {selectedConversation.partner.avatar ? (
-                         <img src={getImageUrl(selectedConversation.partner.avatar)} className="w-full h-full object-cover" />
-                       ) : selectedConversation.partner.name.charAt(0).toUpperCase()}
-                    </div>
-                    <div className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-green-500 border-2 border-white" />
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white font-bold text-sm shadow-sm overflow-hidden cursor-pointer" onClick={() => navigate(`/u/${selectedConversation.partner.id}`)}>
+                     {selectedConversation.partner.avatar ? (
+                       <img src={getImageUrl(selectedConversation.partner.avatar)} className="w-full h-full object-cover" />
+                     ) : selectedConversation.partner.name.charAt(0).toUpperCase()}
                   </div>
-                  <div className="min-w-0 cursor-pointer" onClick={() => navigate(`/u/${selectedConversation.partner.id}`)}>
-                    <h2 className="text-[15px] font-bold text-gray-900 leading-none mb-1 truncate hover:text-blue-600 transition-colors">
+                  <div className="min-w-0 flex flex-col">
+                    <h2 className="text-[15px] font-bold text-gray-900 dark:text-gray-100 leading-tight truncate hover:text-blue-600 dark:hover:text-blue-400 transition-colors cursor-pointer" onClick={() => navigate(`/u/${selectedConversation.partner.id}`)}>
                       {selectedConversation.partner.name}
                     </h2>
-                    <span className="text-[11px] text-gray-400 font-bold uppercase tracking-widest">Online</span>
+                    <span className="text-[12px] text-[#3390ec] dark:text-blue-400 font-medium">last seen recently</span>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-1">
                   {isSearchingHistory ? (
-                      <div className="flex items-center bg-gray-100 rounded-full px-3 py-1">
+                      <div className="flex items-center bg-[#f1f1f1] dark:bg-[#08060d] rounded-full px-3 py-1 border border-gray-200 dark:border-gray-700">
                         <input
                             autoFocus
-                            placeholder="Find in chat..."
-                            className="bg-transparent border-none text-xs outline-none w-32 md:w-48 font-bold"
+                            placeholder="Search"
+                            className="bg-transparent border-none text-sm outline-none w-32 md:w-48 font-medium text-gray-800 dark:text-gray-200"
                             value={historySearch}
                             onChange={(e) => setHistorySearch(e.target.value)}
                         />
-                        <button onClick={() => { setIsSearchingHistory(false); setHistorySearch(''); }} className="text-gray-400"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12"/></svg></button>
+                        <button onClick={() => { setIsSearchingHistory(false); setHistorySearch(''); }} className="text-gray-400 dark:text-gray-600"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12"/></svg></button>
                       </div>
                   ) : (
-                    <button onClick={() => setIsSearchingHistory(true)} className="p-2.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-all">
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                    <button onClick={() => setIsSearchingHistory(true)} className="p-2 text-gray-400 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-all">
+                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                     </button>
                   )}
-                  <button className="p-2.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-all">
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"/></svg>
+                  <button className="p-2 text-gray-400 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-all">
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"/></svg>
                   </button>
                 </div>
               </div>
@@ -354,98 +368,121 @@ export const InboxPage = () => {
               {/* Messages Area */}
               <div
                 ref={scrollContainerRef}
-                className="flex-1 overflow-y-auto p-4 md:p-6 space-y-2 bg-[#f4f4f7] bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] custom-scrollbar"
+                className="flex-1 overflow-y-auto p-2 md:p-6 space-y-1 bg-[#e7ebf0] dark:bg-[#08060d] bg-repeat bg-center custom-scrollbar"
+                style={{
+                  backgroundImage: "url('https://i.pinimg.com/originals/85/ec/da/85ecda1af25fa0a9bc29853909148db3.jpg')",
+                  backgroundSize: '400px'
+                }}
               >
-                {(historySearch ? filteredChatMessages : selectedConversation.messages).map((msg, idx) => {
-                  const isOwn = msg.from_user_id === user.id;
-                  const prevMsg = selectedConversation.messages[idx - 1];
-                  const showDate = !prevMsg || !isToday(new Date(msg.created_at)) && format(new Date(msg.created_at), 'yyyy-MM-dd') !== format(new Date(prevMsg.created_at), 'yyyy-MM-dd');
+                <div className="flex flex-col gap-1">
+                  {(historySearch ? filteredChatMessages : selectedConversation.messages).map((msg, idx) => {
+                    const isOwn = msg.from_user_id === user.id;
+                    const prevMsg = selectedConversation.messages[idx - 1];
+                    const nextMsg = selectedConversation.messages[idx + 1];
 
-                  return (
-                    <div key={msg.id} className="space-y-4">
-                      {showDate && (
-                         <div className="flex justify-center my-6">
-                            <span className="bg-gray-400/20 backdrop-blur-sm text-gray-600 text-[11px] font-black px-4 py-1 rounded-full uppercase tracking-widest shadow-sm">
-                               {isToday(new Date(msg.created_at)) ? 'Today' : format(new Date(msg.created_at), 'MMMM dd, yyyy')}
-                            </span>
-                         </div>
-                      )}
+                    const isFirstInGroup = !prevMsg || prevMsg.from_user_id !== msg.from_user_id;
+                    const isLastInGroup = !nextMsg || nextMsg.from_user_id !== msg.from_user_id;
 
-                      <div className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}>
-                        <div className={`relative max-w-[85%] md:max-w-[70%] group`}>
-                          <div className={`px-4 py-2 rounded-2xl text-[14px] leading-relaxed shadow-sm transition-transform active:scale-[0.99] ${
-                            isOwn
-                              ? 'bg-blue-600 text-white rounded-br-sm'
-                              : 'bg-white text-gray-800 rounded-bl-sm border border-gray-100'
-                          }`}>
-                            {msg.type === 'text' && msg.message}
-                            {msg.type === 'image' && (
-                                <img src={getImageUrl(msg.file_path)} className="max-w-full rounded-lg mb-1" />
-                            )}
-                            {msg.type === 'audio' && (
-                                <audio controls src={getImageUrl(msg.file_path)} className="max-w-full mb-1 h-10" />
-                            )}
-                            {msg.type === 'file' && (
-                                <a href={getImageUrl(msg.file_path)} target="_blank" className="flex items-center gap-2 bg-black/5 p-2 rounded-lg hover:bg-black/10 transition-colors">
-                                    <svg className="w-8 h-8 text-blue-500" fill="currentColor" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6zM6 20V4h7v5h7v11H6z"/></svg>
-                                    <span className="truncate text-xs font-bold underline">{msg.message}</span>
-                                </a>
-                            )}
+                    const showDate = !prevMsg || format(new Date(msg.created_at), 'yyyy-MM-dd') !== format(new Date(prevMsg.created_at), 'yyyy-MM-dd');
 
-                            <div className={`flex items-center justify-end gap-1 mt-1 -mr-1 -mb-0.5`}>
-                               <span className={`text-[10px] font-bold uppercase tracking-tighter ${isOwn ? 'text-blue-100' : 'text-gray-400'}`}>
-                                  {format(new Date(msg.created_at), 'HH:mm')}
-                               </span>
-                               {isOwn && (
-                                 <svg className={`w-3 h-3 ${msg.is_read ? 'text-blue-200' : 'text-blue-300'}`} viewBox="0 0 24 24" fill="currentColor">
-                                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 17.58l12-12-1.41-1.41z"/>
-                                 </svg>
-                               )}
+                    return (
+                      <React.Fragment key={msg.id}>
+                        {showDate && (
+                           <div className="flex justify-center my-4">
+                              <span className="bg-black/10 dark:bg-[#16171d]/60 backdrop-blur text-white dark:text-gray-300 text-[13px] font-bold px-3 py-0.5 rounded-full shadow-sm">
+                                 {isToday(new Date(msg.created_at)) ? 'Today' : format(new Date(msg.created_at), 'MMMM dd')}
+                              </span>
+                           </div>
+                        )}
+
+                        <div className={`flex ${isOwn ? 'justify-end' : 'justify-start'} ${isFirstInGroup ? 'mt-3' : 'mt-0.5'}`}>
+                          <div className={`relative max-w-[90%] md:max-w-[80%] group flex items-end gap-1 ${isOwn ? 'flex-row-reverse' : 'flex-row'}`}>
+
+                            <div className={`relative px-3 py-1.5 shadow-sm min-w-[60px] animate-in fade-in slide-in-from-bottom-1 duration-200 ${
+                              isOwn
+                                ? 'bg-[#effdde] dark:bg-[#2b5278] text-gray-900 dark:text-gray-100 rounded-[15px] rounded-br-[4px]'
+                                : 'bg-white dark:bg-[#16171d] text-gray-900 dark:text-gray-100 rounded-[15px] rounded-bl-[4px]'
+                            } ${!isLastInGroup && (isOwn ? 'rounded-br-[15px]' : 'rounded-bl-[15px]')}`}>
+
+                              {msg.type === 'text' && (
+                                <p className="text-[15px] leading-[1.4] whitespace-pre-wrap break-words">{msg.message}</p>
+                              )}
+                              {msg.type === 'image' && (
+                                  <div className="rounded-lg overflow-hidden mb-1 border border-black/5">
+                                    <img src={getImageUrl(msg.file_path)} className="max-w-full max-h-[400px] object-contain" />
+                                  </div>
+                              )}
+                              {msg.type === 'audio' && (
+                                  <audio controls src={getImageUrl(msg.file_path)} className="max-w-full mb-1 h-10 accent-blue-500" />
+                              )}
+                              {msg.type === 'file' && (
+                                  <a href={getImageUrl(msg.file_path)} target="_blank" className="flex items-center gap-3 bg-black/5 dark:bg-white/5 p-2 rounded-lg hover:bg-black/10 dark:hover:bg-white/10 transition-colors">
+                                      <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white shrink-0">
+                                          <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6zM6 20V4h7v5h7v11H6z"/></svg>
+                                      </div>
+                                      <div className="min-w-0">
+                                          <p className="truncate text-sm font-bold">{msg.message}</p>
+                                          <p className="text-[10px] opacity-60 font-bold uppercase tracking-widest">Document</p>
+                                      </div>
+                                  </a>
+                              )}
+
+                              <div className={`flex items-center justify-end gap-1 mt-0.5 -mr-1 text-right select-none float-right ml-4 relative top-1`}>
+                                 <span className={`text-[11px] font-medium leading-none ${isOwn ? 'text-[#619a64] dark:text-blue-300' : 'text-[#a0acb6] dark:text-gray-500'}`}>
+                                    {format(new Date(msg.created_at), 'HH:mm')}
+                                 </span>
+                                 {isOwn && (
+                                   <svg className={`w-4 h-4 -mr-0.5 ${msg.is_read ? 'text-[#619a64] dark:text-blue-300' : 'text-[#619a64] dark:text-blue-300'}`} viewBox="0 0 24 24" fill="currentColor">
+                                      <path d={msg.is_read ? "M18 7l-1.41-1.41-6.34 6.34 1.41 1.41L18 7zm4.24-1.41L11.66 16.17 7.48 12l-1.41 1.41L11.66 19l12-12-1.42-1.41zM.41 13.41L6 19l1.41-1.41L1.83 12 .41 13.41z" : "M9 16.17L4.83 12l-1.42 1.41L9 17.58l12-12-1.41-1.41z"}/>
+                                   </svg>
+                                 )}
+                              </div>
+
+                              {/* Reactions View */}
+                              {msg.reactions && msg.reactions.length > 0 && (
+                                  <div className={`absolute -bottom-3 ${isOwn ? 'right-2' : 'left-2'} flex gap-1 z-10`}>
+                                      {msg.reactions.map(r => (
+                                          <button
+                                              key={r.id}
+                                              onClick={() => r.user_id === user.id && handleReact(msg.id, r.emoji)}
+                                              className={`bg-white dark:bg-[#16171d] rounded-full px-1.5 py-0.5 text-xs shadow-md border border-gray-100 dark:border-gray-800 animate-in zoom-in-50 transition-transform active:scale-125 ${r.user_id === user.id ? 'hover:scale-110' : 'cursor-default'}`}
+                                          >
+                                              {r.emoji}
+                                          </button>
+                                      ))}
+                                  </div>
+                              )}
                             </div>
 
-                            {/* Reactions View */}
-                            {msg.reactions && msg.reactions.length > 0 && (
-                                <div className={`absolute -bottom-2 ${isOwn ? 'right-0' : 'left-0'} flex gap-1`}>
-                                    {msg.reactions.map(r => (
-                                        <button
-                                            key={r.id}
-                                            onClick={() => r.user_id === user.id && handleReact(msg.id, r.emoji)}
-                                            className={`bg-white rounded-full px-1.5 py-0.5 text-xs shadow-md border border-gray-100 animate-in zoom-in-50 ${r.user_id === user.id ? 'hover:bg-gray-50' : 'cursor-default'}`}
-                                        >
-                                            {r.emoji}
-                                        </button>
-                                    ))}
-                                </div>
-                            )}
-
-                            {/* Actions Shortcut */}
-                            <div className={`absolute top-0 ${isOwn ? '-left-10 md:-left-12' : '-right-10 md:-right-12'} opacity-0 group-hover:opacity-100 transition-opacity flex flex-col gap-1 items-center`}>
+                            {/* Context Menu / Actions Shortcut */}
+                            <div className={`opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-0.5 bg-black/10 dark:bg-white/5 rounded-full px-1 py-0.5 backdrop-blur-sm`}>
                                 {isOwn && (
-                                    <button onClick={() => handleDeleteMessage(msg.id)} className="p-1.5 text-gray-400 hover:text-red-500 transition-colors">
-                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                    <button onClick={() => handleDeleteMessage(msg)} className="p-1 text-gray-600 dark:text-gray-400 hover:text-red-500 transition-colors">
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                                     </button>
                                 )}
                                 {['❤️', '👍', '🔥'].map(emoji => (
-                                    <button key={emoji} onClick={() => handleReact(msg.id, emoji)} className="hover:scale-125 transition-transform text-sm">{emoji}</button>
+                                    <button key={emoji} onClick={() => handleReact(msg.id, emoji)} className="p-1 hover:scale-150 transition-transform text-[15px] leading-none">{emoji}</button>
                                 ))}
                             </div>
+
                           </div>
                         </div>
-                      </div>
-                    </div>
-                  );
-                })}
+                      </React.Fragment>
+                    );
+                  })}
+                </div>
                 <div ref={messagesEndRef} />
               </div>
 
               {/* Input Area */}
-              <div className="p-3 md:p-4 bg-white border-t border-gray-50 flex items-end gap-2 md:gap-3">
-                 <button onClick={() => fileInputRef.current?.click()} className="p-2.5 text-gray-400 hover:text-blue-600 transition-colors">
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.414a4 4 0 00-5.656-5.656l-6.415 6.415a6 6 0 108.486 8.486L20.5 13"/></svg>
+              <div className="p-3 bg-white dark:bg-[#16171d] flex items-end gap-2 max-w-4xl mx-auto w-full mb-2 md:mb-4 md:rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 transition-colors">
+                 <button onClick={() => fileInputRef.current?.click()} className="p-2.5 text-gray-400 dark:text-gray-500 hover:text-[#3390ec] transition-colors rounded-full hover:bg-blue-50 dark:hover:bg-blue-900/10">
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.414a4 4 0 00-5.656-5.656l-6.415 6.415a6 6 0 108.486 8.486L20.5 13"/></svg>
                  </button>
                  <input type="file" ref={fileInputRef} className="hidden" onChange={handleFileUpload} />
 
-                 <div className="flex-1 bg-gray-100 rounded-2xl px-4 py-2 border border-transparent focus-within:border-blue-200 focus-within:bg-white transition-all">
+                 <div className="flex-1 min-h-[44px] flex items-center">
                     <textarea
                       rows={1}
                       value={newMessage}
@@ -456,40 +493,86 @@ export const InboxPage = () => {
                           handleSend('text');
                         }
                       }}
-                      placeholder="Message..."
-                      className="w-full bg-transparent py-1 text-sm focus:outline-none placeholder:text-gray-400 font-medium resize-none max-h-32"
+                      placeholder="Message"
+                      className="w-full bg-transparent py-2.5 text-[15px] focus:outline-none placeholder:text-gray-400 dark:placeholder:text-gray-600 text-gray-800 dark:text-gray-200 resize-none max-h-48 overflow-y-auto"
                     />
                  </div>
 
                  {newMessage.trim() ? (
                     <button
                         onClick={() => handleSend('text')}
-                        className="p-3 rounded-full bg-blue-600 text-white scale-110 shadow-lg shadow-blue-600/30 transition-all"
+                        className="p-2.5 text-[#3390ec] dark:text-blue-400 hover:scale-110 transition-transform active:scale-95"
                     >
-                        <svg className="w-5 h-5 fill-current rotate-45 -mt-0.5 -ml-0.5" viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+                        <svg className="w-7 h-7 fill-current" viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
                     </button>
                  ) : (
                     <button
                         onMouseDown={startRecording}
                         onMouseUp={stopRecording}
-                        className={`p-3 rounded-full transition-all ${isRecording ? 'bg-red-500 text-white animate-pulse' : 'bg-gray-100 text-gray-500 hover:text-blue-600'}`}
+                        className={`p-2.5 rounded-full transition-all ${isRecording ? 'bg-red-500 text-white animate-pulse' : 'text-gray-400 dark:text-gray-500 hover:text-blue-500'}`}
                     >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/></svg>
+                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/></svg>
                     </button>
                  )}
               </div>
             </>
           ) : (
-            <div className="flex-1 flex flex-col items-center justify-center p-12 text-center bg-[#f4f4f7] bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]">
-               <div className="w-24 h-24 bg-white/80 backdrop-blur-md rounded-[2rem] shadow-xl border border-white flex items-center justify-center mb-8 transform rotate-3">
-                  <svg className="w-10 h-10 text-blue-600 opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>
+            <div
+              className="flex-1 flex flex-col items-center justify-center p-12 text-center bg-[#e7ebf0] dark:bg-[#08060d]"
+              style={{
+                backgroundImage: "url('https://www.transparenttextures.com/patterns/pinstriped-suit.png')",
+                backgroundSize: '100px'
+              }}
+            >
+               <div className="bg-black/10 dark:bg-[#16171d]/60 backdrop-blur-md rounded-2xl px-6 py-2 shadow-sm border border-white/10">
+                    <p className="text-white dark:text-gray-300 text-sm font-bold">Select a chat to start messaging</p>
                </div>
-               <h3 className="text-sm bg-black/5 text-gray-500 px-4 py-1 rounded-full font-black uppercase tracking-widest mb-2">Select a chat</h3>
-               <p className="text-gray-400 text-xs font-medium max-w-[200px] leading-relaxed">Choose a conversation from the left to start messaging</p>
             </div>
           )}
         </div>
       </div>
+
+      {/* Telegram Style Delete Modal */}
+      {msgToDelete && (
+        <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4 bg-black/40 backdrop-blur-[2px] animate-in fade-in duration-200">
+          <div className="bg-white dark:bg-[#1c1c1d] w-full max-w-[320px] rounded-[28px] p-6 shadow-2xl animate-in zoom-in-95 duration-200">
+            <h3 className="text-gray-900 dark:text-white text-[17px] font-bold text-center mb-6">
+              Delete selected message?
+            </h3>
+
+            <button
+              onClick={() => setDeleteForBoth(!deleteForBoth)}
+              className="w-full flex items-center gap-3 px-1 mb-8 group"
+            >
+              <div className={`w-6 h-6 rounded-full flex items-center justify-center transition-colors ${deleteForBoth ? 'bg-[#619a64]' : 'border-2 border-gray-300 dark:border-gray-600'}`}>
+                {deleteForBoth && (
+                  <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
+                  </svg>
+                )}
+              </div>
+              <span className="text-[15px] font-medium text-gray-800 dark:text-gray-200">
+                Delete for Me and {selectedConversation?.partner.name}
+              </span>
+            </button>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => setMsgToDelete(null)}
+                className="flex-1 py-3 bg-[#f1f1f2] dark:bg-[#2c2c2e] text-gray-900 dark:text-white rounded-[18px] text-[15px] font-bold hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmDelete}
+                className="flex-1 py-3 bg-[#619a64] text-white rounded-[18px] text-[15px] font-bold hover:bg-[#528a55] transition-colors shadow-lg shadow-[#619a64]/20"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

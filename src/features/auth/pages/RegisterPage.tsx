@@ -83,65 +83,65 @@ export const RegisterPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 antialiased p-4 py-12">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 dark:bg-[#08060d] antialiased p-4 py-12 transition-colors duration-300">
 
       {/* Logo Branding */}
       <Link to="/" className="flex items-center gap-2 mb-8 group">
         <div className="bg-blue-600 text-white font-black px-2 py-1 rounded text-2xl italic group-hover:bg-blue-700 transition">
           SABAY
         </div>
-        <span className="text-2xl font-bold text-gray-800 tracking-tight">SHOP</span>
+        <span className="text-2xl font-bold text-gray-800 dark:text-gray-100 tracking-tight">SHOP</span>
       </Link>
 
-      <div className="max-w-md w-full bg-white border border-gray-200 rounded-md shadow-sm overflow-hidden">
-        <div className="bg-gray-50 px-8 py-4 border-b border-gray-200">
-          <h2 className="text-sm font-bold text-gray-700 uppercase text-center tracking-widest">Create your account</h2>
+      <div className="max-w-md w-full bg-white dark:bg-[#16171d] border border-gray-200 dark:border-gray-800 rounded-md shadow-sm overflow-hidden transition-colors">
+        <div className="bg-gray-50 dark:bg-[#1f2028]/50 px-8 py-4 border-b border-gray-200 dark:border-gray-800">
+          <h2 className="text-sm font-bold text-gray-700 dark:text-gray-300 uppercase text-center tracking-widest">Create your account</h2>
         </div>
 
         <div className="p-8">
           <form onSubmit={handleSubmit} noValidate className="space-y-5">
             <div>
-              <label className="block text-xs font-bold text-gray-500 uppercase mb-2 tracking-wider">Full Name</label>
+              <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase mb-2 tracking-wider">Full Name</label>
               <input
                 name="name"
                 type="text"
                 placeholder="John Doe"
                 value={formData.name}
                 onChange={handleChange}
-                className={`w-full px-4 py-3 border rounded focus:border-blue-500 outline-none transition text-sm ${errors.name ? 'border-red-300' : 'border-gray-300'}`}
+                className={`w-full px-4 py-3 border rounded focus:border-blue-500 outline-none transition text-sm bg-white dark:bg-[#08060d] text-gray-800 dark:text-gray-200 ${errors.name ? 'border-red-300' : 'border-gray-300 dark:border-gray-700'}`}
               />
               {errors.name && <p className="text-red-500 text-[10px] font-bold mt-1.5 ml-1">{errors.name}</p>}
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-gray-500 uppercase mb-2 tracking-wider">Email Address</label>
+              <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase mb-2 tracking-wider">Email Address</label>
               <input
                 name="email"
                 type="email"
                 placeholder="your@email.com"
                 value={formData.email}
                 onChange={handleChange}
-                className={`w-full px-4 py-3 border rounded focus:border-blue-500 outline-none transition text-sm ${errors.email ? 'border-red-300' : 'border-gray-300'}`}
+                className={`w-full px-4 py-3 border rounded focus:border-blue-500 outline-none transition text-sm bg-white dark:bg-[#08060d] text-gray-800 dark:text-gray-200 ${errors.email ? 'border-red-300' : 'border-gray-300 dark:border-gray-700'}`}
               />
               {errors.email && <p className="text-red-500 text-[10px] font-bold mt-1.5 ml-1">{errors.email}</p>}
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-gray-500 uppercase mb-2 tracking-wider">Phone Number</label>
+              <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase mb-2 tracking-wider">Phone Number</label>
               <input
                 name="phone"
                 type="tel"
                 placeholder="012 345 678"
                 value={formData.phone}
                 onChange={handleChange}
-                className={`w-full px-4 py-3 border rounded focus:border-blue-500 outline-none transition text-sm ${errors.phone ? 'border-red-300' : 'border-gray-300'}`}
+                className={`w-full px-4 py-3 border rounded focus:border-blue-500 outline-none transition text-sm bg-white dark:bg-[#08060d] text-gray-800 dark:text-gray-200 ${errors.phone ? 'border-red-300' : 'border-gray-300 dark:border-gray-700'}`}
               />
               {errors.phone && <p className="text-red-500 text-[10px] font-bold mt-1.5 ml-1">{errors.phone}</p>}
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-bold text-gray-500 uppercase mb-2 tracking-wider">Password</label>
+                <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase mb-2 tracking-wider">Password</label>
                 <div className="relative">
                   <input
                     name="password"
@@ -149,7 +149,7 @@ export const RegisterPage = () => {
                     placeholder="••••••••"
                     value={formData.password}
                     onChange={handleChange}
-                    className={`w-full px-4 py-3 pr-10 border rounded focus:border-blue-500 outline-none transition text-sm ${errors.password ? 'border-red-300' : 'border-gray-300'}`}
+                    className={`w-full px-4 py-3 pr-10 border rounded focus:border-blue-500 outline-none transition text-sm bg-white dark:bg-[#08060d] text-gray-800 dark:text-gray-200 ${errors.password ? 'border-red-300' : 'border-gray-300 dark:border-gray-700'}`}
                   />
                   <button
                     type="button"
@@ -166,7 +166,7 @@ export const RegisterPage = () => {
                 {errors.password && <p className="text-red-500 text-[10px] font-bold mt-1.5 ml-1">{errors.password}</p>}
               </div>
               <div>
-                <label className="block text-xs font-bold text-gray-500 uppercase mb-2 tracking-wider">Confirm</label>
+                <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase mb-2 tracking-wider">Confirm</label>
                 <div className="relative">
                   <input
                     name="password_confirmation"
@@ -174,7 +174,7 @@ export const RegisterPage = () => {
                     placeholder="••••••••"
                     value={formData.password_confirmation}
                     onChange={handleChange}
-                    className={`w-full px-4 py-3 pr-10 border rounded focus:border-blue-500 outline-none transition text-sm ${errors.password_confirmation ? 'border-red-300' : 'border-gray-300'}`}
+                    className={`w-full px-4 py-3 pr-10 border rounded focus:border-blue-500 outline-none transition text-sm bg-white dark:bg-[#08060d] text-gray-800 dark:text-gray-200 ${errors.password_confirmation ? 'border-red-300' : 'border-gray-300 dark:border-gray-700'}`}
                   />
                   <button
                     type="button"
@@ -201,8 +201,8 @@ export const RegisterPage = () => {
             </button>
           </form>
 
-          <div className="mt-8 pt-6 border-t border-gray-100 text-center">
-            <p className="text-sm text-gray-500">
+          <div className="mt-8 pt-6 border-t border-gray-100 dark:border-gray-800 text-center transition-colors">
+            <p className="text-sm text-gray-500 dark:text-gray-400">
               Already have an account?{' '}
               <Link to="/login" className="font-bold text-blue-600 hover:underline">Login</Link>
             </p>
@@ -210,7 +210,7 @@ export const RegisterPage = () => {
         </div>
       </div>
 
-      <p className="mt-8 text-xs text-gray-400">
+      <p className="mt-8 text-xs text-gray-400 dark:text-gray-600">
         &copy; {new Date().getFullYear()} Sabay Shop Marketplace. All rights reserved.
       </p>
     </div>

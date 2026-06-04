@@ -25,48 +25,48 @@ export const AdminDashboard = () => {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold text-gray-800">Admin Dashboard</h1>
-        <p className="text-sm text-gray-500 mt-1">Welcome back, here's what's happening today.</p>
+        <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100">Admin Dashboard</h1>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Welcome back, here's what's happening today.</p>
       </div>
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {stats.map((stat, idx) => (
-          <div key={idx} className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
+          <div key={idx} className="bg-white dark:bg-[#16171d] p-6 rounded-xl border border-gray-100 dark:border-gray-800 shadow-sm transition-colors">
             <div className="flex items-center justify-between mb-4">
               <div className={`${stat.color} text-white p-3 rounded-lg`}>
                 {stat.icon}
               </div>
             </div>
-            <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider font-bold">{stat.label}</h3>
-            <p className="text-2xl font-black text-gray-900 mt-1">{stat.value}</p>
+            <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider font-bold">{stat.label}</h3>
+            <p className="text-2xl font-black text-gray-900 dark:text-gray-100 mt-1">{stat.value}</p>
           </div>
         ))}
       </div>
 
       {/* Recent Activity / Tables */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
-          <div className="p-6 border-b border-gray-50 flex items-center justify-between">
-            <h2 className="text-sm font-bold text-gray-800 uppercase tracking-wider">Recent Products</h2>
-            <Link to="/admin/products" className="text-xs font-bold text-blue-600 hover:underline uppercase">View All</Link>
+        <div className="bg-white dark:bg-[#16171d] rounded-xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden transition-colors">
+          <div className="p-6 border-b border-gray-50 dark:border-gray-800 flex items-center justify-between">
+            <h2 className="text-sm font-bold text-gray-800 dark:text-gray-200 uppercase tracking-wider">Recent Products</h2>
+            <Link to="/admin/products" className="text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline uppercase">View All</Link>
           </div>
-          <div className="p-0">
-             <table className="w-full text-left border-collapse">
-                <thead className="bg-gray-50 border-b border-gray-100">
+          <div className="p-0 overflow-x-auto">
+             <table className="w-full text-left border-collapse min-w-[300px]">
+                <thead className="bg-gray-50 dark:bg-gray-800/50 border-b border-gray-100 dark:border-gray-800">
                     <tr>
-                        <th className="px-6 py-3 text-[10px] font-black text-gray-400 uppercase">Product</th>
-                        <th className="px-6 py-3 text-[10px] font-black text-gray-400 uppercase">Price</th>
+                        <th className="px-6 py-3 text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">Product</th>
+                        <th className="px-6 py-3 text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">Price</th>
                     </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-50">
+                <tbody className="divide-y divide-gray-50 dark:divide-gray-800">
                     {data.recent_products.map((p: any) => (
-                        <tr key={p.id} className="hover:bg-gray-50">
+                        <tr key={p.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
                             <td className="px-6 py-4">
-                                <div className="text-sm font-bold text-gray-800 truncate max-w-[200px]">{p.title}</div>
-                                <div className="text-[10px] text-gray-400 font-bold uppercase">{p.category?.name}</div>
+                                <div className="text-sm font-bold text-gray-800 dark:text-gray-200 truncate max-w-[200px]">{p.title}</div>
+                                <div className="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase">{p.category?.name}</div>
                             </td>
-                            <td className="px-6 py-4 text-sm font-black text-blue-600">${p.price}</td>
+                            <td className="px-6 py-4 text-sm font-black text-blue-600 dark:text-blue-400">${p.price}</td>
                         </tr>
                     ))}
                 </tbody>
@@ -74,27 +74,28 @@ export const AdminDashboard = () => {
           </div>
         </div>
 
-        <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
-          <div className="p-6 border-b border-gray-50 flex items-center justify-between">
-            <h2 className="text-sm font-bold text-gray-800 uppercase tracking-wider">Latest Users</h2>
-            <Link to="/admin/users" className="text-xs font-bold text-blue-600 hover:underline uppercase">View All</Link>
+        <div className="bg-white dark:bg-[#16171d] rounded-xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden transition-colors">
+          <div className="p-6 border-b border-gray-50 dark:border-gray-800 flex items-center justify-between">
+            <h2 className="text-sm font-bold text-gray-800 dark:text-gray-200 uppercase tracking-wider">Latest Users</h2>
+            <Link to="/admin/users" className="text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline uppercase">View All</Link>
           </div>
-          <div className="p-0">
-             <table className="w-full text-left border-collapse">
-                <thead className="bg-gray-50 border-b border-gray-100">
+          <div className="p-0 overflow-x-auto">
+             <table className="w-full text-left border-collapse min-w-[300px]">
+                <thead className="bg-gray-50 dark:bg-gray-800/50 border-b border-gray-100 dark:border-gray-800">
                     <tr>
-                        <th className="px-6 py-3 text-[10px] font-black text-gray-400 uppercase">User</th>
-                        <th className="px-6 py-3 text-[10px] font-black text-gray-400 uppercase">Joined</th>
+                        <th className="px-6 py-3 text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">User</th>
+                        <th className="px-6 py-3 text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">Joined</th>
                     </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-50">
+                <tbody className="divide-y divide-gray-50 dark:divide-gray-800">
                     {data.recent_users.map((u: any) => (
-                        <tr key={u.id} className="hover:bg-gray-50">
+                        <tr key={u.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
                             <td className="px-6 py-4">
-                                <div className="text-sm font-bold text-gray-800">{u.name}</div>
-                                <div className="text-[10px] text-gray-400 font-medium">{u.email}</div>
+                                <div className="text-sm font-bold text-gray-800 dark:text-gray-200">{u.name}</div>
+                                <div className="text-[10px] text-gray-400 dark:text-gray-500 font-medium">{u.email}</div>
                             </td>
-                            <td className="px-6 py-4 text-[10px] text-gray-500 font-bold uppercase">{new Date(u.created_at).toLocaleDateString()}</td>
+                            <td className="px-6 py-4 text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase">{new Date(u.created_at).toLocaleDateString()}</td>
+
                         </tr>
                     ))}
                 </tbody>

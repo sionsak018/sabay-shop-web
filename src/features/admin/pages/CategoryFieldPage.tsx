@@ -62,22 +62,22 @@ export const CategoryFieldPage = () => {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-800">Category Fields Mapping</h1>
+        <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100">Category Fields Mapping</h1>
         {selectedCatId && (
           <button onClick={handleSave} className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-black text-xs uppercase tracking-widest shadow-lg">Save Changes</button>
         )}
       </div>
 
-      <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm flex flex-col md:flex-row gap-8">
+      <div className="bg-white dark:bg-[#16171d] p-6 rounded-xl border border-gray-100 dark:border-gray-800 shadow-sm flex flex-col md:flex-row gap-8 transition-colors">
         {/* Step 1: Select Sub-Category */}
-        <div className="md:w-1/3">
-          <label className="block text-xs font-black text-gray-400 uppercase mb-3 tracking-widest">1. Select Sub-Category</label>
+        <div className="md:w-1/3 shrink-0">
+          <label className="block text-xs font-black text-gray-400 dark:text-gray-500 uppercase mb-3 tracking-widest">1. Select Sub-Category</label>
           <div className="space-y-1 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
             {subCategories.map(cat => (
               <button
                 key={cat.id}
                 onClick={() => setSelectedCatId(String(cat.id))}
-                className={`w-full text-left px-4 py-3 rounded-lg text-sm font-bold transition-all ${selectedCatId === String(cat.id) ? 'bg-blue-600 text-white' : 'text-gray-600 hover:bg-gray-50'}`}
+                className={`w-full text-left px-4 py-3 rounded-lg text-sm font-bold transition-all ${selectedCatId === String(cat.id) ? 'bg-blue-600 text-white shadow-md' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:text-blue-600 dark:hover:text-blue-400'}`}
               >
                 {cat.name}
               </button>
@@ -87,9 +87,9 @@ export const CategoryFieldPage = () => {
 
         {/* Step 2: Assign Fields */}
         <div className="flex-1">
-          <label className="block text-xs font-black text-gray-400 uppercase mb-3 tracking-widest">2. Assign Fields to Category</label>
+          <label className="block text-xs font-black text-gray-400 dark:text-gray-500 uppercase mb-3 tracking-widest">2. Assign Fields to Category</label>
           {!selectedCatId ? (
-            <div className="h-64 flex items-center justify-center text-gray-300 font-bold border-2 border-dashed border-gray-50 rounded-xl">Select a category to begin</div>
+            <div className="h-64 flex items-center justify-center text-gray-300 dark:text-gray-700 font-bold border-2 border-dashed border-gray-50 dark:border-gray-800 rounded-xl">Select a category to begin</div>
           ) : (
             <div className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -98,11 +98,11 @@ export const CategoryFieldPage = () => {
                   return (
                     <div
                       key={attr.id}
-                      className={`p-4 border rounded-xl text-left transition-all flex items-center justify-between group ${mapped ? 'border-blue-600 bg-blue-50/50 ring-1 ring-blue-600' : 'border-gray-100 hover:border-blue-400'}`}
+                      className={`p-4 border rounded-xl text-left transition-all flex items-center justify-between group ${mapped ? 'border-blue-600 bg-blue-50/50 dark:bg-blue-900/10 ring-1 ring-blue-600' : 'border-gray-100 dark:border-gray-800 hover:border-blue-400 dark:hover:border-blue-500 bg-white dark:bg-[#08060d]'}`}
                     >
                       <button onClick={() => toggleField(attr)} className="flex-1 text-left">
-                        <p className={`text-sm font-black ${mapped ? 'text-blue-700' : 'text-gray-700'}`}>{attr.name}</p>
-                        <p className="text-[10px] text-gray-400 font-bold uppercase">{attr.type}</p>
+                        <p className={`text-sm font-black ${mapped ? 'text-blue-700 dark:text-blue-400' : 'text-gray-700 dark:text-gray-300'}`}>{attr.name}</p>
+                        <p className="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase">{attr.type}</p>
                       </button>
                       {mapped && (
                         <div className="flex items-center gap-4">
@@ -117,14 +117,14 @@ export const CategoryFieldPage = () => {
                                   newFields[idx].is_required = e.target.checked;
                                   setMappedFields(newFields);
                                 }}
-                                className="w-4 h-4 rounded text-blue-600"
+                                className="w-4 h-4 rounded text-blue-600 bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-700"
                               />
                            </div>
                            <button onClick={() => toggleField(attr)} className="bg-blue-600 text-white p-1 rounded-full"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"/></svg></button>
                         </div>
                       )}
                       {!mapped && (
-                        <button onClick={() => toggleField(attr)} className="w-6 h-6 border border-gray-200 rounded-full group-hover:border-blue-400" />
+                        <button onClick={() => toggleField(attr)} className="w-6 h-6 border border-gray-200 dark:border-gray-700 rounded-full group-hover:border-blue-400 dark:group-hover:border-blue-500 bg-white dark:bg-gray-800" />
                       )}
                     </div>
                   );
@@ -135,5 +135,6 @@ export const CategoryFieldPage = () => {
         </div>
       </div>
     </div>
+
   );
 };

@@ -44,6 +44,9 @@ export const HomeSlider = () => {
             src={getImageUrl(slider.image_url)}
             alt={slider.title || 'Promo'}
             className="w-full h-full object-cover"
+            onError={(e) => {
+              (e.target as HTMLImageElement).src = 'https://placehold.co/1200x400?text=Slider+Image+Not+Found';
+            }}
           />
           {slider.title && (
             <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-4">
