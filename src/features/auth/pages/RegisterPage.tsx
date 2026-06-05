@@ -85,6 +85,17 @@ export const RegisterPage = () => {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 dark:bg-[#08060d] antialiased p-4 py-12 transition-colors duration-300">
 
+      {/* Back to Home Link */}
+      <Link
+        to="/"
+        className="mb-8 flex items-center gap-2 text-gray-400 hover:text-blue-600 dark:text-gray-500 dark:hover:text-blue-400 transition-all font-bold text-xs uppercase tracking-widest group"
+      >
+        <svg className="w-4 h-4 transform group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        Back to Home
+      </Link>
+
       {/* Logo Branding */}
       <Link to="/" className="flex items-center gap-2 mb-8 group">
         <div className="bg-blue-600 text-white font-black px-2 py-1 rounded text-2xl italic group-hover:bg-blue-700 transition">
