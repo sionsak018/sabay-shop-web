@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../../auth/hooks/useAuth';
+import { useAlert } from '../../../context/AlertContext';
 import { profileApi } from '../services/profileApi';
 import { productApi } from '../../products/services/productApi';
 import { type Product } from '../../products/types/product.types';
@@ -11,6 +12,7 @@ import { LocationPickerModal } from '../../../components/common/LocationPickerMo
 
 export const ProfilePage = () => {
   const { user, updateUser, logout } = useAuth();
+  const { showAlert } = useAlert();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -145,23 +147,41 @@ export const ProfilePage = () => {
       updateUser(res.data);
       fetchUserContent();
     } catch (error) {
-      alert('Failed to upload image');
+      showAlert({
+        title: 'Upload Failed',
+        message: 'Failed to upload image. Please try again.',
+        type: 'error'
+      });
     }
   };
 
   const handleDeleteImage = async (type: 'avatar' | 'cover_photo') => {
-    if (!window.confirm(`Are you sure you want to delete your ${type.replace('_', ' ')}?`)) return;
+    showAlert({
+      title: 'Remove Image',
+      message: `Are you sure you want to remove your ${type.replace('_', ' ')}?`,
+      type: 'confirm',
+      onConfirm: async () => {
+        const formData = new FormData();
+        formData.append(`remove_${type}`, '1');
 
-    const formData = new FormData();
-    formData.append(`remove_${type}`, '1');
-
-    try {
-      const res = await profileApi.update(formData);
-      updateUser(res.data);
-      fetchUserContent();
-    } catch (error) {
-      alert('Failed to delete image');
-    }
+        try {
+          const res = await profileApi.update(formData);
+          updateUser(res.data);
+          fetchUserContent();
+          showAlert({
+            title: 'Deleted',
+            message: `Your ${type.replace('_', ' ')} has been removed.`,
+            type: 'success'
+          });
+        } catch (error) {
+          showAlert({
+            title: 'Error',
+            message: 'Failed to delete image',
+            type: 'error'
+          });
+        }
+      }
+    });
   };
 
   const handleUpdate = async () => {
@@ -178,24 +198,46 @@ export const ProfilePage = () => {
     try {
       const res = await profileApi.update(formData);
       updateUser(res.data);
-      alert('Profile updated successfully');
+      showAlert({
+        title: 'Success',
+        message: 'Profile updated successfully',
+        type: 'success'
+      });
       fetchUserContent();
     } catch (err: any) {
-      alert(err.response?.data?.message || 'Update failed');
+      showAlert({
+        title: 'Update Failed',
+        message: err.response?.data?.message || 'Something went wrong during update',
+        type: 'error'
+      });
     } finally {
       setLoading(false);
     }
   };
 
   const handleDeleteProduct = async (id: number) => {
-    if (window.confirm('Are you sure you want to delete this ad?')) {
-      try {
-        await productApi.delete(id);
-        fetchUserContent();
-      } catch (error) {
-        alert('Failed to delete ad');
+    showAlert({
+      title: 'Delete Ad',
+      message: 'Are you sure you want to permanently delete this ad? This action cannot be undone.',
+      type: 'confirm',
+      onConfirm: async () => {
+        try {
+          await productApi.delete(id);
+          fetchUserContent();
+          showAlert({
+            title: 'Deleted',
+            message: 'Your ad has been deleted successfully.',
+            type: 'success'
+          });
+        } catch (error) {
+          showAlert({
+            title: 'Error',
+            message: 'Failed to delete ad',
+            type: 'error'
+          });
+        }
       }
-    }
+    });
   };
 
   const handleUpdateStatus = async (id: number, status: string) => {
@@ -205,7 +247,11 @@ export const ProfilePage = () => {
       await productApi.update(id, formData);
       fetchUserContent();
     } catch (error: any) {
-      alert(error.response?.data?.message || 'Failed to update status');
+      showAlert({
+        title: 'Error',
+        message: error.response?.data?.message || 'Failed to update status',
+        type: 'error'
+      });
     }
   };
 
