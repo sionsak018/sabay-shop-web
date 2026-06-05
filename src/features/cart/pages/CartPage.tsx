@@ -32,7 +32,7 @@ export const CartPage = () => {
             <h1 className="text-3xl font-black text-gray-900 dark:text-gray-100 uppercase tracking-tight">Your Cart</h1>
             <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mt-1">{cart.items.length} Items Selected</p>
         </div>
-        <button onClick={clearCart} className="text-[10px] font-black text-red-500 hover:text-red-600 uppercase tracking-[0.2em] transition-colors flex items-center gap-2">
+        <button onClick={clearCart} className="text-[10px] font-black text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300 uppercase tracking-[0.2em] transition-colors flex items-center gap-2">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
             Empty Cart
         </button>
@@ -46,13 +46,13 @@ export const CartPage = () => {
           const currentPrice = hasDiscount ? discountVal : originalVal;
 
           return (
-            <div key={item.id} className="flex flex-col sm:flex-row gap-6 bg-white dark:bg-[#1f2028] border border-gray-100 dark:border-gray-800 p-6 rounded-2xl shadow-sm hover:shadow-md transition-all group">
-              <div className="w-full sm:w-32 h-32 rounded-xl overflow-hidden bg-gray-50 dark:bg-[#16171d] flex-shrink-0 border border-gray-100 dark:border-gray-800">
+            <div key={item.id} className="flex flex-col sm:flex-row gap-6 bg-white dark:bg-[#16171d] border border-gray-100 dark:border-gray-800 p-4 sm:p-6 rounded-2xl shadow-sm hover:shadow-md transition-all group">
+              <div className="w-full sm:w-32 h-32 rounded-xl overflow-hidden bg-gray-50 dark:bg-[#08060d] flex-shrink-0 border border-gray-100 dark:border-gray-800">
                 <img src={getImageUrl(item.product.images[0]?.image_url, 'https://placehold.co/200x200?text=No+Image')} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
               </div>
               <div className="flex-1 flex flex-col justify-between">
                 <div>
-                    <h3 className="font-bold text-gray-900 dark:text-gray-100 text-lg group-hover:text-blue-600 transition-colors leading-tight mb-1">{item.product.title}</h3>
+                    <h3 className="font-bold text-gray-900 dark:text-gray-100 text-lg group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors leading-tight mb-1">{item.product.title}</h3>
                     <div className="flex items-baseline gap-2">
                         <span className="text-blue-600 dark:text-blue-400 font-black text-lg">${currentPrice.toLocaleString()}</span>
                         {hasDiscount && (
@@ -62,7 +62,7 @@ export const CartPage = () => {
                 </div>
 
                 <div className="flex items-center gap-4 mt-6">
-                  <div className="flex items-center bg-gray-100 dark:bg-gray-800 rounded-xl p-1">
+                  <div className="flex items-center bg-gray-100 dark:bg-gray-800 rounded-xl p-1 border dark:border-gray-700">
                       <button
                         onClick={() => updateQuantity(item.id, Math.max(1, item.quantity - 1))}
                         className="w-8 h-8 flex items-center justify-center text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors font-black"
@@ -85,15 +85,15 @@ export const CartPage = () => {
         })}
       </div>
 
-      <div className="mt-12 bg-white dark:bg-[#1f2028] border border-gray-100 dark:border-gray-800 p-8 rounded-3xl shadow-xl flex flex-col md:flex-row items-center justify-between gap-8 transition-colors">
+      <div className="mt-12 bg-white dark:bg-[#16171d] border border-gray-100 dark:border-gray-800 p-6 sm:p-8 rounded-3xl shadow-xl flex flex-col md:flex-row items-center justify-between gap-8 transition-colors">
         <div>
             <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-[0.2em] mb-1 text-center md:text-left">Order Summary</p>
-            <div className="text-4xl font-black text-gray-900 dark:text-gray-100 flex items-center gap-4">
+            <div className="text-2xl sm:text-4xl font-black text-gray-900 dark:text-gray-100 flex items-center gap-4">
                 <span className="text-lg text-gray-300 dark:text-gray-700 font-black">TOTAL</span>
                 ${total.toLocaleString()}
             </div>
         </div>
-        <Link to="/checkout" className="w-full md:w-auto min-w-[280px] bg-blue-600 hover:bg-blue-700 text-white px-10 py-5 rounded-2xl font-black uppercase tracking-[0.2em] text-sm text-center shadow-2xl shadow-blue-600/30 active:scale-95 transition-all">
+        <Link to="/checkout" className="w-full md:w-auto sm:min-w-[280px] bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-600 text-white px-10 py-5 rounded-2xl font-black uppercase tracking-[0.2em] text-sm text-center shadow-2xl shadow-blue-600/30 active:scale-95 transition-all">
             Secure Checkout
         </Link>
       </div>

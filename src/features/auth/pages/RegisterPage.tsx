@@ -94,11 +94,11 @@ export const RegisterPage = () => {
       </Link>
 
       <div className="max-w-md w-full bg-white dark:bg-[#16171d] border border-gray-200 dark:border-gray-800 rounded-md shadow-sm overflow-hidden transition-colors">
-        <div className="bg-gray-50 dark:bg-[#1f2028]/50 px-8 py-4 border-b border-gray-200 dark:border-gray-800">
+        <div className="bg-gray-50 dark:bg-[#1f2028]/50 px-8 py-4 border-b border-gray-200 dark:border-gray-800 transition-colors">
           <h2 className="text-sm font-bold text-gray-700 dark:text-gray-300 uppercase text-center tracking-widest">Create your account</h2>
         </div>
 
-        <div className="p-8">
+        <div className="p-5 sm:p-8">
           <form onSubmit={handleSubmit} noValidate className="space-y-5">
             <div>
               <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase mb-2 tracking-wider">Full Name</label>

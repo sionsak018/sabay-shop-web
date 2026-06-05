@@ -63,7 +63,7 @@ export const AdminDashboard = () => {
                     {data.recent_products.map((p: any) => (
                         <tr key={p.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
                             <td className="px-6 py-4">
-                                <div className="text-sm font-bold text-gray-800 dark:text-gray-200 truncate max-w-[200px]">{p.title}</div>
+                                <div className="text-sm font-bold text-gray-800 dark:text-gray-100 truncate max-w-[200px]">{p.title}</div>
                                 <div className="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase">{p.category?.name}</div>
                             </td>
                             <td className="px-6 py-4 text-sm font-black text-blue-600 dark:text-blue-400">${p.price}</td>
@@ -91,7 +91,7 @@ export const AdminDashboard = () => {
                     {data.recent_users.map((u: any) => (
                         <tr key={u.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
                             <td className="px-6 py-4">
-                                <div className="text-sm font-bold text-gray-800 dark:text-gray-200">{u.name}</div>
+                                <div className="text-sm font-bold text-gray-800 dark:text-gray-100">{u.name}</div>
                                 <div className="text-[10px] text-gray-400 dark:text-gray-500 font-medium">{u.email}</div>
                             </td>
                             <td className="px-6 py-4 text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase">{new Date(u.created_at).toLocaleDateString()}</td>

@@ -253,7 +253,6 @@ export const AdminLayout = () => {
               {user.name.charAt(0).toUpperCase()}
             </div>
             <div className="flex-1 min-w-0">
-
               <p className="text-xs font-bold text-gray-900 dark:text-gray-100 truncate">{user.name}</p>
               <p className="text-[9px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-widest">{t('admin.super_admin')}</p>
             </div>
@@ -271,11 +270,11 @@ export const AdminLayout = () => {
       {/* Main Content */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative bg-[#f8fafc] dark:bg-[#08060d]">
         {/* Mobile Header - Improved for iPhone 14 Pro Max & larger screens */}
-        <header className="h-16 bg-white dark:bg-[#16171d] border-b border-gray-200 dark:border-gray-800 flex items-center justify-between px-4 lg:hidden sticky top-0 z-40">
+        <header className="h-16 bg-white dark:bg-[#16171d] border-b border-gray-200 dark:border-gray-800 flex items-center justify-between px-4 lg:hidden sticky top-0 z-40 transition-colors">
           <div className="flex items-center gap-3">
             <button
               onClick={() => setIsMobileSidebarOpen(true)}
-              className="p-2.5 -ml-2 text-blue-600 bg-blue-50 dark:bg-blue-900/20 rounded-lg active:scale-95 transition-all shadow-sm flex items-center justify-center"
+              className="p-2.5 -ml-2 text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 rounded-lg active:scale-95 transition-all shadow-sm flex items-center justify-center"
               aria-label="Open Menu"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
@@ -284,7 +283,7 @@ export const AdminLayout = () => {
             </button>
             <Link to="/" className="flex items-center gap-2">
               <div className="bg-blue-600 text-white font-black px-2 py-0.5 rounded text-lg italic leading-tight shadow-sm">SABAY</div>
-              <span className="text-sm font-black text-gray-800 dark:text-gray-100 uppercase tracking-tighter hidden xs:block">{t('common.admin')}</span>
+              <span className="text-sm font-black text-gray-800 dark:text-gray-200 uppercase tracking-tighter hidden xs:block">{t('common.admin')}</span>
             </Link>
           </div>
 

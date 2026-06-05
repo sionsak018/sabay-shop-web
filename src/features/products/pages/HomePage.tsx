@@ -233,7 +233,7 @@ export const HomePage = () => {
             )
         ) : (!isSubCategorySelected) && (
             <div className="bg-white dark:bg-[#16171d] border border-gray-200 dark:border-gray-800 rounded-md p-3 sm:p-4 shadow-sm transition-colors mb-3">
-                <h2 className="text-sm sm:text-base font-bold mb-3 sm:mb-4 text-gray-800 dark:text-gray-100">
+                <h2 className="text-[13px] sm:text-base font-bold mb-3 sm:mb-4 text-gray-800 dark:text-gray-100">
                     {activeCategoryId ? t('home.browse_in', { name: selectedCategory?.name }) : t('home.browse_by_category')}
                 </h2>
 
@@ -244,7 +244,7 @@ export const HomePage = () => {
                                 onClick={() => browseCategory(cat.id)}
                                 className={`block w-full h-full group bg-white dark:bg-[#16171d] rounded cursor-pointer active:opacity-50 p-1.5 sm:p-2.5 transition-all hover:bg-[#f8f9fa] dark:hover:bg-[#1f2028] ${activeCategoryId === cat.id ? 'ring-2 ring-blue-500 bg-blue-50 dark:bg-blue-900/10' : ''}`}
                             >
-                                <div className="mx-auto bg-[#e9ecef] dark:bg-gray-800 rounded-full mt-1 group-hover:bg-[#dee2e6] dark:group-hover:bg-gray-700 transition-all size-10 sm:size-14 flex items-center justify-center overflow-hidden">
+                                <div className="mx-auto bg-[#e9ecef] dark:bg-gray-700 group-hover:bg-[#dee2e6] dark:group-hover:bg-gray-600 transition-all size-10 sm:size-14 flex items-center justify-center overflow-hidden rounded-full">
                                     <CategoryIcon cat={cat} className="w-full h-full group-hover:scale-110 transition-transform duration-300" />
                                 </div>
                                 <p className="overflow-hidden text-ellipsis mt-1.5 sm:mt-2.5 text-[10px] sm:text-[13px] font-bold text-gray-700 dark:text-gray-300 group-hover:text-blue-600 leading-tight">
@@ -358,8 +358,8 @@ export const HomePage = () => {
 
         {/* Latest Listings */}
         <div className="mt-5">
-            <div className="flex items-center justify-between mb-3 px-1 border-b border-gray-200 dark:border-gray-800 pb-1.5">
-                <h2 className="text-sm font-bold text-gray-800 dark:text-gray-100 uppercase tracking-tight">
+            <div className="flex items-center justify-between mb-3 px-1 border-b border-gray-200 dark:border-gray-800 pb-1.5 gap-2">
+                <h2 className="text-sm font-bold text-gray-800 dark:text-gray-100 uppercase tracking-tight truncate flex-1">
                     {getResultsTitle()}
                 </h2>
                 {(activeCategoryId || activeProvinceId) ? (

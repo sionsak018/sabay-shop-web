@@ -281,13 +281,13 @@ export const CreateProductPage = () => {
           <div className="flex-1">
             <h1 className="font-semibold text-2xl mb-4 text-gray-900 dark:text-gray-100">{t('create_product.title')}</h1>
             <div className="flex gap-4 items-center text-md">
-              <div className={`flex items-center gap-2 ${step === 1 ? 'text-blue-600 font-bold' : 'text-gray-50'}`}>
-                <span className={`rounded-full w-5 h-5 flex items-center justify-center text-[10px] ${step === 1 ? 'bg-blue-600 text-white' : 'bg-gray-200 dark:bg-gray-800 text-gray-50'}`}>1</span>
+              <div className={`flex items-center gap-2 ${step === 1 ? 'text-blue-600 font-bold' : 'text-gray-500 dark:text-gray-400'}`}>
+                <span className={`rounded-full w-5 h-5 flex items-center justify-center text-[10px] ${step === 1 ? 'bg-blue-600 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300'}`}>1</span>
                 {t('create_product.step_1')}
               </div>
               <svg className="w-4 h-4 text-gray-300 dark:text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M9 5l7 7-7 7"/></svg>
-              <div className={`flex items-center gap-2 ${step === 2 ? 'text-blue-600 font-bold' : 'text-gray-400 dark:text-gray-600'}`}>
-                <span className={`rounded-full w-5 h-5 flex items-center justify-center text-[10px] ${step === 2 ? 'bg-blue-600 text-white' : 'bg-gray-200 dark:bg-gray-800 text-gray-400'}`}>2</span>
+              <div className={`flex items-center gap-2 ${step === 2 ? 'text-blue-600 font-bold' : 'text-gray-500 dark:text-gray-400'}`}>
+                <span className={`rounded-full w-5 h-5 flex items-center justify-center text-[10px] ${step === 2 ? 'bg-blue-600 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300'}`}>2</span>
                 {t('create_product.step_2')}
               </div>
             </div>
@@ -343,31 +343,31 @@ export const CreateProductPage = () => {
             <h2 className="font-semibold text-lg mt-6 mb-4">{t('common.categories')}</h2>
 
             {/* Split Category Selection */}
-            <div className="grid grid-cols-1 md:grid-cols-2 border border-gray-200 rounded-lg overflow-hidden h-[500px] sm:h-[600px]">
+            <div className="grid grid-cols-1 md:grid-cols-2 border border-gray-200 dark:border-gray-800 rounded-lg overflow-hidden h-[700px] md:h-[600px]">
 
               {/* Parent Categories */}
-              <div className="bg-white border-r border-gray-200 flex flex-col h-full overflow-hidden">
-                <div className="px-4 py-3 bg-gray-50 border-b border-gray-200 flex items-center gap-2 text-xs font-bold text-gray-500 uppercase tracking-widest shrink-0">
-                  <span className="w-5 h-5 bg-gray-200 rounded-full flex items-center justify-center text-[10px] text-gray-600">1</span>
+              <div className="bg-white dark:bg-[#16171d] border-r border-gray-200 dark:border-gray-800 flex flex-col h-full overflow-hidden">
+                <div className="px-4 py-3 bg-gray-50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-800 flex items-center gap-2 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest shrink-0">
+                  <span className="w-5 h-5 bg-gray-200 dark:bg-gray-700 rounded-full flex items-center justify-center text-[10px] text-gray-600 dark:text-gray-300">1</span>
                   {t('create_product.step_1')}
                 </div>
                 <div className="overflow-y-auto flex-1 custom-scrollbar py-1 min-h-0">
-                  <ul className="divide-y divide-gray-50">
+                  <ul className="divide-y divide-gray-50 dark:divide-gray-800/50">
                     {mainCategories.map((cat) => (
                       <li key={cat.id}>
                         <button
                           type="button"
                           onMouseEnter={() => setSelectedMainCat(cat)}
                           onClick={() => handleSelectMainCat(cat)}
-                          className={`w-full group flex gap-4 items-center py-3 px-4 hover:bg-gray-50 transition-all text-left ${selectedMainCat?.id === cat.id ? 'bg-blue-50 text-blue-600' : 'text-gray-700'}`}
+                          className={`w-full group flex gap-4 items-center py-3 px-4 hover:bg-gray-50 dark:hover:bg-gray-800/30 transition-all text-left ${selectedMainCat?.id === cat.id ? 'bg-blue-50 dark:bg-blue-900/10 text-blue-600 dark:text-blue-400' : 'text-gray-700 dark:text-gray-300'}`}
                         >
                           {cat.image_url ? (
                             <img src={getImageUrl(cat.image_url)} className="w-10 h-10 object-contain" />
                           ) : (
-                            <div className="w-10 h-10 bg-gray-100 rounded flex items-center justify-center"><svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16m-7 6h7"/></svg></div>
+                            <div className="w-10 h-10 bg-gray-100 dark:bg-gray-800 rounded flex items-center justify-center"><svg className="w-6 h-6 text-gray-400 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16m-7 6h7"/></svg></div>
                           )}
-                          <p className={`flex-1 text-sm font-bold ${selectedMainCat?.id === cat.id ? 'text-blue-600' : 'text-gray-600'}`}>{cat.name}</p>
-                          <svg className="w-4 h-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M9 5l7 7-7 7"/></svg>
+                          <p className={`flex-1 text-sm font-bold ${selectedMainCat?.id === cat.id ? 'text-blue-600 dark:text-blue-400' : 'text-gray-600 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400'}`}>{cat.name}</p>
+                          <svg className="w-4 h-4 text-gray-300 dark:text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M9 5l7 7-7 7"/></svg>
                         </button>
                       </li>
                     ))}
@@ -376,35 +376,35 @@ export const CreateProductPage = () => {
               </div>
 
               {/* Sub Categories */}
-              <div className="bg-white flex flex-col h-full overflow-hidden">
-                <div className="px-4 py-3 bg-gray-50 border-b border-gray-200 flex items-center gap-2 text-xs font-bold text-gray-500 uppercase tracking-widest shrink-0">
-                  <span className="w-5 h-5 bg-gray-200 rounded-full flex items-center justify-center text-[10px] text-gray-600">2</span>
+              <div className="bg-white dark:bg-[#16171d] flex flex-col h-full overflow-hidden">
+                <div className="px-4 py-3 bg-gray-50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-800 flex items-center gap-2 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest shrink-0">
+                  <span className="w-5 h-5 bg-gray-200 dark:bg-gray-700 rounded-full flex items-center justify-center text-[10px] text-gray-600 dark:text-gray-300">2</span>
                   {t('create_product.select_sub_category', { defaultValue: 'Select a subcategory' })}
                 </div>
                 <div className="overflow-y-auto flex-1 custom-scrollbar py-1 min-h-0">
                   {!selectedMainCat ? (
                     <div className="h-full flex flex-col items-center justify-center text-center p-10 space-y-4">
-                        <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center">
-                            <svg className="w-10 h-10 text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+                        <div className="w-20 h-20 bg-gray-50 dark:bg-gray-800/50 rounded-full flex items-center justify-center">
+                            <svg className="w-10 h-10 text-gray-200 dark:text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
                         </div>
-                        <p className="text-gray-400 text-xs font-bold uppercase tracking-widest">{t('create_product.choose_main_first', { defaultValue: 'Please choose a main category first' })}</p>
+                        <p className="text-gray-400 dark:text-gray-600 text-xs font-bold uppercase tracking-widest">{t('create_product.choose_main_first', { defaultValue: 'Please choose a main category first' })}</p>
                     </div>
                   ) : (
-                    <ul className="divide-y divide-gray-50 animate-in slide-in-from-right-4 duration-300">
+                    <ul className="divide-y divide-gray-50 dark:divide-gray-800/50 animate-in slide-in-from-right-4 duration-300">
                       {categories.filter(sub => sub.parent_id === selectedMainCat.id).map(sub => (
                         <li key={sub.id}>
                           <button
                             type="button"
                             onClick={() => handleSelectSubCat(sub)}
-                            className="w-full group flex gap-4 items-center py-3 px-6 hover:bg-blue-50 transition-all text-left"
+                            className="w-full group flex gap-4 items-center py-3 px-6 hover:bg-blue-50 dark:hover:bg-blue-900/10 transition-all text-left"
                           >
                             {sub.image_url ? (
                               <img src={getImageUrl(sub.image_url)} className="w-8 h-8 object-contain" />
                             ) : (
-                              <div className="w-8 h-8 bg-gray-100 rounded flex items-center justify-center"><svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16m-7 6h7"/></svg></div>
+                              <div className="w-8 h-8 bg-gray-100 dark:bg-gray-800 rounded flex items-center justify-center"><svg className="w-4 h-4 text-gray-400 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16m-7 6h7"/></svg></div>
                             )}
-                            <p className="flex-1 text-sm font-bold text-gray-700 group-hover:text-blue-600">{sub.name}</p>
-                            <svg className="w-4 h-4 text-gray-300 group-hover:text-blue-600 group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M9 5l7 7-7 7"/></svg>
+                            <p className="flex-1 text-sm font-bold text-gray-700 dark:text-gray-300 group-hover:text-blue-600 dark:group-hover:text-blue-400">{sub.name}</p>
+                            <svg className="w-4 h-4 text-gray-300 dark:text-gray-700 group-hover:text-blue-600 dark:group-hover:text-blue-400 group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M9 5l7 7-7 7"/></svg>
                           </button>
                         </li>
                       ))}
@@ -465,7 +465,7 @@ export const CreateProductPage = () => {
                         <span className="w-1.5 h-6 bg-blue-600 rounded-full"></span>
                         {t('create_product.specifications')}
                     </h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8 p-6 border border-gray-100 dark:border-gray-800 rounded-2xl bg-gray-50/30 dark:bg-gray-800/20">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6 sm:gap-y-8 p-4 sm:p-6 border border-gray-100 dark:border-gray-800 rounded-2xl bg-gray-50/30 dark:bg-gray-800/20">
                         <div>
                             <label className="block text-[11px] font-black text-gray-400 dark:text-gray-500 uppercase mb-3 tracking-widest ml-1">{t('create_product.condition')} <span className="text-red-500">*</span></label>
                             <div className={`flex p-1 bg-gray-100 dark:bg-gray-800 rounded-xl gap-1 border transition-colors ${errors.condition ? 'border-red-300' : 'border-transparent'}`}>
@@ -596,7 +596,7 @@ export const CreateProductPage = () => {
                         <span className="w-1.5 h-6 bg-blue-600 rounded-full"></span>
                         {t('create_product.location_section')}
                     </h2>
-                    <div className="space-y-8 p-6 border border-gray-100 dark:border-gray-800 rounded-2xl bg-gray-50/30 dark:bg-gray-800/20">
+                    <div className="space-y-6 sm:space-y-8 p-4 sm:p-6 border border-gray-100 dark:border-gray-800 rounded-2xl bg-gray-50/30 dark:bg-gray-800/20">
 
                         <div>
                             <label className="block text-[11px] font-black text-gray-400 dark:text-gray-500 uppercase mb-3 tracking-widest ml-1">{t('create_product.select_location')} <span className="text-red-500">*</span></label>
@@ -695,7 +695,7 @@ export const CreateProductPage = () => {
                         <span className="w-1.5 h-6 bg-blue-600 rounded-full"></span>
                         {t('create_product.contact_details')}
                     </h2>
-                    <div className="p-6 border border-gray-100 dark:border-gray-800 rounded-2xl bg-gray-50/30 dark:bg-gray-800/20 space-y-8">
+                    <div className="p-4 sm:p-6 border border-gray-100 dark:border-gray-800 rounded-2xl bg-gray-50/30 dark:bg-gray-800/20 space-y-6 sm:space-y-8">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                             <div>
                                 <label className="block text-[11px] font-black text-gray-400 dark:text-gray-500 uppercase mb-3 tracking-widest ml-1">{t('create_product.poster_name')} <span className="text-red-500">*</span></label>
@@ -798,7 +798,7 @@ export const CreateProductPage = () => {
               <button
                 type="submit"
                 disabled={loading || limitInfo?.limit_reached}
-                className="w-full sm:w-auto min-w-[300px] bg-blue-600 hover:bg-blue-700 text-white px-10 py-5 rounded-2xl font-black uppercase tracking-[0.2em] transition-all shadow-2xl shadow-blue-600/30 active:scale-95 disabled:opacity-50"
+                className="w-full sm:w-auto sm:min-w-[300px] bg-blue-600 hover:bg-blue-700 text-white px-10 py-5 rounded-2xl font-black uppercase tracking-[0.2em] transition-all shadow-2xl shadow-blue-600/30 active:scale-95 disabled:opacity-50"
               >
                 {loading ? t('create_product.processing') : limitInfo?.limit_reached ? t('create_product.limit_reached') : t('create_product.post_now')}
               </button>

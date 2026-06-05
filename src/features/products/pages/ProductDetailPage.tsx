@@ -167,13 +167,13 @@ export const ProductDetailPage = () => {
       <div className="bg-white dark:bg-[#16171d] border-b border-gray-200 dark:border-gray-800 py-3 shadow-sm transition-colors">
         <div className="container mx-auto px-4 max-w-7xl">
           <nav className="flex text-xs font-bold text-gray-400 dark:text-gray-500 gap-2 items-center uppercase tracking-tight">
-            <Link to="/" className="hover:text-blue-600 transition-colors">Home</Link>
-            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M9 5l7 7-7 7"/></svg>
-            <Link to={`/products?category_id=${mainCategory.id}`} className="hover:text-blue-600 transition-colors">{mainCategory.name}</Link>
+            <Link to="/" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Home</Link>
+            <svg className="w-3 h-3 text-gray-300 dark:text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M9 5l7 7-7 7"/></svg>
+            <Link to={`/products?category_id=${mainCategory.id}`} className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">{mainCategory.name}</Link>
             {subCategory && (
               <>
-                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M9 5l7 7-7 7"/></svg>
-                <Link to={`/products?category_id=${subCategory.id}`} className="hover:text-blue-600 transition-colors">{subCategory.name}</Link>
+                <svg className="w-3 h-3 text-gray-300 dark:text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M9 5l7 7-7 7"/></svg>
+                <Link to={`/products?category_id=${subCategory.id}`} className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">{subCategory.name}</Link>
               </>
             )}
           </nav>
@@ -238,17 +238,17 @@ export const ProductDetailPage = () => {
               )}
 
               {/* Product Header */}
-              <div className="p-6">
-                <div className="mb-8 border-b border-gray-100 dark:border-gray-800 pb-6">
-                    <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 leading-tight mb-4">{product.title}</h1>
-                    <div className="flex items-center justify-between">
+              <div className="p-4 sm:p-6">
+                <div className="mb-6 sm:mb-8 border-b border-gray-100 dark:border-gray-800 pb-6">
+                    <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100 leading-tight mb-4">{product.title}</h1>
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <div className="flex items-baseline gap-4">
-                            <p className="text-3xl font-black text-blue-600 dark:text-blue-500">${Number(product.discount_price ?? product.price ?? 0).toLocaleString()}</p>
+                            <p className="text-2xl sm:text-3xl font-black text-blue-600 dark:text-blue-500">${Number(product.discount_price ?? product.price ?? 0).toLocaleString()}</p>
                             {product.discount_price && (
-                                <p className="text-xl font-bold text-gray-400 dark:text-gray-600 line-through">${Number(product.price || 0).toLocaleString()}</p>
+                                <p className="text-lg sm:text-xl font-bold text-gray-400 dark:text-gray-600 line-through">${Number(product.price || 0).toLocaleString()}</p>
                             )}
                         </div>
-                        <div className="text-[11px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-tighter space-y-0.5 text-right">
+                        <div className="text-[10px] sm:text-[11px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-tighter space-y-0.5 sm:text-right">
                            <p className="flex items-center justify-end gap-1.5">
                                 <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                                 Posted on {new Date(product.created_at).toLocaleDateString()}
@@ -265,7 +265,7 @@ export const ProductDetailPage = () => {
                 </div>
 
                 {/* Specifications Grid - THE KEY REQUESTED PART */}
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-y-6 gap-x-4 mb-10">
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-y-6 gap-x-2 sm:gap-x-4 mb-10">
                   <div className="space-y-1">
                     <p className="text-[10px] text-gray-400 dark:text-gray-600 uppercase font-black tracking-tight">Category</p>
                     <p className="text-sm font-bold text-blue-600 dark:text-blue-500 hover:underline"><Link to={`/products?category_id=${product.category?.id}`}>{product.category?.name}</Link></p>
@@ -331,7 +331,7 @@ export const ProductDetailPage = () => {
               <div className="bg-[#f8f9fa] dark:bg-[#16171d] px-4 py-2 border-b border-gray-100 dark:border-gray-800 transition-colors">
                 <h2 className="text-[11px] font-black text-gray-400 dark:text-gray-600 uppercase tracking-widest">Seller Contact</h2>
               </div>
-              <div className="p-6">
+              <div className="p-4 sm:p-6">
                 <div className="flex items-center gap-4 mb-6">
                   <Link to={`/u/${product.seller?.id}`} className="w-16 h-16 rounded-full bg-blue-600 flex items-center justify-center text-white text-2xl font-black border-4 border-[#f1f2f6] dark:border-[#08060d] shadow-inner overflow-hidden flex-shrink-0 transition-colors">
                     {product.seller?.avatar ? (

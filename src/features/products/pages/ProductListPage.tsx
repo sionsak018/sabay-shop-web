@@ -554,22 +554,22 @@ export const ProductListPage = () => {
 
           {/* Filter Modal */}
           {isMobileFilterOpen && (
-            <div className="fixed inset-0 z-50 bg-white flex flex-col animate-in slide-in-from-bottom duration-300">
-              <div className="h-14 flex items-center justify-between px-4 border-b border-gray-200 sticky top-0 bg-white">
-                <h2 className="font-bold text-gray-800">Filter & Sort</h2>
-                <button onClick={() => setIsMobileFilterOpen(false)} className="p-2 text-gray-400 hover:text-red-500">
+            <div className="fixed inset-0 z-[100] bg-white dark:bg-[#08060d] flex flex-col animate-in slide-in-from-bottom duration-300">
+              <div className="h-14 flex items-center justify-between px-4 border-b border-gray-200 dark:border-gray-800 sticky top-0 bg-white dark:bg-[#16171d]">
+                <h2 className="font-bold text-gray-800 dark:text-gray-100">Filter & Sort</h2>
+                <button onClick={() => setIsMobileFilterOpen(false)} className="p-2 text-gray-400 hover:text-red-500 transition-colors">
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"/></svg>
                 </button>
               </div>
-              <div className="flex-1 overflow-y-auto p-4 space-y-8">
+              <div className="flex-1 overflow-y-auto p-4 space-y-8 custom-scrollbar">
                 <div className="space-y-4">
-                  <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest">Categories</h3>
+                  <h3 className="text-xs font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">Categories</h3>
                   <div className="grid grid-cols-2 gap-2">
                     {categories.filter(c => !c.parent_id).map(cat => (
                       <button
                         key={cat.id}
                         onClick={() => { setCategory(String(cat.id)); setIsMobileFilterOpen(false); }}
-                        className={`flex items-center gap-2 p-3 rounded-lg border transition ${categoryId === String(cat.id) ? 'border-blue-600 bg-blue-50 text-blue-600' : 'border-gray-100 bg-gray-50'}`}
+                        className={`flex items-center gap-2 p-3 rounded-lg border transition ${categoryId === String(cat.id) ? 'border-blue-600 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' : 'border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 text-gray-700 dark:text-gray-300'}`}
                       >
                         <CategoryIcon cat={cat} className="w-5 h-5 shrink-0" />
                         <span className="text-[11px] font-bold truncate">{cat.name}</span>
@@ -579,37 +579,37 @@ export const ProductListPage = () => {
                 </div>
 
                 <div className="space-y-4">
-                  <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest">Price Range ($)</h3>
+                  <h3 className="text-xs font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">Price Range ($)</h3>
                   <div className="flex gap-4">
                     <input
                       type="number"
                       placeholder="Min"
                       value={localFilters.min_price}
                       onChange={e => setLocalFilters({...localFilters, min_price: e.target.value})}
-                      className="flex-1 bg-gray-50 border border-gray-200 p-3 rounded-xl outline-none focus:bg-white focus:border-blue-500 transition-all font-bold"
+                      className="flex-1 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-3 rounded-xl outline-none focus:bg-white dark:focus:bg-[#08060d] focus:border-blue-500 transition-all font-bold text-gray-800 dark:text-gray-200"
                     />
                     <input
                       type="number"
                       placeholder="Max"
                       value={localFilters.max_price}
                       onChange={e => setLocalFilters({...localFilters, max_price: e.target.value})}
-                      className="flex-1 bg-gray-50 border border-gray-200 p-3 rounded-xl outline-none focus:bg-white focus:border-blue-500 transition-all font-bold"
+                      className="flex-1 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-3 rounded-xl outline-none focus:bg-white dark:focus:bg-[#08060d] focus:border-blue-500 transition-all font-bold text-gray-800 dark:text-gray-200"
                     />
                   </div>
                 </div>
 
                 <div className="space-y-4 pb-10">
-                  <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest">Location</h3>
+                  <h3 className="text-xs font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">Location</h3>
                   <button
                     onClick={() => setIsLocationModalOpen(true)}
-                    className="w-full flex items-center justify-between p-4 bg-gray-50 border border-gray-100 rounded-xl font-bold text-sm text-gray-700"
+                    className="w-full flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl font-bold text-sm text-gray-700 dark:text-gray-300 transition-colors"
                   >
-                    <span>{localFilters.province_id ? (districtName ? `${districtName}, ${provinces.find(p => String(p.id) === localFilters.province_id)?.name}` : (provinces.find(p => String(p.id) === localFilters.province_id)?.name || 'Select Location')) : 'All Cambodia'}</span>
+                    <span className="truncate">{localFilters.province_id ? (districtName ? `${districtName}, ${provinces.find(p => String(p.id) === localFilters.province_id)?.name}` : (provinces.find(p => String(p.id) === localFilters.province_id)?.name || 'Select Location')) : 'All Cambodia'}</span>
                     <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7"/></svg>
                   </button>
                 </div>
               </div>
-              <div className="p-4 border-t border-gray-100 bg-white sticky bottom-0">
+              <div className="p-4 border-t border-gray-100 dark:border-gray-800 bg-white dark:bg-[#16171d] sticky bottom-0">
                 <button
                   onClick={() => { applyFilters(); setIsMobileFilterOpen(false); }}
                   className="w-full bg-blue-600 text-white py-4 rounded-xl font-black uppercase tracking-widest shadow-xl shadow-blue-600/30 active:scale-[0.98] transition-all"
@@ -673,13 +673,13 @@ export const ProductListPage = () => {
                                     <button
                                         key={p}
                                         onClick={() => goToPage(p)}
-                                        className={`w-8 h-8 sm:w-10 sm:h-10 rounded border text-[11px] sm:text-[13px] font-bold transition ${page === p ? 'bg-blue-600 border-blue-600 text-white shadow-md z-10' : 'bg-white border-gray-300 text-gray-600 hover:bg-gray-50'}`}
+                                        className={`w-8 h-8 sm:w-10 sm:h-10 rounded border text-[11px] sm:text-[13px] font-bold transition ${page === p ? 'bg-blue-600 border-blue-600 text-white shadow-md z-10' : 'bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700'}`}
                                     >
                                         {p}
                                     </button>
                                 );
                             }
-                            if (p === 2 || p === pagination.lastPage - 1) return <span key={p} className="px-0.5 sm:px-1 text-gray-300 self-end font-bold">...</span>;
+                            if (p === 2 || p === pagination.lastPage - 1) return <span key={p} className="px-0.5 sm:px-1 text-gray-300 dark:text-gray-600 self-end font-bold">...</span>;
                             return null;
                         })}
                       </div>

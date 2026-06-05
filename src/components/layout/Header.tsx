@@ -215,9 +215,9 @@ export const Header = () => {
           <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[60] md:hidden animate-in fade-in duration-200" onClick={() => setIsMobileMenuOpen(false)} />
           <div
             ref={mobileMenuRef}
-            className="fixed inset-y-0 left-0 w-[280px] bg-white dark:bg-[#16171d] z-[70] md:hidden flex flex-col shadow-2xl animate-in slide-in-from-left duration-300 transition-colors"
+            className="fixed inset-y-0 left-0 w-[280px] bg-white dark:bg-[#16171d] z-[70] md:hidden flex flex-col shadow-2xl animate-in slide-in-from-left duration-300 transition-colors border-r dark:border-gray-800"
           >
-            <div className="p-4 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between bg-blue-600 text-white">
+            <div className="p-4 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between bg-blue-600 dark:bg-blue-700 text-white">
               <div className="flex items-center gap-2 italic font-black text-lg">
                 SABAY SHOP
               </div>

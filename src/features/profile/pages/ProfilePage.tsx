@@ -7,6 +7,7 @@ import { ProductCard } from '../../products/components/ProductCard';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import api from '../../../services/api';
 import { getImageUrl } from '../../../utils/imageUrl';
+import { LocationPickerModal } from '../../../components/common/LocationPickerModal';
 
 export const ProfilePage = () => {
   const { user, updateUser, logout } = useAuth();
@@ -17,6 +18,12 @@ export const ProfilePage = () => {
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [aboutMe, setAboutMe] = useState('');
+  const [provinceId, setProvinceId] = useState('');
+  const [districtId, setDistrictId] = useState('');
+  const [communeId, setCommuneId] = useState('');
+  const [villageId, setVillageId] = useState('');
+  const [locationName, setLocationName] = useState('');
+  const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
   // State for navigation
@@ -54,6 +61,13 @@ export const ProfilePage = () => {
       setName(user.name || '');
       setPhone(user.phone || '');
       setAboutMe(user.about_me || '');
+      setProvinceId(user.province_id ? String(user.province_id) : '');
+      setDistrictId(user.district_id ? String(user.district_id) : '');
+      setCommuneId(user.commune_id ? String(user.commune_id) : '');
+      setVillageId(user.village_id ? String(user.village_id) : '');
+      setLocationName(user.province ? (
+        `${user.village?.name ? user.village.name + ', ' : ''}${user.commune?.name ? user.commune.name + ', ' : ''}${user.district?.name ? user.district.name + ', ' : ''}${user.province.name}`
+      ) : '');
       fetchUserContent();
     }
   }, [user?.id]);
@@ -135,12 +149,31 @@ export const ProfilePage = () => {
     }
   };
 
+  const handleDeleteImage = async (type: 'avatar' | 'cover_photo') => {
+    if (!window.confirm(`Are you sure you want to delete your ${type.replace('_', ' ')}?`)) return;
+
+    const formData = new FormData();
+    formData.append(`remove_${type}`, '1');
+
+    try {
+      const res = await profileApi.update(formData);
+      updateUser(res.data);
+      fetchUserContent();
+    } catch (error) {
+      alert('Failed to delete image');
+    }
+  };
+
   const handleUpdate = async () => {
     setLoading(true);
     const formData = new FormData();
     formData.append('name', name);
     formData.append('phone', phone);
     formData.append('about_me', aboutMe);
+    if (provinceId) formData.append('province_id', provinceId);
+    if (districtId) formData.append('district_id', districtId);
+    if (communeId) formData.append('commune_id', communeId);
+    if (villageId) formData.append('village_id', villageId);
 
     try {
       const res = await profileApi.update(formData);
@@ -191,13 +224,28 @@ export const ProfilePage = () => {
             alt="Cover"
           />
           <div className="absolute inset-0 bg-black/10 group-hover:bg-black/20 transition-colors" />
-          <button
-            onClick={() => coverInputRef.current?.click()}
-            className="absolute bottom-4 right-4 bg-white/90 dark:bg-gray-900/90 hover:bg-white dark:hover:bg-gray-800 text-gray-800 dark:text-gray-200 px-3 py-1.5 rounded-md text-[11px] font-bold shadow-lg backdrop-blur-sm transition flex items-center gap-2 border border-gray-200 dark:border-gray-700"
-          >
-            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-            Update Cover
-          </button>
+          <div className="absolute inset-2.5 flex flex-col md:flex-row justify-between md:justify-end items-end gap-2 pointer-events-none">
+            <div className="pointer-events-auto">
+              {user.cover_photo && (
+                <button
+                  onClick={() => handleDeleteImage('cover_photo')}
+                  className="bg-black/40 hover:bg-red-600 text-white p-1.5 rounded-full shadow-lg backdrop-blur-md transition-all flex items-center justify-center border border-white/10 group/del"
+                  title="Delete Cover"
+                >
+                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                </button>
+              )}
+            </div>
+            <div className="pointer-events-auto">
+              <button
+                onClick={() => coverInputRef.current?.click()}
+                className="bg-black/60 hover:bg-black/80 text-white px-2 py-1 rounded-full text-[8px] font-black uppercase tracking-tighter shadow-xl backdrop-blur-md transition-all flex items-center gap-1 border border-white/10 active:scale-95"
+              >
+                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 00-2-2V9z"/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                Update Cover
+              </button>
+            </div>
+          </div>
           <input type="file" ref={coverInputRef} className="hidden" accept="image/*" onChange={(e) => handleFileChange(e, 'cover_photo')} />
         </div>
 
@@ -218,6 +266,15 @@ export const ProfilePage = () => {
                     <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                 </button>
               </div>
+              {user.avatar && (
+                <button
+                  onClick={(e) => { e.stopPropagation(); handleDeleteImage('avatar'); }}
+                  className="absolute top-1 right-1 bg-black/40 hover:bg-red-600 text-white p-1.5 rounded-full shadow-lg backdrop-blur-md border border-white/10 transition-all z-30 flex items-center justify-center md:scale-0 md:group-hover:scale-100 group/del"
+                  title="Delete Avatar"
+                >
+                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                </button>
+              )}
               <input type="file" ref={avatarInputRef} className="hidden" accept="image/*" onChange={(e) => handleFileChange(e, 'avatar')} />
             </div>
 
@@ -233,7 +290,10 @@ export const ProfilePage = () => {
               <div className="flex flex-wrap justify-center md:justify-start items-center gap-4 text-[11px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-3">
                 <p className="flex items-center gap-1">
                     <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                    Phnom Penh, Cambodia
+                    {user.village?.name ? `${user.village.name}, ` : ''}
+                    {user.commune?.name ? `${user.commune.name}, ` : ''}
+                    {user.district?.name ? `${user.district.name}, ` : ''}
+                    {user.province?.name || 'Cambodia'}
                 </p>
                 <div className="w-1 h-1 bg-gray-300 dark:bg-gray-700 rounded-full" />
                 <p className="flex items-center gap-1">
@@ -247,7 +307,7 @@ export const ProfilePage = () => {
             </div>
 
             {/* Quick Stats */}
-            <div className="flex gap-6 pb-2 pt-6 md:pt-10">
+            <div className="flex gap-4 sm:gap-6 pb-2 pt-6 md:pt-10">
                 <button onClick={() => handleTabChange('ads')} className="text-center group">
                     <p className="text-xl font-black text-gray-900 dark:text-gray-100 leading-none group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">{stats.ads_count || userProducts.length}</p>
                     <p className="text-[9px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mt-1">Total Ads</p>
@@ -272,12 +332,12 @@ export const ProfilePage = () => {
 
           {/* Sidebar Navigation */}
           <aside className="lg:w-64 flex-shrink-0">
-            <nav className="bg-white dark:bg-[#16171d] border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden shadow-sm sticky top-24 transition-colors">
-              <div className="p-2 space-y-0.5">
+            <nav className="bg-white dark:bg-[#16171d] border border-gray-200 dark:border-gray-800 rounded-xl overflow-x-auto scrollbar-hide shadow-sm sticky top-24 transition-colors">
+              <div className="p-2 flex lg:flex-col gap-0.5 whitespace-nowrap">
                 {[
                   { id: 'dashboard', label: 'Dashboard', icon: <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg> },
                   { id: 'ads', label: 'My Ads', icon: <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg> },
-                  { id: 'saved', label: 'Saved Ads', icon: <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M4.318 6.318a4.5 4.01 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.01 0 00-6.364 0z"/></svg> },
+                  { id: 'saved', label: 'Saved Ads', icon: <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M4.318 6.318a4.5 4.01 0 000 6.364L12 20.364l7.682-7.682a4.5 4.01 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.01 0 00-6.364 0z"/></svg> },
                   { id: 'followers', label: 'Followers', icon: <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 8.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg> },
                   { id: 'following', label: 'Following', icon: <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg> },
                 ].map((item) => (
@@ -291,8 +351,8 @@ export const ProfilePage = () => {
                   </button>
                 ))}
 
-                <div className="h-px bg-gray-100 dark:bg-gray-800 my-2 mx-2" />
-                <p className="px-4 py-1.5 text-[9px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">Account Settings</p>
+                <div className="hidden lg:block h-px bg-gray-100 dark:bg-gray-800 my-2 mx-2" />
+                <p className="hidden lg:block px-4 py-1.5 text-[9px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">Account Settings</p>
 
                 {[
                   { id: 'settings', label: 'Edit Profile', icon: <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg> },
@@ -593,10 +653,10 @@ export const ProfilePage = () => {
 
             {activeTab === 'settings' && (
               <div className="bg-white dark:bg-[#16171d] border border-gray-200 dark:border-gray-800 rounded-2xl shadow-sm overflow-hidden animate-in fade-in slide-in-from-right-4 duration-400">
-                <div className="bg-gray-50/80 dark:bg-gray-800/80 px-8 py-5 border-b border-gray-100 dark:border-gray-800 transition-colors">
+                <div className="bg-gray-50/80 dark:bg-gray-800/80 px-4 sm:px-8 py-4 sm:py-5 border-b border-gray-100 dark:border-gray-800 transition-colors">
                     <h2 className="text-[11px] font-black text-gray-800 dark:text-gray-200 uppercase tracking-widest">Update Profile Details</h2>
                 </div>
-                <div className="p-8 space-y-8 max-w-2xl">
+                <div className="p-4 sm:p-8 space-y-6 sm:space-y-8 max-w-2xl">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div className="space-y-2">
                       <label className="block text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest ml-1">Account Display Name</label>
@@ -616,6 +676,32 @@ export const ProfilePage = () => {
                         className="w-full px-4 py-3 bg-gray-50 dark:bg-[#08060d] border border-gray-200 dark:border-gray-800 rounded-xl outline-none focus:bg-white dark:focus:bg-[#1f2028] focus:border-blue-500 dark:focus:border-blue-400 focus:ring-4 focus:ring-blue-500/5 font-bold transition-all text-gray-800 dark:text-gray-100"
                       />
                     </div>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="block text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest ml-1">Location</label>
+                    <button
+                        type="button"
+                        onClick={() => setIsLocationModalOpen(true)}
+                        className="w-full flex items-center justify-between px-4 py-3 bg-gray-50 dark:bg-[#08060d] border border-gray-200 dark:border-gray-800 rounded-xl hover:border-blue-500 dark:hover:border-blue-400 transition-all text-left group shadow-inner"
+                    >
+                        <span className="text-sm font-bold text-gray-800 dark:text-gray-200">
+                            {locationName || (user.province ? (
+                                `${user.village?.name ? user.village.name + ', ' : ''}${user.commune?.name ? user.commune.name + ', ' : ''}${user.district?.name ? user.district.name + ', ' : ''}${user.province.name}`
+                            ) : 'Select Location')}
+                        </span>
+                        <svg className="w-5 h-5 text-gray-400 group-hover:text-blue-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7"/></svg>
+                    </button>
+                    <LocationPickerModal
+                        isOpen={isLocationModalOpen}
+                        onClose={() => setIsLocationModalOpen(false)}
+                        onSelect={(data) => {
+                            setProvinceId(data.province_id);
+                            setDistrictId(data.district_id);
+                            setCommuneId(data.commune_id);
+                            setVillageId(data.village_id);
+                            setLocationName(data.locationName);
+                        }}
+                    />
                   </div>
                   <div className="space-y-2">
                     <label className="block text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest ml-1">Public Biography</label>
@@ -647,10 +733,10 @@ export const ProfilePage = () => {
 
             {activeTab === 'password' && (
               <div className="bg-white dark:bg-[#16171d] border border-gray-200 dark:border-gray-800 rounded-2xl shadow-sm overflow-hidden animate-in fade-in slide-in-from-right-4 duration-400">
-                <div className="bg-gray-50/80 dark:bg-gray-800/80 px-8 py-5 border-b border-gray-100 dark:border-gray-800 transition-colors">
+                <div className="bg-gray-50/80 dark:bg-gray-800/80 px-4 sm:px-8 py-4 sm:py-5 border-b border-gray-100 dark:border-gray-800 transition-colors">
                     <h2 className="text-[11px] font-black text-gray-800 dark:text-gray-200 uppercase tracking-widest">Update Account Security</h2>
                 </div>
-                <div className="p-8 space-y-6 max-w-md">
+                <div className="p-4 sm:p-8 space-y-6 max-w-md">
                     <div className="space-y-2">
                         <label className="block text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest ml-1">Current Password</label>
                         <input type="password" placeholder="••••••••" className="w-full px-4 py-3 bg-gray-50 dark:bg-[#08060d] border border-gray-200 dark:border-gray-800 rounded-xl outline-none focus:bg-white dark:focus:bg-[#1f2028] focus:border-blue-500 dark:focus:border-blue-400 font-bold transition-all text-gray-800 dark:text-gray-100" />

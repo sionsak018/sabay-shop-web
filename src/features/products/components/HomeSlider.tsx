@@ -31,7 +31,7 @@ export const HomeSlider = () => {
   if (sliders.length === 0) return null;
 
   return (
-    <div className="relative w-full aspect-[21/9] sm:aspect-[25/7] overflow-hidden rounded-md shadow-sm bg-gray-200 group mb-3">
+    <div className="relative w-full aspect-[21/9] sm:aspect-[25/7] overflow-hidden rounded-md shadow-sm bg-gray-200 dark:bg-gray-800 group mb-3">
       {sliders.map((slider, index) => (
         <a
           key={slider.id}
@@ -49,8 +49,8 @@ export const HomeSlider = () => {
             }}
           />
           {slider.title && (
-            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-4">
-              <p className="text-white text-sm sm:text-lg font-bold truncate">{slider.title}</p>
+            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6 pt-12">
+              <p className="text-white text-base sm:text-xl font-black uppercase tracking-tight truncate drop-shadow-md">{slider.title}</p>
             </div>
           )}
         </a>
@@ -58,12 +58,12 @@ export const HomeSlider = () => {
 
       {/* Dots */}
       {sliders.length > 1 && (
-        <div className="absolute bottom-2 left-1/2 -translate-x-1/2 z-20 flex gap-1.5">
+        <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-20 flex gap-2">
           {sliders.map((_, idx) => (
             <button
               key={idx}
               onClick={() => setCurrentIndex(idx)}
-              className={`w-1.5 h-1.5 rounded-full transition-all ${idx === currentIndex ? 'bg-blue-600 w-4' : 'bg-white/60'}`}
+              className={`w-2 h-2 rounded-full transition-all ${idx === currentIndex ? 'bg-blue-600 w-5' : 'bg-white/60 dark:bg-white/20 shadow-sm'}`}
             />
           ))}
         </div>

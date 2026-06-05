@@ -1,6 +1,7 @@
 @import "tailwindcss";
 
 @theme {
+  --breakpoint-xs: 480px;
   --color-dark-bg: #08060d;
   --color-dark-card: #16171d;
   --color-dark-border: #1f2028;
@@ -82,5 +83,79 @@
   .scrollbar-hide {
     -ms-overflow-style: none;
     scrollbar-width: none;
+  }
+
+  /* Toast UI Editor Dark Mode Overrides */
+  .dark .toastui-editor-default-ui {
+    background-color: #16171d !important;
+    border-color: #2e303a !important;
+  }
+  .dark .toastui-editor-toolbar {
+    background-color: #1f2028 !important;
+    border-bottom: 1px solid #2e303a !important;
+  }
+  .dark .toastui-editor-toolbar-group {
+    border-right: 1px solid #2e303a !important;
+  }
+  .dark .toastui-editor-toolbar-icons {
+    filter: invert(0.8) !important;
+  }
+  .dark .toastui-editor-main {
+    background-color: #16171d !important;
+    color: #f3f4f6 !important;
+  }
+  .dark .toastui-editor-main-container {
+    background-color: #16171d !important;
+  }
+  .dark .toastui-editor-ww-container {
+    background-color: #16171d !important;
+  }
+  .dark .toastui-editor-contents {
+    color: #f3f4f6 !important;
+  }
+  .dark .toastui-editor-md-container {
+    background-color: #16171d !important;
+  }
+  .dark .toastui-editor-md-editor {
+    background-color: #16171d !important;
+  }
+  .dark .toastui-editor-mode-switch {
+    background-color: #1f2028 !important;
+    border-top: 1px solid #2e303a !important;
+  }
+  .dark .toastui-editor-mode-switch .tab-item {
+    color: #9ca3af !important;
+    border-color: #2e303a !important;
+  }
+  .dark .toastui-editor-mode-switch .tab-item.active {
+    background-color: #16171d !important;
+    color: #3b82f6 !important;
+  }
+  .dark .toastui-editor-contents p,
+  .dark .toastui-editor-contents h1,
+  .dark .toastui-editor-contents h2,
+  .dark .toastui-editor-contents h3,
+  .dark .toastui-editor-contents h4,
+  .dark .toastui-editor-contents h5,
+  .dark .toastui-editor-contents h6,
+  .dark .toastui-editor-contents li,
+  .dark .toastui-editor-contents span {
+    color: #f3f4f6 !important;
+  }
+  .dark .toastui-editor-ww-container .ProseMirror {
+    color: #f3f4f6 !important;
+  }
+  .dark .toastui-editor-popup {
+    background-color: #1c1c1d !important;
+    border-color: #2e303a !important;
+  }
+  .dark .toastui-editor-popup .toastui-editor-button {
+    background-color: #1f2028 !important;
+    color: #f3f4f6 !important;
+    border-color: #2e303a !important;
+  }
+  .dark .toastui-editor-popup .toastui-editor-ok-button {
+    background-color: #3b82f6 !important;
+    color: #ffffff !important;
   }
 }

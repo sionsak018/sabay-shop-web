@@ -104,14 +104,14 @@ export const UserPage = () => {
             <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100 tracking-tight">User Management</h1>
             <p className="text-sm text-gray-500 dark:text-gray-400 font-bold uppercase tracking-widest mt-1">Found {pagination.total} Users</p>
         </div>
-        <div className="flex items-center gap-3">
-            <form onSubmit={handleSearch} className="relative group">
+        <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
+            <form onSubmit={handleSearch} className="relative group w-full sm:w-64">
                 <input
                     type="text"
                     placeholder="Search name, email, phone..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="bg-white dark:bg-[#16171d] border border-gray-200 dark:border-gray-800 px-10 py-2 rounded-lg text-sm font-bold outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10 transition-all w-64 shadow-sm dark:text-gray-200"
+                    className="bg-white dark:bg-[#16171d] border border-gray-200 dark:border-gray-800 px-10 py-2 rounded-lg text-sm font-bold outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10 transition-all w-full shadow-sm dark:text-gray-200"
                 />
                 <svg className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 group-focus-within:text-blue-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
             </form>

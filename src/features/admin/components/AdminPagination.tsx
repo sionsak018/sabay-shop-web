@@ -16,14 +16,14 @@ export const AdminPagination: React.FC<PaginationProps> = ({ currentPage, lastPa
                 <button
                     onClick={() => onPageChange(currentPage - 1)}
                     disabled={currentPage === 1}
-                    className="relative inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-700 text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50"
+                    className="relative inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-700 text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 transition-colors"
                 >
                     Previous
                 </button>
                 <button
                     onClick={() => onPageChange(currentPage + 1)}
                     disabled={currentPage === lastPage}
-                    className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-700 text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50"
+                    className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-700 text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 transition-colors"
                 >
                     Next
                 </button>
@@ -55,8 +55,8 @@ export const AdminPagination: React.FC<PaginationProps> = ({ currentPage, lastPa
                                         onClick={() => onPageChange(page)}
                                         className={`relative inline-flex items-center px-4 py-2 border text-sm font-black transition-all ${
                                             currentPage === page
-                                                ? 'z-10 bg-blue-600 border-blue-600 text-white'
-                                                : 'bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700'
+                                                ? 'z-10 bg-blue-600 border-blue-600 text-white shadow-lg'
+                                                : 'bg-white dark:bg-[#1f2028] border-gray-300 dark:border-gray-800 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'
                                         }`}
                                     >
                                         {page}
@@ -64,7 +64,7 @@ export const AdminPagination: React.FC<PaginationProps> = ({ currentPage, lastPa
                                 );
                             }
                             if (page === 2 || page === lastPage - 1) {
-                                return <span key={page} className="relative inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm font-medium text-gray-700 dark:text-gray-400">...</span>;
+                                return <span key={page} className="relative inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-800 bg-white dark:bg-[#16171d] text-sm font-medium text-gray-700 dark:text-gray-500">...</span>;
                             }
                             return null;
                         })}

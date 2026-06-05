@@ -167,7 +167,7 @@ export const PublicProfilePage = () => {
             </div>
 
             <div className="flex flex-col items-center md:items-end gap-4 pb-2 pt-6 md:pt-10">
-                <div className="flex gap-6">
+                <div className="flex gap-4 sm:gap-6">
                     <button onClick={() => setActiveTab('home')} className={`text-center group transition-colors ${activeTab === 'home' ? 'text-blue-600 dark:text-blue-400' : 'text-gray-900 dark:text-gray-100'}`}>
                         <p className="text-xl font-black leading-none">{stats.ads_count}</p>
                         <p className="text-[9px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mt-1">Ads</p>
@@ -210,9 +210,9 @@ export const PublicProfilePage = () => {
         </div>
 
         {/* Store Tabs */}
-        <div className="bg-gray-50 dark:bg-[#08060d] border-t border-gray-200 dark:border-gray-800 transition-colors">
+        <div className="bg-gray-50 dark:bg-gray-800/50 border-t border-gray-200 dark:border-gray-800 transition-colors">
             <div className="container mx-auto px-4 max-w-6xl">
-                <div className="flex gap-8">
+                <div className="flex gap-4 sm:gap-8 overflow-x-auto scrollbar-hide whitespace-nowrap">
                     {[
                         { id: 'home', label: 'STORE HOME' },
                         { id: 'about', label: 'ABOUT' },
@@ -312,7 +312,7 @@ export const PublicProfilePage = () => {
         )}
 
         {activeTab === 'about' && (
-            <div className="max-w-3xl mx-auto bg-white dark:bg-[#16171d] border border-gray-200 dark:border-gray-800 rounded-2xl p-10 shadow-sm animate-in fade-in slide-in-from-bottom-2 duration-300 transition-colors">
+            <div className="max-w-3xl mx-auto bg-white dark:bg-[#16171d] border border-gray-200 dark:border-gray-800 rounded-2xl p-6 sm:p-10 shadow-sm animate-in fade-in slide-in-from-bottom-2 duration-300 transition-colors">
                 <h2 className="text-sm font-black text-gray-800 dark:text-gray-100 uppercase tracking-widest mb-6 pb-2 border-b border-gray-100 dark:border-gray-800">About {user.name}</h2>
                 <div className="space-y-6">
                     <div>

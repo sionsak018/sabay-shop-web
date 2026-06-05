@@ -88,18 +88,18 @@ export const MapView: React.FC<MapViewProps> = ({ lat, lng }) => {
             <div ref={mapRef} className="w-full h-full" />
 
             {/* View Switcher */}
-            <div className="absolute top-4 left-4 z-[1000] flex bg-white/90 backdrop-blur-md p-1 rounded-lg border border-gray-100 shadow-lg transition-opacity opacity-0 group-hover:opacity-100">
+            <div className="absolute top-4 left-4 z-[1000] flex bg-white/90 dark:bg-[#1c1c1d]/90 backdrop-blur-md p-1 rounded-lg border border-gray-100 dark:border-gray-700 shadow-lg transition-opacity opacity-0 group-hover:opacity-100">
                 <button
                     type="button"
                     onClick={(e) => { e.preventDefault(); setViewType('streets'); }}
-                    className={`px-3 py-1 text-[9px] font-black uppercase rounded ${viewType === 'streets' ? 'bg-blue-600 text-white' : 'text-gray-500 hover:bg-gray-100'}`}
+                    className={`px-3 py-1 text-[9px] font-black uppercase rounded ${viewType === 'streets' ? 'bg-blue-600 text-white' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'}`}
                 >
                     Map
                 </button>
                 <button
                     type="button"
                     onClick={(e) => { e.preventDefault(); setViewType('satellite'); }}
-                    className={`px-3 py-1 text-[9px] font-black uppercase rounded ${viewType === 'satellite' ? 'bg-blue-600 text-white' : 'text-gray-500 hover:bg-gray-100'}`}
+                    className={`px-3 py-1 text-[9px] font-black uppercase rounded ${viewType === 'satellite' ? 'bg-blue-600 text-white' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'}`}
                 >
                     Satellite
                 </button>

@@ -69,7 +69,7 @@ export const LoginPage = () => {
           <h2 className="text-sm font-bold text-gray-700 dark:text-gray-300 uppercase text-center tracking-widest">Login to your account</h2>
         </div>
 
-        <div className="p-8">
+        <div className="p-5 sm:p-8">
           <form onSubmit={handleSubmit} noValidate className="space-y-5">
             <div>
               <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase mb-2 tracking-wider">Email Address</label>

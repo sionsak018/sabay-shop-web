@@ -156,9 +156,9 @@ export const AttributePage = () => {
 
   return (
     <div className="space-y-6 text-left">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100">Custom Fields</h1>
-        <button onClick={() => handleOpenModal()} className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-bold text-sm shadow-sm flex items-center gap-2">
+        <button onClick={() => handleOpenModal()} className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-bold text-sm shadow-sm flex items-center justify-center gap-2 whitespace-nowrap">
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4"/></svg>
           New Field
         </button>
@@ -226,7 +226,7 @@ export const AttributePage = () => {
               </button>
             </div>
             <div className="overflow-y-auto flex-1 custom-scrollbar">
-              <form id="attr-form" onSubmit={handleSubmit} noValidate className="p-8 space-y-6">
+              <form id="attr-form" onSubmit={handleSubmit} noValidate className="p-4 sm:p-8 space-y-6">
                 <div>
                   <label className="block text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase mb-2 tracking-widest">Field Name <span className="text-red-500">*</span></label>
                   <input
@@ -319,7 +319,7 @@ export const AttributePage = () => {
               )}
               </form>
             </div>
-            <div className="p-8 bg-gray-50 dark:bg-gray-800/50 border-t dark:border-gray-800 flex gap-4 flex-shrink-0">
+            <div className="p-4 sm:p-8 bg-gray-50 dark:bg-gray-800/50 border-t dark:border-gray-800 flex gap-4 flex-shrink-0">
               <button type="button" onClick={() => setIsModalOpen(false)} className="flex-1 px-6 py-3.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-gray-100 dark:hover:bg-gray-700 transition-all">Cancel</button>
               <button type="submit" form="attr-form" className="flex-1 px-6 py-3.5 bg-blue-600 text-white rounded-xl font-black text-xs uppercase tracking-widest shadow-xl shadow-blue-600/20 hover:bg-blue-700 transition-all active:scale-[0.98]">
                 {editingAttr ? 'Save Changes' : 'Create Field'}

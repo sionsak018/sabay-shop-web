@@ -24,8 +24,8 @@ export const AlertModal: React.FC<AlertModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-      <div className="bg-white dark:bg-[#1c1c1d] rounded-2xl shadow-2xl w-full max-w-sm p-8 text-center border dark:border-gray-800 animate-in zoom-in-95 duration-300">
+    <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+      <div className="bg-white dark:bg-[#1c1c1d] rounded-2xl shadow-2xl w-full max-w-sm p-6 sm:p-8 text-center border dark:border-gray-800 animate-in zoom-in-95 duration-300">
         <div className="flex justify-center mb-6">
           {(type === 'success') && (
             <div className="w-20 h-20 rounded-full border-4 border-green-100 dark:border-green-900/30 flex items-center justify-center text-green-500 animate-in bounce-in duration-500">
@@ -63,7 +63,7 @@ export const AlertModal: React.FC<AlertModalProps> = ({
             </button>
             <button
               onClick={onConfirm}
-              className="flex-1 py-3.5 rounded-xl font-black text-white bg-blue-600 text-sm uppercase tracking-widest transition-all active:scale-95 shadow-lg shadow-blue-600/20 hover:bg-blue-700"
+              className="flex-1 py-3.5 rounded-xl font-black text-white bg-blue-600 dark:bg-blue-500 text-sm uppercase tracking-widest transition-all active:scale-95 shadow-lg shadow-blue-600/20 dark:shadow-blue-500/20 hover:bg-blue-700 dark:hover:bg-blue-600"
             >
               {confirmText}
             </button>
@@ -72,9 +72,9 @@ export const AlertModal: React.FC<AlertModalProps> = ({
           <button
             onClick={onClose}
             className={`w-full py-3.5 rounded-xl font-black text-white text-sm uppercase tracking-widest transition-all active:scale-95 shadow-lg ${
-              type === 'success' ? 'bg-blue-600 shadow-blue-600/20 hover:bg-blue-700' :
-              type === 'error' ? 'bg-red-600 shadow-red-600/20 hover:bg-red-700' :
-              'bg-yellow-600 shadow-yellow-600/20 hover:bg-yellow-700'
+              type === 'success' ? 'bg-blue-600 dark:bg-blue-500 shadow-blue-600/20 dark:shadow-blue-500/20 hover:bg-blue-700 dark:hover:bg-blue-600' :
+              type === 'error' ? 'bg-red-600 dark:bg-red-500 shadow-red-600/20 dark:shadow-red-500/20 hover:bg-red-700 dark:hover:bg-red-600' :
+              'bg-yellow-600 dark:bg-yellow-500 shadow-yellow-600/20 dark:shadow-yellow-500/20 hover:bg-yellow-700 dark:hover:bg-yellow-600'
             }`}
           >
             Close

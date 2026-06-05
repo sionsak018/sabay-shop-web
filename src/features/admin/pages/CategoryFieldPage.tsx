@@ -61,10 +61,10 @@ export const CategoryFieldPage = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100">Category Fields Mapping</h1>
         {selectedCatId && (
-          <button onClick={handleSave} className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-black text-xs uppercase tracking-widest shadow-lg">Save Changes</button>
+          <button onClick={handleSave} className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-black text-xs uppercase tracking-widest shadow-lg">Save Changes</button>
         )}
       </div>
 

@@ -3,14 +3,24 @@ import { format, isToday, isYesterday, formatDistanceToNow } from 'date-fns';
 import { useAuth } from '../../auth/hooks/useAuth';
 import { messageApi } from '../services/messageApi';
 import { type Message } from '../types/message.types';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { getImageUrl } from '../../../utils/imageUrl';
 
 export const InboxPage = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+
   const [messages, setMessages] = useState<Message[]>([]);
-  const [selectedPartnerId, setSelectedPartnerId] = useState<number | null>(null);
+  const selectedPartnerId = searchParams.get('id') ? Number(searchParams.get('id')) : null;
+  const setSelectedPartnerId = (id: number | null) => {
+    if (id) {
+        setSearchParams({ id: String(id) });
+    } else {
+        setSearchParams({});
+    }
+  };
+
   const [newMessage, setNewMessage] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [historySearch, setHistorySearch] = useState('');
@@ -209,7 +219,7 @@ export const InboxPage = () => {
   };
 
   return (
-    <div className="bg-[#e7ebf0] dark:bg-[#08060d] h-[calc(100dvh-64px)] md:min-h-[calc(100vh-56px)] flex items-start justify-center p-0 md:p-4 antialiased transition-colors duration-300">
+    <div className={`bg-[#e7ebf0] dark:bg-[#08060d] ${selectedPartnerId ? 'h-[100dvh]' : 'h-[calc(100dvh-64px)]'} md:h-[calc(100vh-64px)] flex items-start justify-center p-0 md:p-4 antialiased transition-colors duration-300`}>
       <div
         onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }}
         onDragLeave={() => setIsDragOver(false)}
@@ -344,24 +354,26 @@ export const InboxPage = () => {
 
                 <div className="flex items-center gap-1">
                   {isSearchingHistory ? (
-                      <div className="flex items-center bg-[#f1f1f1] dark:bg-[#08060d] rounded-full px-3 py-1 border border-gray-200 dark:border-gray-700">
+                      <div className="flex items-center bg-[#f1f1f1] dark:bg-[#16171d] rounded-full px-3 py-1 border border-gray-200 dark:border-gray-700 absolute right-4 left-4 md:static md:w-auto z-30">
                         <input
                             autoFocus
                             placeholder="Search"
-                            className="bg-transparent border-none text-sm outline-none w-32 md:w-48 font-medium text-gray-800 dark:text-gray-200"
+                            className="bg-transparent border-none text-sm outline-none w-full md:w-48 font-medium text-gray-800 dark:text-gray-100"
                             value={historySearch}
                             onChange={(e) => setHistorySearch(e.target.value)}
                         />
-                        <button onClick={() => { setIsSearchingHistory(false); setHistorySearch(''); }} className="text-gray-400 dark:text-gray-600"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12"/></svg></button>
+                        <button onClick={() => { setIsSearchingHistory(false); setHistorySearch(''); }} className="text-gray-400 dark:text-gray-500 shrink-0"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12"/></svg></button>
                       </div>
                   ) : (
                     <button onClick={() => setIsSearchingHistory(true)} className="p-2 text-gray-400 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-all">
                         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                     </button>
                   )}
-                  <button className="p-2 text-gray-400 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-all">
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"/></svg>
-                  </button>
+                  {!isSearchingHistory && (
+                    <button className="p-2 text-gray-400 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-all">
+                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"/></svg>
+                    </button>
+                  )}
                 </div>
               </div>
 

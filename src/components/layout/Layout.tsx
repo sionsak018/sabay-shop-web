@@ -9,9 +9,10 @@ export const Layout = () => {
   const { t } = useTranslation();
 
   const isActive = (path: string) => location.pathname === path;
+  const isChatOpen = location.pathname === '/inbox' && new URLSearchParams(location.search).has('id');
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#f1f2f6] dark:bg-[#08060d] text-gray-900 dark:text-gray-100 antialiased font-sans pb-16 md:pb-0 transition-colors duration-300">
+    <div className={`flex flex-col min-h-screen bg-[#f1f2f6] dark:bg-[#08060d] text-gray-900 dark:text-gray-100 antialiased font-sans ${isChatOpen ? 'pb-0' : 'pb-16'} md:pb-0 transition-colors duration-300 overflow-x-hidden`}>
       
       {/* Khmer24 Style Global Header */}
       <div className={`sticky top-0 z-50 ${location.pathname === '/inbox' ? 'hidden md:block' : ''}`}>
@@ -24,7 +25,7 @@ export const Layout = () => {
       </main>
 
       {/* Khmer24 Style Bottom Navigation - Mobile Only */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-white dark:bg-[#16171d] border-t border-gray-200 dark:border-gray-800 z-[100] md:hidden h-16 flex items-center justify-around px-2 shadow-[0_-2px_10px_rgba(0,0,0,0.05)] transition-colors">
+      <nav className={`fixed bottom-0 left-0 right-0 bg-white dark:bg-[#16171d] border-t border-gray-200 dark:border-gray-800 z-[100] md:hidden h-16 flex items-center justify-around px-2 shadow-[0_-2px_10px_rgba(0,0,0,0.05)] transition-colors ${isChatOpen ? 'hidden' : 'flex'}`}>
         <Link to="/" className={`flex flex-col items-center gap-1 transition-colors ${isActive('/') ? 'text-blue-600' : 'text-gray-400 dark:text-gray-500'}`}>
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
           <span className="text-[9px] font-black uppercase tracking-tighter">{t('common.home')}</span>
@@ -60,7 +61,7 @@ export const Layout = () => {
       <footer className={`w-full bg-white dark:bg-[#16171d] border-t border-gray-200 dark:border-gray-800 mt-auto transition-colors ${location.pathname === '/inbox' ? 'hidden md:block' : ''}`}>
         <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12">
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12 mb-12">
             
             {/* Branding & Mission */}
             <div className="space-y-4">
