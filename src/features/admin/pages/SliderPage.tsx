@@ -147,7 +147,7 @@ export const SliderPage = () => {
                   (e.target as HTMLImageElement).src = 'https://placehold.co/800x400?text=Image+Not+Found';
                 }}
               />
-              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity hidden sm:flex items-center justify-center gap-2">
                 <button onClick={() => handleOpenModal(slider)} className="p-2 bg-white text-blue-600 rounded-full hover:bg-blue-50 transition">
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-5M18.364 5.364a2.121 2.121 0 013 3L12 18l-4 1 1-4 9.364-9.364z"/></svg>
                 </button>
@@ -157,8 +157,28 @@ export const SliderPage = () => {
               </div>
             </div>
             <div className="p-4">
-              <p className="font-bold text-gray-800 dark:text-gray-200 text-sm truncate">{slider.title || 'No Title'}</p>
-              <p className="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase mt-1">Order: {slider.sort_order}</p>
+              <div className="flex items-center justify-between">
+                <div className="min-w-0">
+                  <p className="font-bold text-gray-800 dark:text-gray-200 text-sm truncate">{slider.title || 'No Title'}</p>
+                  <p className="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase mt-1">Order: {slider.sort_order}</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-2 mt-4 sm:hidden">
+                <button
+                  onClick={() => handleOpenModal(slider)}
+                  className="flex items-center justify-center gap-2 px-3 py-2 bg-blue-50 dark:bg-blue-900/10 text-blue-600 dark:text-blue-400 rounded-xl border border-blue-100 dark:border-blue-900/50 text-[10px] font-black uppercase tracking-widest transition-colors active:scale-95"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M11 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-5M18.364 5.364a2.121 2.121 0 013 3L12 18l-4 1 1-4 9.364-9.364z"/></svg>
+                  Edit
+                </button>
+                <button
+                  onClick={() => handleDelete(slider.id)}
+                  className="flex items-center justify-center gap-2 px-3 py-2 bg-red-50 dark:bg-red-900/10 text-red-600 dark:text-red-400 rounded-xl border border-red-100 dark:border-red-900/50 text-[10px] font-black uppercase tracking-widest transition-colors active:scale-95"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                  Delete
+                </button>
+              </div>
             </div>
           </div>
         ))}
