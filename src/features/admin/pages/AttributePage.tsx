@@ -3,6 +3,8 @@ import { productSpecApi } from '../services/productSpecApi';
 import api from '../../../services/api';
 import { getImageUrl } from '../../../utils/imageUrl';
 import { useAlert } from '../../../context/AlertContext';
+import { useTranslation } from 'react-i18next';
+import { useDebounce } from '../../../hooks/useDebounce';
 
 interface OptionItem {
   value: string;
@@ -11,12 +13,15 @@ interface OptionItem {
 }
 
 export const AttributePage = () => {
+  const { t } = useTranslation();
   const { showAlert } = useAlert();
   const [attributes, setAttributes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingAttr, setEditingAttr] = useState<any | null>(null);
   const [saving, setSaving] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const debouncedSearch = useDebounce(searchTerm, 500);
   const [formData, setFormData] = useState({
     name: '',
     type: 'text',
@@ -24,9 +29,9 @@ export const AttributePage = () => {
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const fetchAttributes = async () => {
+  const fetchAttributes = async (search = '') => {
     try {
-      const res = await api.get('/admin/attributes');
+      const res = await api.get(`/admin/attributes?search=${search}`);
       setAttributes(res.data);
     } catch (error) {
       console.error(error);
@@ -36,8 +41,13 @@ export const AttributePage = () => {
   };
 
   useEffect(() => {
-    fetchAttributes();
-  }, []);
+    fetchAttributes(debouncedSearch);
+  }, [debouncedSearch]);
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    fetchAttributes(searchTerm);
+  };
 
   const handleOpenModal = (attr: any | null = null) => {
     setErrors({});
@@ -88,7 +98,7 @@ export const AttributePage = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const newErrors: Record<string, string> = {};
-    const Msg = 'ព័ត៌មាននេះត្រូវបានទាមទារ';
+    const Msg = t('validation.required');
 
     if (!formData.name.trim()) newErrors.name = Msg;
 
@@ -157,11 +167,23 @@ export const AttributePage = () => {
   return (
     <div className="space-y-6 text-left">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100">Custom Fields</h1>
-        <button onClick={() => handleOpenModal()} className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-bold text-sm shadow-sm flex items-center justify-center gap-2 whitespace-nowrap">
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4"/></svg>
-          New Field
-        </button>
+        <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100 uppercase tracking-tight">Custom Fields</h1>
+        <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
+            <form onSubmit={handleSearch} className="relative group w-full sm:w-64">
+                <input
+                    type="text"
+                    placeholder="Search fields..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="bg-white dark:bg-[#16171d] border border-gray-200 dark:border-gray-800 px-10 py-2 rounded-lg text-sm font-bold outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10 transition-all w-full shadow-sm dark:text-gray-200"
+                />
+                <svg className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 group-focus-within:text-blue-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+            </form>
+            <button onClick={() => handleOpenModal()} className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg font-bold text-sm shadow-sm flex items-center justify-center gap-2 whitespace-nowrap active:scale-95 transition-all">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4"/></svg>
+                New Field
+            </button>
+        </div>
       </div>
 
       <div className="bg-white dark:bg-[#16171d] rounded-xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden overflow-x-auto transition-colors">

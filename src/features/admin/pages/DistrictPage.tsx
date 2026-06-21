@@ -2,8 +2,11 @@ import React, { useState, useEffect } from 'react';
 import api from '../../../services/api';
 import { AdminPagination } from '../components/AdminPagination';
 import { useAlert } from '../../../context/AlertContext';
+import { useTranslation } from 'react-i18next';
+import { useDebounce } from '../../../hooks/useDebounce';
 
 export const DistrictPage = () => {
+  const { t } = useTranslation();
   const { showAlert } = useAlert();
   const [districts, setDistricts] = useState<any[]>([]);
   const [provinces, setProvinces] = useState<any[]>([]);
@@ -16,6 +19,7 @@ export const DistrictPage = () => {
   // Pagination & Search
   const [pagination, setPagination] = useState({ currentPage: 1, lastPage: 1, total: 0 });
   const [searchTerm, setSearchTerm] = useState('');
+  const debouncedSearch = useDebounce(searchTerm, 500);
 
   const fetchData = async (page = 1, search = '') => {
     setLoading(true);
@@ -40,8 +44,8 @@ export const DistrictPage = () => {
   };
 
   useEffect(() => {
-    fetchData();
-  }, []);
+    fetchData(1, debouncedSearch);
+  }, [debouncedSearch]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -67,7 +71,7 @@ export const DistrictPage = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const newErrors: Record<string, string> = {};
-    const Msg = 'ព័ត៌មាននេះត្រូវបានទាមទារ';
+    const Msg = t('validation.required');
 
     if (!formData.province_id) newErrors.province_id = Msg;
     if (!formData.name.trim()) newErrors.name = Msg;

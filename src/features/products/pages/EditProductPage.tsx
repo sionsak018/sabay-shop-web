@@ -220,7 +220,7 @@ export const EditProductPage = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const newErrors: Record<string, string> = {};
-    const Msg = 'ព័ត៌មាននេះត្រូវបានទាមទារ';
+    const Msg = t('validation.required');
 
     if (images.length === 0 && existingImages.length === 0) newErrors.images = Msg;
     if (!formData.title.trim()) newErrors.title = Msg;

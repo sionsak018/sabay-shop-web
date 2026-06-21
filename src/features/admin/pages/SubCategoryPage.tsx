@@ -3,8 +3,11 @@ import { categoryApi } from '../../categories/services/categoryApi';
 import { type Category } from '../../categories/types/category.types';
 import { getImageUrl } from '../../../utils/imageUrl';
 import { useAlert } from '../../../context/AlertContext';
+import { useTranslation } from 'react-i18next';
+import { useDebounce } from '../../../hooks/useDebounce';
 
 export const SubCategoryPage = () => {
+  const { t } = useTranslation();
   const { showAlert } = useAlert();
   const [categories, setCategories] = useState<Category[]>([]);
   const [mainCategories, setMainCategories] = useState<Category[]>([]);
@@ -17,6 +20,7 @@ export const SubCategoryPage = () => {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const debouncedSearch = useDebounce(searchTerm, 500);
 
   const fetchCategories = async (search = '') => {
     setLoading(true);
@@ -37,8 +41,8 @@ export const SubCategoryPage = () => {
   };
 
   useEffect(() => {
-    fetchCategories();
-  }, []);
+    fetchCategories(debouncedSearch);
+  }, [debouncedSearch]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -84,7 +88,7 @@ export const SubCategoryPage = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const newErrors: Record<string, string> = {};
-    const Msg = 'ព័ត៌មាននេះត្រូវបានទាមទារ';
+    const Msg = t('validation.required');
 
     if (!formData.parent_id) newErrors.parent_id = Msg;
     if (!formData.name.trim()) newErrors.name = Msg;

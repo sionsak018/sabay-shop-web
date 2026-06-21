@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import api from '../../../services/api';
 import { AdminPagination } from '../components/AdminPagination';
 import { useAlert } from '../../../context/AlertContext';
+import { useDebounce } from '../../../hooks/useDebounce';
 
 export const ProductPage = () => {
   const { showAlert } = useAlert();
@@ -9,6 +10,7 @@ export const ProductPage = () => {
   const [loading, setLoading] = useState(true);
   const [pagination, setPagination] = useState({ currentPage: 1, lastPage: 1, total: 0 });
   const [searchTerm, setSearchTerm] = useState('');
+  const debouncedSearch = useDebounce(searchTerm, 500);
 
   const fetchData = async (page = 1, search = '') => {
     setLoading(true);
@@ -28,8 +30,8 @@ export const ProductPage = () => {
   };
 
   useEffect(() => {
-    fetchData();
-  }, []);
+    fetchData(1, debouncedSearch);
+  }, [debouncedSearch]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();

@@ -8,7 +8,8 @@ interface MenuItem {
   path?: string;
   label: string;
   icon: React.ReactNode;
-  children?: { path: string; label: string }[];
+  permission?: string;
+  children?: { path: string; label: string; permission?: string }[];
 }
 
 export const AdminLayout = () => {
@@ -20,6 +21,13 @@ export const AdminLayout = () => {
   const [expandedMenus, setExpandedMenus] = useState<string[]>(['Categories', 'Custom Fields', 'Locations', 'User Access']);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
+  const hasPermission = (permission?: string) => {
+    if (!user) return false;
+    // Strict mode: Only allow if permission is explicitly in the user's permissions array
+    if (!permission) return true;
+    return user.permissions?.includes(permission);
+  };
+
   const menuItems: MenuItem[] = [
     {
       path: '/admin',
@@ -29,6 +37,7 @@ export const AdminLayout = () => {
     {
       label: t('admin.categories'),
       icon: <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16m-7 6h7"/></svg>,
+      permission: 'manage_categories',
       children: [
         { path: '/admin/main-categories', label: t('admin.main_categories') },
         { path: '/admin/sub-categories', label: t('admin.sub_categories') },
@@ -37,6 +46,7 @@ export const AdminLayout = () => {
     {
       label: t('admin.custom_fields'),
       icon: <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>,
+      permission: 'manage_categories',
       children: [
         { path: '/admin/attributes', label: t('admin.field_list') },
         { path: '/admin/category-fields', label: t('admin.assign_to_category') },
@@ -45,11 +55,13 @@ export const AdminLayout = () => {
     {
       path: '/admin/products',
       label: t('admin.all_products'),
-      icon: <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+      icon: <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>,
+      permission: 'view_products'
     },
     {
       label: t('admin.locations'),
       icon: <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>,
+      permission: 'manage_categories',
       children: [
         { path: '/admin/provinces', label: t('admin.provinces') },
         { path: '/admin/districts', label: t('admin.districts') },
@@ -60,21 +72,24 @@ export const AdminLayout = () => {
     {
       label: t('admin.user_access'),
       icon: <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>,
+      permission: 'view_users',
       children: [
-        { path: '/admin/users', label: t('admin.users') },
-        { path: '/admin/roles', label: t('admin.roles') },
-        { path: '/admin/permissions', label: t('admin.permissions') },
+        { path: '/admin/users', label: t('admin.users'), permission: 'view_users' },
+        { path: '/admin/roles', label: t('admin.roles'), permission: 'manage_roles' },
+        { path: '/admin/permissions', label: t('admin.permissions'), permission: 'manage_roles' },
       ]
     },
     {
       path: '/admin/sliders',
       label: t('admin.sliders'),
-      icon: <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+      icon: <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>,
+      permission: 'manage_categories'
     },
     {
       path: '/admin/config',
       label: t('admin.settings'),
-      icon: <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+      icon: <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>,
+      permission: 'manage_roles'
     },
   ];
 
@@ -93,9 +108,24 @@ export const AdminLayout = () => {
     navigate('/login');
   };
 
-  if (!user || user.role !== 'admin') {
+  if (!user || (user.role !== 'admin' && !user.permissions?.length)) {
     return <Navigate to="/" replace />;
   }
+
+  const filteredMenuItems = menuItems
+    .map(item => ({
+      ...item,
+      children: item.children ? item.children.filter(child => hasPermission(child.permission)) : undefined
+    }))
+    .filter(item => {
+      // If item has a specific permission, check it
+      if (item.permission && !hasPermission(item.permission)) return false;
+
+      // If item has children, only show it if at least one child is visible
+      if (item.children) return item.children.length > 0;
+
+      return true;
+    });
 
   return (
     <div className="flex min-h-screen bg-gray-100 dark:bg-[#08060d] antialiased">
@@ -157,7 +187,7 @@ export const AdminLayout = () => {
               </button>
           </div>
 
-          {menuItems.map((item) => {
+          {filteredMenuItems.map((item) => {
             const hasChildren = item.children && item.children.length > 0;
             const isExpanded = expandedMenus.includes(item.label);
             const isActive = item.path ? location.pathname === item.path : item.children?.some(c => location.pathname === c.path);

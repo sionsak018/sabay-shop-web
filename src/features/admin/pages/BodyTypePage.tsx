@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { productSpecApi, type BodyType } from '../services/productSpecApi';
 import { getImageUrl } from '../../../utils/imageUrl';
 import { useAlert } from '../../../context/AlertContext';
+import { useTranslation } from 'react-i18next';
 
 export const BodyTypePage = () => {
+  const { t } = useTranslation();
   const { showAlert } = useAlert();
   const [bodyTypes, setBodyTypes] = useState<BodyType[]>([]);
   const [loading, setLoading] = useState(true);
@@ -55,7 +57,7 @@ export const BodyTypePage = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const newErrors: Record<string, string> = {};
-    const Msg = 'ព័ត៌មាននេះត្រូវបានទាមទារ';
+    const Msg = t('validation.required');
 
     if (!formData.name.trim()) newErrors.name = Msg;
     if (!formData.slug.trim()) newErrors.slug = Msg;

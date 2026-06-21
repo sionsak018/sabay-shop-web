@@ -3,8 +3,11 @@ import { categoryApi } from '../../categories/services/categoryApi';
 import { type Category } from '../../categories/types/category.types';
 import { getImageUrl } from '../../../utils/imageUrl';
 import { useAlert } from '../../../context/AlertContext';
+import { useTranslation } from 'react-i18next';
+import { useDebounce } from '../../../hooks/useDebounce';
 
 export const MainCategoryPage = () => {
+  const { t } = useTranslation();
   const { showAlert } = useAlert();
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
@@ -16,6 +19,7 @@ export const MainCategoryPage = () => {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const debouncedSearch = useDebounce(searchTerm, 500);
 
   const fetchCategories = async (search = '') => {
     setLoading(true);
@@ -34,8 +38,8 @@ export const MainCategoryPage = () => {
   };
 
   useEffect(() => {
-    fetchCategories();
-  }, []);
+    fetchCategories(debouncedSearch);
+  }, [debouncedSearch]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -73,7 +77,7 @@ export const MainCategoryPage = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const newErrors: Record<string, string> = {};
-    const Msg = 'ព័ត៌មាននេះត្រូវបានទាមទារ';
+    const Msg = t('validation.required');
 
     if (!formData.name.trim()) newErrors.name = Msg;
     if (!formData.slug.trim()) newErrors.slug = Msg;

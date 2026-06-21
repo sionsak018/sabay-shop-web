@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { productSpecApi, type BrandModel, type Brand } from '../services/productSpecApi';
 import { useAlert } from '../../../context/AlertContext';
+import { useTranslation } from 'react-i18next';
 
 export const ModelPage = () => {
+  const { t } = useTranslation();
   const { showAlert } = useAlert();
   const [models, setModels] = useState<BrandModel[]>([]);
   const [brands, setBrands] = useState<Brand[]>([]);
@@ -50,7 +52,7 @@ export const ModelPage = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const newErrors: Record<string, string> = {};
-    const Msg = 'ព័ត៌មាននេះត្រូវបានទាមទារ';
+    const Msg = t('validation.required');
 
     if (!formData.brand_id) newErrors.brand_id = Msg;
     if (!formData.name.trim()) newErrors.name = Msg;

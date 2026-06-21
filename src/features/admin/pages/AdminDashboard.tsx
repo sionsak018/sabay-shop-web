@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../../services/api';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 export const AdminDashboard = () => {
+  const { t } = useTranslation();
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
@@ -13,20 +15,20 @@ export const AdminDashboard = () => {
       .finally(() => setLoading(false));
   }, []);
 
-  if (loading) return <div className="p-12 text-center text-gray-400 font-bold uppercase animate-pulse">Loading Dashboard...</div>;
+  if (loading) return <div className="p-12 text-center text-gray-400 font-bold uppercase animate-pulse">{t('admin.loading')}...</div>;
 
   const stats = [
-    { label: 'Total Users', value: data.stats.total_users, change: '', icon: <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>, color: 'bg-blue-500' },
-    { label: 'Total Products', value: data.stats.total_products, change: '', icon: <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>, color: 'bg-green-500' },
-    { label: 'Total Orders', value: data.stats.total_orders, change: '', icon: <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>, color: 'bg-purple-500' },
-    { label: 'Revenue', value: `$${data.stats.revenue.toLocaleString()}`, change: '', icon: <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>, color: 'bg-orange-500' },
+    { label: t('admin.total_users'), value: data.stats.total_users, change: '', icon: <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>, color: 'bg-blue-500' },
+    { label: t('admin.total_products'), value: data.stats.total_products, change: '', icon: <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>, color: 'bg-green-500' },
+    { label: t('admin.total_orders'), value: data.stats.total_orders, change: '', icon: <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>, color: 'bg-purple-500' },
+    { label: t('admin.revenue'), value: `$${data.stats.revenue.toLocaleString()}`, change: '', icon: <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>, color: 'bg-orange-500' },
   ];
 
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100">Admin Dashboard</h1>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Welcome back, here's what's happening today.</p>
+        <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100">{t('admin.dashboard')}</h1>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{t('admin.welcome_back')}</p>
       </div>
 
       {/* Stats Grid */}
@@ -48,15 +50,15 @@ export const AdminDashboard = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <div className="bg-white dark:bg-[#16171d] rounded-xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden transition-colors">
           <div className="p-6 border-b border-gray-50 dark:border-gray-800 flex items-center justify-between">
-            <h2 className="text-sm font-bold text-gray-800 dark:text-gray-200 uppercase tracking-wider">Recent Products</h2>
-            <Link to="/admin/products" className="text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline uppercase">View All</Link>
+            <h2 className="text-sm font-bold text-gray-800 dark:text-gray-200 uppercase tracking-wider">{t('admin.recent_products')}</h2>
+            <Link to="/admin/products" className="text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline uppercase">{t('admin.view_all')}</Link>
           </div>
           <div className="p-0 overflow-x-auto">
              <table className="w-full text-left border-collapse min-w-[300px]">
                 <thead className="bg-gray-50 dark:bg-gray-800/50 border-b border-gray-100 dark:border-gray-800">
                     <tr>
-                        <th className="px-6 py-3 text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">Product</th>
-                        <th className="px-6 py-3 text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">Price</th>
+                        <th className="px-6 py-3 text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">{t('admin.product')}</th>
+                        <th className="px-6 py-3 text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">{t('admin.price')}</th>
                     </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-50 dark:divide-gray-800">
@@ -76,15 +78,15 @@ export const AdminDashboard = () => {
 
         <div className="bg-white dark:bg-[#16171d] rounded-xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden transition-colors">
           <div className="p-6 border-b border-gray-50 dark:border-gray-800 flex items-center justify-between">
-            <h2 className="text-sm font-bold text-gray-800 dark:text-gray-200 uppercase tracking-wider">Latest Users</h2>
-            <Link to="/admin/users" className="text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline uppercase">View All</Link>
+            <h2 className="text-sm font-bold text-gray-800 dark:text-gray-200 uppercase tracking-wider">{t('admin.latest_users')}</h2>
+            <Link to="/admin/users" className="text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline uppercase">{t('admin.view_all')}</Link>
           </div>
           <div className="p-0 overflow-x-auto">
              <table className="w-full text-left border-collapse min-w-[300px]">
                 <thead className="bg-gray-50 dark:bg-gray-800/50 border-b border-gray-100 dark:border-gray-800">
                     <tr>
-                        <th className="px-6 py-3 text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">User</th>
-                        <th className="px-6 py-3 text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">Joined</th>
+                        <th className="px-6 py-3 text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">{t('admin.user')}</th>
+                        <th className="px-6 py-3 text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">{t('admin.joined')}</th>
                     </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-50 dark:divide-gray-800">
