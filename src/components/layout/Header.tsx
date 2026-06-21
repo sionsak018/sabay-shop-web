@@ -3,6 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../features/auth/hooks/useAuth';
 import { useTheme } from '../../context/ThemeContext';
 import { useTranslation } from 'react-i18next';
+import { getImageUrl } from '../../utils/imageUrl';
 
 export const Header = () => {
   const { user, logout } = useAuth();
@@ -129,7 +130,7 @@ export const Header = () => {
                 >
                   <div className="h-8 w-8 rounded-full bg-blue-600 flex items-center justify-center text-white text-xs font-black border-2 border-white dark:border-gray-800 shadow-sm overflow-hidden shrink-0">
                     {user.avatar ? (
-                      <img src={user.avatar.startsWith('http') ? user.avatar : `http://127.0.0.1:8000/storage/${user.avatar}`} className="w-full h-full object-cover" />
+                      <img src={getImageUrl(user.avatar)} className="w-full h-full object-cover" />
                     ) : (
                       user.name?.charAt(0)?.toUpperCase() || '?'
                     )}

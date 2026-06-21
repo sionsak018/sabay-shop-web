@@ -23,6 +23,8 @@ export const AdminLayout = () => {
 
   const hasPermission = (permission?: string) => {
     if (!user) return false;
+    // Admins have all permissions
+    if (user.role === 'admin') return true;
     // Strict mode: Only allow if permission is explicitly in the user's permissions array
     if (!permission) return true;
     return user.permissions?.includes(permission);
