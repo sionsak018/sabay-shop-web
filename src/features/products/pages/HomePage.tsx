@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useProducts } from '../hooks/useProducts';
 import { ProductCard } from '../components/ProductCard';
@@ -39,6 +39,12 @@ export const HomePage = () => {
   const [activeAttributes, setActiveAttributes] = useState<Record<string, string>>({});
   const [expandedAttrs, setExpandedAttrs] = useState<Record<number, boolean>>({});
 
+  const selectedCategory = categories.find(c => c.id === activeCategoryId);
+  const mainCategory = selectedCategory?.parent_id ? categories.find(c => c.id === selectedCategory.parent_id) : selectedCategory;
+  const subCategories = mainCategory ? categories.filter(c => c.parent_id === mainCategory.id) : [];
+
+  const mainCategoriesToDisplay = categories.filter(c => !c.parent_id);
+
   useEffect(() => {
     // Optimization: Check if we already have categories in session storage to show them instantly
     const cachedCats = sessionStorage.getItem('cached_categories');
@@ -77,7 +83,7 @@ export const HomePage = () => {
     province_id: activeProvinceId || undefined,
     district_id: activeDistrictId || undefined,
     ...activeAttributes
-  }), [activeCategoryId, activeProvinceId, activeDistrictId, JSON.stringify(activeAttributes)]);
+  }), [activeCategoryId, activeProvinceId, activeDistrictId, activeAttributes]);
 
   const { products, loading, error } = useProducts(productFilters);
 
@@ -110,12 +116,6 @@ export const HomePage = () => {
         return { ...prev, [key]: value };
     });
   };
-
-  const selectedCategory = categories.find(c => c.id === activeCategoryId);
-  const mainCategory = selectedCategory?.parent_id ? categories.find(c => c.id === selectedCategory.parent_id) : selectedCategory;
-  const subCategories = mainCategory ? categories.filter(c => c.parent_id === mainCategory.id) : [];
-
-  const mainCategoriesToDisplay = categories.filter(c => !c.parent_id);
 
   // Logic for Step-by-Step visibility
   const isSubCategorySelected = selectedCategory && selectedCategory.parent_id;
