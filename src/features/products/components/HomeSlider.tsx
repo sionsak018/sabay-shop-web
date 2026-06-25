@@ -2,17 +2,26 @@ import { useState, useEffect } from 'react';
 import { sliderApi, type Slider } from '../../admin/services/sliderApi';
 import { getImageUrl } from '../../../utils/imageUrl';
 
-export const HomeSlider = () => {
-  const [sliders, setSliders] = useState<Slider[]>([]);
+interface HomeSliderProps {
+  initialData?: any[];
+}
+
+export const HomeSlider = ({ initialData }: HomeSliderProps) => {
+  const [sliders, setSliders] = useState<Slider[]>(initialData || []);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!initialData);
 
   useEffect(() => {
+    if (initialData) {
+        setSliders(initialData);
+        setLoading(false);
+        return;
+    }
     sliderApi.getPublic()
       .then(res => setSliders(res.data))
       .catch(err => console.error('Failed to load sliders', err))
       .finally(() => setLoading(false));
-  }, []);
+  }, [initialData]);
 
   useEffect(() => {
     if (sliders.length <= 1) return;

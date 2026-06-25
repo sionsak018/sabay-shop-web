@@ -27,6 +27,8 @@ export const HomePage = () => {
   const { t } = useTranslation();
   const [categories, setCategories] = useState<Category[]>([]);
   const [loadingCategories, setLoadingCategories] = useState(true);
+  const [homeData, setHomeData] = useState<any>(null);
+  const [initialLoading, setInitialLoading] = useState(true);
 
   // New Filter States
   const [activeCategoryId, setActiveCategoryId] = useState<number | undefined>();
@@ -46,20 +48,27 @@ export const HomePage = () => {
   const mainCategoriesToDisplay = categories.filter(c => !c.parent_id);
 
   useEffect(() => {
-    // Optimization: Check if we already have categories in session storage to show them instantly
-    const cachedCats = sessionStorage.getItem('cached_categories');
-    if (cachedCats) {
-        setCategories(JSON.parse(cachedCats));
+    // Optimization: Check if we already have home data in session storage to show it instantly
+    const cachedHome = sessionStorage.getItem('cached_home_data');
+    if (cachedHome) {
+        const parsed = JSON.parse(cachedHome);
+        setHomeData(parsed);
+        setCategories(parsed.categories);
+        setInitialLoading(false);
         setLoadingCategories(false);
     }
 
-    categoryApi.getAll()
+    // Single Batch Request for everything
+    api.get('/home')
       .then(res => {
-          const data = Array.isArray(res.data) ? res.data : res.data.data || [];
-          setCategories(data);
-          sessionStorage.setItem('cached_categories', JSON.stringify(data));
+          setHomeData(res.data);
+          setCategories(res.data.categories);
+          sessionStorage.setItem('cached_home_data', JSON.stringify(res.data));
       })
-      .finally(() => setLoadingCategories(false));
+      .finally(() => {
+          setInitialLoading(false);
+          setLoadingCategories(false);
+      });
   }, []);
 
   // Fetch dynamic attributes when category changes
@@ -85,7 +94,14 @@ export const HomePage = () => {
     ...activeAttributes
   }), [activeCategoryId, activeProvinceId, activeDistrictId, activeAttributes]);
 
-  const { products, loading, error } = useProducts(productFilters);
+  const { products: fetchedProducts, loading, error } = useProducts(productFilters);
+
+  // Optimization: If we are on the base home page (no filters), use pre-loaded data
+  const products = (!activeCategoryId && !activeProvinceId && homeData?.recent_products)
+    ? homeData.recent_products
+    : fetchedProducts;
+
+  const isProductsLoading = loading && products.length === 0;
 
   const getResultsTitle = () => {
     if (activeCategoryId) return t('home.results_in_cat', { name: selectedCategory?.name });
@@ -133,7 +149,7 @@ export const HomePage = () => {
       <div className="container mx-auto px-4 max-w-7xl mt-2 sm:mt-3">
 
         {/* Auto Slider */}
-        <HomeSlider />
+        <HomeSlider initialData={homeData?.sliders} />
 
         {/* Breadcrumb if category selected */}
         {activeCategoryId && (
@@ -385,7 +401,7 @@ export const HomePage = () => {
                     <p className="text-red-500 font-bold mb-2">Failed to load products</p>
                     <button onClick={() => navigate(0)} className="text-xs text-blue-600 dark:text-blue-400 font-bold hover:underline">Try Again</button>
                 </div>
-            ) : loading ? (
+            ) : isProductsLoading ? (
                 <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3">
                     {[...Array(10)].map((_, i) => (
                         <ProductSkeleton key={i} />
