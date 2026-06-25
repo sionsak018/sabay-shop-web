@@ -657,10 +657,9 @@ export const CreateProductPage = () => {
 
                         <div>
                             <label className="block text-[11px] font-black text-gray-400 dark:text-gray-500 uppercase mb-3 tracking-widest ml-1">{t('create_product.location_on_map')} <span className="text-red-500">*</span></label>
-                            <button
-                                type="button"
+                            <div
                                 onClick={() => setIsMapModalOpen(true)}
-                                className={`w-full h-48 bg-gray-50 dark:bg-gray-800 border rounded-2xl overflow-hidden relative group transition-all shadow-sm ${errors.lat ? 'border-red-300' : 'border-gray-200 dark:border-gray-800 hover:border-blue-400 dark:hover:border-blue-400'}`}
+                                className={`w-full h-48 bg-gray-50 dark:bg-gray-800 border rounded-2xl overflow-hidden relative group transition-all shadow-sm cursor-pointer ${errors.lat ? 'border-red-300' : 'border-gray-200 dark:border-gray-800 hover:border-blue-400 dark:hover:border-blue-400'}`}
                             >
                                 <div className="absolute inset-0 pointer-events-none opacity-50 dark:opacity-30 group-hover:opacity-100 transition-opacity">
                                     <MapView lat={formData.lat} lng={formData.lng} />
@@ -673,7 +672,7 @@ export const CreateProductPage = () => {
                                         {t('create_product.pin_location')}
                                     </span>
                                 </div>
-                            </button>
+                            </div>
                             {errors.lat && <p className="text-red-500 text-[10px] font-bold mt-2 ml-1">{errors.lat}</p>}
                             <MapPickerModal
                                 isOpen={isMapModalOpen}

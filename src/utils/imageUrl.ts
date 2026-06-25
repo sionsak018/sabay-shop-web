@@ -1,16 +1,41 @@
 export const getImageUrl = (path: string | null | undefined, placeholder = 'https://placehold.co/400x300?text=No+Image') => {
   if (!path) return placeholder;
 
-  // If it's already a full URL (like Cloudinary), return it
+  // Use API URL to determine backend base URL
+  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
+  const backendBaseUrl = apiBaseUrl.replace(/\/api$/, '');
+
+  // If it's already a full URL (like Cloudinary)
   if (path.startsWith('http://') || path.startsWith('https://')) {
+    // Optimization for Cloudinary: Add auto-format, auto-quality, and max width
+    if (path.includes('cloudinary.com')) {
+        return path.replace('/upload/', '/upload/f_auto,q_auto,w_800/');
+    }
+
+    // If it's a local URL (contains localhost or 127.0.0.1),
+    // we should ensure it uses the current backendBaseUrl to avoid host mismatch issues
+    if (path.includes('localhost') || path.includes('127.0.0.1')) {
+      try {
+        const urlObj = new URL(path);
+        // Replace everything up to the /storage part with our backendBaseUrl
+        const storageIndex = path.indexOf('/storage/');
+        if (storageIndex !== -1) {
+          return `${backendBaseUrl}${path.substring(storageIndex)}`;
+        }
+      } catch (e) {
+        return path;
+      }
+    }
     return path;
   }
 
   // Otherwise, prepend the backend storage URL
-  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api';
-  const baseUrl = apiBaseUrl.replace('/api', '');
-
-  // Ensure no double slashes
   const cleanPath = path.startsWith('/') ? path.substring(1) : path;
-  return `${baseUrl}/storage/${cleanPath}`;
+
+  // If the path already includes 'storage/', don't double prepend it
+  if (cleanPath.startsWith('storage/')) {
+    return `${backendBaseUrl}/${cleanPath}`;
+  }
+
+  return `${backendBaseUrl}/storage/${cleanPath}`;
 };

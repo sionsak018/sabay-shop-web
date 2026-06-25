@@ -9,6 +9,7 @@ import { LocationPickerModal } from '../../../components/common/LocationPickerMo
 import { MapView } from '../../../components/common/MapView';
 import { getImageUrl } from '../../../utils/imageUrl';
 import { useAlert } from '../../../context/AlertContext';
+import { useTranslation } from 'react-i18next';
 
 // Toast UI Editor
 import '@toast-ui/editor/dist/toastui-editor.css';
@@ -18,6 +19,7 @@ export const EditProductPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { showAlert } = useAlert();
+  const { t } = useTranslation();
   const editorRef = useRef<any>(null);
 
   const [categories, setCategories] = useState<Category[]>([]);
@@ -571,10 +573,9 @@ export const EditProductPage = () => {
 
                     <div>
                         <label className="block text-[11px] font-black text-gray-400 dark:text-gray-500 uppercase mb-3 tracking-widest ml-1">Location on Map <span className="text-red-500">*</span></label>
-                        <button
-                            type="button"
+                        <div
                             onClick={() => setIsMapModalOpen(true)}
-                            className={`w-full h-48 bg-gray-50 dark:bg-gray-800 border rounded-2xl overflow-hidden relative group transition-all shadow-sm ${errors.lat ? 'border-red-300' : 'border-gray-200 dark:border-gray-700 hover:border-blue-400 dark:hover:border-blue-400'}`}
+                            className={`w-full h-48 bg-gray-50 dark:bg-gray-800 border rounded-2xl overflow-hidden relative group transition-all shadow-sm cursor-pointer ${errors.lat ? 'border-red-300' : 'border-gray-200 dark:border-gray-700 hover:border-blue-400 dark:hover:border-blue-400'}`}
                         >
                             <div className="absolute inset-0 pointer-events-none opacity-50 dark:opacity-30 group-hover:opacity-100 transition-opacity">
                                 <MapView lat={formData.lat} lng={formData.lng} />
@@ -587,7 +588,7 @@ export const EditProductPage = () => {
                                     Tap to Update Location Pin
                                 </span>
                             </div>
-                        </button>
+                        </div>
                         {errors.lat && <p className="text-red-500 text-[10px] font-bold mt-2 ml-1">{errors.lat}</p>}
                         <MapPickerModal
                             isOpen={isMapModalOpen}
