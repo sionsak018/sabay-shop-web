@@ -15,9 +15,9 @@ export interface ProductFilters {
   page?: number;
 }
 
-export const useProducts = (filters: ProductFilters = {}) => {
+export const useProducts = (filters: ProductFilters = {}, enabled: boolean = true) => {
   const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(enabled);
   const [error, setError] = useState<string | null>(null);
   const [pagination, setPagination] = useState({
     currentPage: 1,
@@ -36,6 +36,8 @@ export const useProducts = (filters: ProductFilters = {}) => {
   const page = filters.page || 1;
 
   const fetchProducts = useCallback(async () => {
+    if (!enabled) return;
+
     setLoading(true);
     setError(null);
     try {
@@ -71,11 +73,13 @@ export const useProducts = (filters: ProductFilters = {}) => {
     } finally {
       setLoading(false);
     }
-  }, [filtersKey, page]); // only re-run when filter criteria OR page changes
+  }, [filtersKey, page, enabled]); // only re-run when filter criteria OR page OR enabled changes
 
   useEffect(() => {
-    fetchProducts();
-  }, [fetchProducts]);
+    if (enabled) {
+        fetchProducts();
+    }
+  }, [fetchProducts, enabled]);
 
   const goToPage = (newPage: number) => {
     if (newPage >= 1 && newPage <= pagination.lastPage) {

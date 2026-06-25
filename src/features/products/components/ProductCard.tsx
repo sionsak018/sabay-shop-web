@@ -19,6 +19,11 @@ export const ProductCard = ({ product, onToggleFavorite, isFavorited: initialFav
   const { user } = useAuth();
   const [isLiked, setIsLiked] = useState(initialFavorited !== undefined ? initialFavorited : !!product.is_favorited);
 
+  // Pre-fetch detail page when hovering to make click feel instant
+  const prefetchDetail = () => {
+    productApi.getOne(product.id);
+  };
+
   useEffect(() => {
     if (initialFavorited !== undefined) {
       setIsLiked(initialFavorited);
@@ -67,12 +72,14 @@ export const ProductCard = ({ product, onToggleFavorite, isFavorited: initialFav
     return (
       <div
         onClick={() => navigate(`/product/${product.id}`)}
+        onMouseEnter={prefetchDetail}
         className="bg-white dark:bg-[#16171d] border border-gray-100 dark:border-gray-800 rounded-lg overflow-hidden hover:shadow-md transition-all duration-200 cursor-pointer flex gap-3 sm:gap-4 p-2 sm:p-3 group"
       >
         <div className="relative w-32 sm:w-48 aspect-[4/3] overflow-hidden rounded-md bg-[#f8f9fa] dark:bg-[#16171d] shrink-0">
           <img
             src={coverImage}
             alt={product.title}
+            loading="lazy"
             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
             onError={(e) => {
               (e.target as HTMLImageElement).src = 'https://placehold.co/400x300?text=Product+Image+Not+Found';
@@ -119,12 +126,14 @@ export const ProductCard = ({ product, onToggleFavorite, isFavorited: initialFav
   return (
     <div
       onClick={() => navigate(`/product/${product.id}`)}
+      onMouseEnter={prefetchDetail}
       className="bg-white dark:bg-[#16171d] border border-gray-200 dark:border-gray-800 rounded sm:rounded-md overflow-hidden hover:shadow-lg transition-all duration-200 cursor-pointer flex flex-col h-full group"
     >
       <div className="relative aspect-[4/3] overflow-hidden bg-[#f8f9fa] dark:bg-[#16171d]">
         <img
           src={coverImage}
           alt={product.title}
+          loading="lazy"
           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
           onError={(e) => {
             (e.target as HTMLImageElement).src = 'https://placehold.co/400x300?text=Product+Image+Not+Found';

@@ -94,7 +94,9 @@ export const HomePage = () => {
     ...activeAttributes
   }), [activeCategoryId, activeProvinceId, activeDistrictId, activeAttributes]);
 
-  const { products: fetchedProducts, loading, error } = useProducts(productFilters);
+  // Only enable the separate product fetcher if we have active filters
+  const isFiltering = !!(activeCategoryId || activeProvinceId || activeDistrictId || Object.keys(activeAttributes).length > 0);
+  const { products: fetchedProducts, loading, error } = useProducts(productFilters, isFiltering);
 
   // Optimization: If we are on the base home page (no filters), use pre-loaded data
   const products = (!activeCategoryId && !activeProvinceId && homeData?.recent_products)
