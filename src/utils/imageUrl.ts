@@ -7,11 +7,6 @@ export const getImageUrl = (path: string | null | undefined, placeholder = 'http
 
   // If it's already a full URL (like Cloudinary)
   if (path.startsWith('http://') || path.startsWith('https://')) {
-    // Optimization for Cloudinary: Add auto-format, auto-quality, and max width
-    if (path.includes('cloudinary.com')) {
-        return path.replace('/upload/', '/upload/f_auto,q_auto,w_800/');
-    }
-
     // If it's a local URL (contains localhost or 127.0.0.1),
     // we should ensure it uses the current backendBaseUrl to avoid host mismatch issues
     if (path.includes('localhost') || path.includes('127.0.0.1')) {

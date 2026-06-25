@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useProducts } from '../hooks/useProducts';
 import { ProductCard } from '../components/ProductCard';
@@ -27,8 +27,6 @@ export const HomePage = () => {
   const { t } = useTranslation();
   const [categories, setCategories] = useState<Category[]>([]);
   const [loadingCategories, setLoadingCategories] = useState(true);
-  const [homeData, setHomeData] = useState<any>(null);
-  const [initialLoading, setInitialLoading] = useState(true);
 
   // New Filter States
   const [activeCategoryId, setActiveCategoryId] = useState<number | undefined>();
@@ -41,34 +39,21 @@ export const HomePage = () => {
   const [activeAttributes, setActiveAttributes] = useState<Record<string, string>>({});
   const [expandedAttrs, setExpandedAttrs] = useState<Record<number, boolean>>({});
 
-  const selectedCategory = categories.find(c => c.id === activeCategoryId);
-  const mainCategory = selectedCategory?.parent_id ? categories.find(c => c.id === selectedCategory.parent_id) : selectedCategory;
-  const subCategories = mainCategory ? categories.filter(c => c.parent_id === mainCategory.id) : [];
-
-  const mainCategoriesToDisplay = categories.filter(c => !c.parent_id);
-
   useEffect(() => {
-    // Optimization: Check if we already have home data in session storage to show it instantly
-    const cachedHome = sessionStorage.getItem('cached_home_data');
-    if (cachedHome) {
-        const parsed = JSON.parse(cachedHome);
-        setHomeData(parsed);
-        setCategories(parsed.categories);
-        setInitialLoading(false);
+    // Optimization: Check if we already have categories in session storage to show them instantly
+    const cachedCats = sessionStorage.getItem('cached_categories');
+    if (cachedCats) {
+        setCategories(JSON.parse(cachedCats));
         setLoadingCategories(false);
     }
 
-    // Single Batch Request for everything
-    api.get('/home')
+    categoryApi.getAll()
       .then(res => {
-          setHomeData(res.data);
-          setCategories(res.data.categories);
-          sessionStorage.setItem('cached_home_data', JSON.stringify(res.data));
+          const data = Array.isArray(res.data) ? res.data : res.data.data || [];
+          setCategories(data);
+          sessionStorage.setItem('cached_categories', JSON.stringify(data));
       })
-      .finally(() => {
-          setInitialLoading(false);
-          setLoadingCategories(false);
-      });
+      .finally(() => setLoadingCategories(false));
   }, []);
 
   // Fetch dynamic attributes when category changes
@@ -85,25 +70,15 @@ export const HomePage = () => {
     setActiveAttributes({}); // Reset attributes when category changes
   }, [activeCategoryId]);
 
-  // Optimization: Memoize filters to prevent unnecessary re-fetches
-  const productFilters = useMemo(() => ({
+  const productFilters = {
     page: 1,
     category_id: activeCategoryId?.toString(),
     province_id: activeProvinceId || undefined,
     district_id: activeDistrictId || undefined,
     ...activeAttributes
-  }), [activeCategoryId, activeProvinceId, activeDistrictId, activeAttributes]);
+  };
 
-  // Only enable the separate product fetcher if we have active filters
-  const isFiltering = !!(activeCategoryId || activeProvinceId || activeDistrictId || Object.keys(activeAttributes).length > 0);
-  const { products: fetchedProducts, loading, error } = useProducts(productFilters, isFiltering);
-
-  // Optimization: If we are on the base home page (no filters), use pre-loaded data
-  const products = (!activeCategoryId && !activeProvinceId && homeData?.recent_products)
-    ? homeData.recent_products
-    : fetchedProducts;
-
-  const isProductsLoading = loading && products.length === 0;
+  const { products, loading, error } = useProducts(productFilters);
 
   const getResultsTitle = () => {
     if (activeCategoryId) return t('home.results_in_cat', { name: selectedCategory?.name });
@@ -135,6 +110,12 @@ export const HomePage = () => {
     });
   };
 
+  const selectedCategory = categories.find(c => c.id === activeCategoryId);
+  const mainCategory = selectedCategory?.parent_id ? categories.find(c => c.id === selectedCategory.parent_id) : selectedCategory;
+  const subCategories = mainCategory ? categories.filter(c => c.parent_id === mainCategory.id) : [];
+
+  const mainCategoriesToDisplay = categories.filter(c => !c.parent_id);
+
   // Logic for Step-by-Step visibility
   const isSubCategorySelected = selectedCategory && selectedCategory.parent_id;
 
@@ -151,7 +132,7 @@ export const HomePage = () => {
       <div className="container mx-auto px-4 max-w-7xl mt-2 sm:mt-3">
 
         {/* Auto Slider */}
-        <HomeSlider initialData={homeData?.sliders} />
+        <HomeSlider />
 
         {/* Breadcrumb if category selected */}
         {activeCategoryId && (
@@ -403,7 +384,7 @@ export const HomePage = () => {
                     <p className="text-red-500 font-bold mb-2">Failed to load products</p>
                     <button onClick={() => navigate(0)} className="text-xs text-blue-600 dark:text-blue-400 font-bold hover:underline">Try Again</button>
                 </div>
-            ) : isProductsLoading ? (
+            ) : loading ? (
                 <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3">
                     {[...Array(10)].map((_, i) => (
                         <ProductSkeleton key={i} />
