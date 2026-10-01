@@ -5,7 +5,7 @@ import { profileApi } from '../../profile/services/profileApi';
 import { messageApi } from '../../messages/services/messageApi';
 import { type Product } from '../types/product.types';
 import { useAuth } from '../../auth/context/AuthContext';
-import { MapView } from '../../../components/common/MapView';
+import { LazyMapView } from '../../../components/common/LazyMapView';
 
 import { getImageUrl } from '../../../utils/imageUrl';
 import SmartImage from '../../../components/common/SmartImage';
@@ -312,7 +312,7 @@ export const ProductDetailPage = () => {
                     <div className="mt-12 pt-8 border-t border-gray-100 dark:border-gray-800">
                         <h3 className="text-sm font-black text-gray-900 dark:text-gray-100 uppercase tracking-widest mb-6">Location Map</h3>
                         <div className="h-80 w-full rounded-md border border-gray-200 dark:border-gray-800 overflow-hidden relative shadow-inner group transition-colors">
-                            <MapView lat={String(product.lat)} lng={String(product.lng)} />
+                            <LazyMapView lat={String(product.lat)} lng={String(product.lng)} />
                             <a
                                 href={`https://www.google.com/maps/search/?api=1&query=${product.lat},${product.lng}`}
                                 target="_blank"
