@@ -107,8 +107,8 @@ export const BodyTypePage = () => {
           await productSpecApi.deleteBodyType(id);
           showAlert({ title: 'Deleted!', message: 'Body type removed.', type: 'success' });
           fetchData();
-        } catch (error) {
-          showAlert({ title: 'Error!', message: 'Failed to delete body type', type: 'error' });
+        } catch (error: any) {
+          showAlert({ title: 'Error!', message: error.response?.data?.message || 'Failed to delete body type', type: 'error' });
         }
       }
     });

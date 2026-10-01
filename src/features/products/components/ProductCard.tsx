@@ -30,11 +30,11 @@ export const ProductCard = ({ product, onToggleFavorite, isFavorited: initialFav
   const coverImage = getImageUrl(product.images?.[0]?.image_url);
 
   const price = typeof product.price === 'number' 
-    ? product.price.toFixed(0)
-    : Number(product.price)?.toFixed(0) || '0';
+    ? product.price.toFixed(2)
+    : Number(product.price)?.toFixed(2) || '0.00';
 
-  const discountPrice = product.discount_price
-    ? (typeof product.discount_price === 'number' ? product.discount_price.toFixed(0) : Number(product.discount_price).toFixed(0))
+  const discountPrice = product.discount_price && Number(product.discount_price) > 0
+    ? (typeof product.discount_price === 'number' ? product.discount_price.toFixed(2) : Number(product.discount_price).toFixed(2))
     : null;
 
   const handleLike = async (e: React.MouseEvent) => {
@@ -79,7 +79,7 @@ export const ProductCard = ({ product, onToggleFavorite, isFavorited: initialFav
             }}
           />
           <div className="absolute top-1 left-1 flex flex-col gap-0.5">
-            {product.discount_price && <span className="bg-red-500 text-white text-[7px] px-1 py-0.5 rounded font-black uppercase">SALE</span>}
+            {product.discount_price && Number(product.discount_price) > 0 && <span className="bg-red-500 text-white text-[7px] px-1 py-0.5 rounded font-black uppercase">SALE</span>}
             {product.condition && <span className="bg-black/40 backdrop-blur-sm text-white text-[7px] px-1 py-0.5 rounded font-bold uppercase">{product.condition}</span>}
           </div>
           <button
@@ -95,7 +95,9 @@ export const ProductCard = ({ product, onToggleFavorite, isFavorited: initialFav
 
           <div className="flex items-baseline gap-2 mb-2">
             <p className="text-lg sm:text-2xl font-black text-blue-600 dark:text-blue-500">${discountPrice || price}</p>
-            {discountPrice && <p className="text-xs sm:text-sm text-gray-400 dark:text-gray-600 line-through font-bold">${price}</p>}
+            {discountPrice && (
+              <p className="text-xs sm:text-sm text-gray-400 dark:text-gray-600 line-through font-bold">${price}</p>
+            )}
           </div>
 
           <div className="mt-auto pt-2 border-t border-gray-50 dark:border-gray-800 flex items-center justify-between text-[10px] sm:text-xs text-gray-500 dark:text-gray-500">
@@ -132,7 +134,7 @@ export const ProductCard = ({ product, onToggleFavorite, isFavorited: initialFav
         />
 
         <div className="absolute top-1 left-1 sm:top-1.5 sm:left-1.5 flex flex-col gap-0.5">
-            {product.discount_price && (
+            {product.discount_price && Number(product.discount_price) > 0 && (
                 <span className="bg-red-500 text-white text-[7px] sm:text-[8px] px-1 py-0.5 rounded uppercase font-black tracking-tighter w-fit">
                     SALE
                 </span>

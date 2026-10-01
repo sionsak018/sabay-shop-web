@@ -33,6 +33,7 @@ export const EditProductPage = () => {
     title: '',
     description: '',
     price: '',
+    discount_price: '',
     condition: 'used',
     location: 'Phnom Penh',
     category_id: '',
@@ -93,6 +94,7 @@ export const EditProductPage = () => {
           title: p.title,
           description: p.description,
           price: String(p.price),
+          discount_price: p.discount_price ? String(p.discount_price) : '',
           condition: p.condition || '',
           location: p.location,
           category_id: String(p.category?.id || ''),
@@ -227,6 +229,11 @@ export const EditProductPage = () => {
     if (images.length === 0 && existingImages.length === 0) newErrors.images = Msg;
     if (!formData.title.trim()) newErrors.title = Msg;
     if (!formData.price) newErrors.price = Msg;
+
+    if (formData.discount_price && Number(formData.discount_price) >= Number(formData.price)) {
+      newErrors.discount_price = t('create_product.discount_must_be_lower', { defaultValue: 'Selling price must be lower than original price' });
+    }
+
     if (!formData.province_id) newErrors.province_id = Msg;
     if (!formData.district_id) newErrors.district_id = Msg;
     if (!formData.condition) newErrors.condition = Msg;
@@ -480,6 +487,24 @@ export const EditProductPage = () => {
                   />
                 </div>
                 {errors.price && <p className="text-red-500 text-[10px] font-bold mt-2 ml-1">{errors.price}</p>}
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-black text-gray-500 dark:text-gray-400 uppercase mb-3 tracking-widest">{t('create_product.discount_price', { defaultValue: 'Discount Price (Optional)' })} ($)</label>
+                <div className="relative">
+                  <span className={`absolute left-5 top-1/2 -translate-y-1/2 font-black text-lg ${errors.discount_price ? 'text-red-300' : 'text-gray-400 dark:text-gray-600'}`}>$</span>
+                  <input
+                    type="number"
+                    placeholder={t('create_product.discount_price_placeholder', { defaultValue: 'Enter a lower price for sale' })}
+                    value={formData.discount_price}
+                    onChange={e => {
+                      setFormData({...formData, discount_price: e.target.value});
+                      if (errors.discount_price) setErrors(prev => ({ ...prev, discount_price: '' }));
+                    }}
+                    className={`w-full pl-10 pr-5 py-4 bg-gray-50 dark:bg-[#08060d] border rounded-xl focus:bg-white dark:focus:bg-[#16171d] focus:border-blue-500 dark:focus:border-blue-400 outline-none transition font-black text-gray-800 dark:text-gray-100 text-lg shadow-inner ${errors.discount_price ? 'border-red-300' : 'border-gray-200 dark:border-gray-800'}`}
+                  />
+                </div>
+                {errors.discount_price && <p className="text-red-500 text-[10px] font-bold mt-2 ml-1">{errors.discount_price}</p>}
               </div>
 
               <div>

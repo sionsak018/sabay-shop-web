@@ -35,6 +35,7 @@ export const CreateProductPage = () => {
     title: '',
     description: '',
     price: '',
+    discount_price: '',
     category_id: '',
     province_id: '',
     district_id: '',
@@ -182,6 +183,11 @@ export const CreateProductPage = () => {
     if (images.length === 0) newErrors.images = Msg;
     if (!formData.title.trim()) newErrors.title = Msg;
     if (!formData.price) newErrors.price = Msg;
+
+    if (formData.discount_price && Number(formData.discount_price) >= Number(formData.price)) {
+      newErrors.discount_price = t('create_product.discount_must_be_lower', { defaultValue: 'Selling price must be lower than original price' });
+    }
+
     if (!formData.province_id) newErrors.province_id = Msg;
     if (!formData.district_id) newErrors.district_id = Msg;
     if (!formData.condition) newErrors.condition = Msg;
@@ -553,16 +559,34 @@ export const CreateProductPage = () => {
                                 <span className={`absolute left-6 top-1/2 -translate-y-1/2 font-black text-lg ${errors.price ? 'text-red-300' : 'text-gray-400'}`}>$</span>
                                 <input
                                     type="number"
-                                                                        placeholder="0.00"
+                                    placeholder="0.00"
                                     value={formData.price}
                                     onChange={e => {
                                         setFormData({...formData, price: e.target.value});
                                         if (errors.price) setErrors(prev => ({ ...prev, price: '' }));
                                     }}
-                                    className={`w-full pl-12 pr-6 py-4 border rounded-2xl focus:bg-white dark:focus:bg-[#08060d] outline-none transition font-black text-gray-800 dark:text-gray-100 text-lg shadow-sm bg-white dark:bg-[#08060d] ${errors.price ? 'border-red-300' : 'border-gray-200 dark:border-gray-800 focus:border-blue-500 dark:focus:border-blue-400'}`}
+                                    className={`w-full pl-12 pr-6 py-4 border rounded-2xl focus:bg-white dark:focus:bg-[#08060d] outline-none transition font-black text-gray-800 dark:text-100 text-lg shadow-sm bg-white dark:bg-[#08060d] ${errors.price ? 'border-red-300' : 'border-gray-200 dark:border-gray-800 focus:border-blue-500 dark:focus:border-blue-400'}`}
                                 />
                             </div>
                             {errors.price && <p className="text-red-500 text-[10px] font-bold mt-2 ml-1">{errors.price}</p>}
+                        </div>
+
+                        <div>
+                            <label className="block text-[11px] font-black text-gray-400 dark:text-gray-500 uppercase mb-3 tracking-widest ml-1">{t('create_product.discount_price', { defaultValue: 'Discount Price (Optional)' })} ($)</label>
+                            <div className="relative">
+                                <span className={`absolute left-6 top-1/2 -translate-y-1/2 font-black text-lg ${errors.discount_price ? 'text-red-300' : 'text-gray-400'}`}>$</span>
+                                <input
+                                    type="number"
+                                    placeholder={t('create_product.discount_price_placeholder', { defaultValue: 'Enter a lower price for sale' })}
+                                    value={formData.discount_price}
+                                    onChange={e => {
+                                        setFormData({...formData, discount_price: e.target.value});
+                                        if (errors.discount_price) setErrors(prev => ({ ...prev, discount_price: '' }));
+                                    }}
+                                    className={`w-full pl-12 pr-6 py-4 border rounded-2xl focus:bg-white dark:focus:bg-[#08060d] outline-none transition font-black text-gray-800 dark:text-100 text-lg shadow-sm bg-white dark:bg-[#08060d] ${errors.discount_price ? 'border-red-300' : 'border-gray-200 dark:border-gray-800 focus:border-blue-500 dark:focus:border-blue-400'}`}
+                                />
+                            </div>
+                            {errors.discount_price && <p className="text-red-500 text-[10px] font-bold mt-2 ml-1">{errors.discount_price}</p>}
                         </div>
 
                         <div>

@@ -141,8 +141,8 @@ export const SubCategoryPage = () => {
           await categoryApi.adminDelete(id);
           showAlert({ title: 'Deleted!', message: 'Sub-category removed.', type: 'success' });
           fetchCategories();
-        } catch (error) {
-          showAlert({ title: 'Error!', message: 'Failed to delete sub-category', type: 'error' });
+        } catch (error: any) {
+          showAlert({ title: 'Error!', message: error.response?.data?.message || 'Failed to delete sub-category', type: 'error' });
         }
       }
     });

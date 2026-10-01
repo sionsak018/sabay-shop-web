@@ -128,8 +128,8 @@ export const MainCategoryPage = () => {
           await categoryApi.adminDelete(id);
           showAlert({ title: 'Deleted!', message: 'Category has been removed.', type: 'success' });
           fetchCategories();
-        } catch (error) {
-          showAlert({ title: 'Error!', message: 'Failed to delete category', type: 'error' });
+        } catch (error: any) {
+          showAlert({ title: 'Error!', message: error.response?.data?.message || 'Failed to delete category', type: 'error' });
         }
       }
     });
