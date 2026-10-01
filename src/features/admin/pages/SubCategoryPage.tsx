@@ -5,6 +5,7 @@ import { getImageUrl } from '../../../utils/imageUrl';
 import { useAlert } from '../../../context/AlertContext';
 import { useTranslation } from 'react-i18next';
 import { useDebounce } from '../../../hooks/useDebounce';
+import SmartImage from '../../../components/common/SmartImage';
 
 export const SubCategoryPage = () => {
   const { t } = useTranslation();
@@ -188,7 +189,7 @@ export const SubCategoryPage = () => {
                   <td className="px-6 py-4">
                     <div className="w-10 h-10 rounded bg-gray-100 dark:bg-gray-800 overflow-hidden">
                       {cat.image_url ? (
-                        <img src={getImageUrl(cat.image_url)} className="w-full h-full object-cover" />
+                        <SmartImage src={cat.image_url} alt="" width={80} height={80} widths={[80, 160, 320]} sizes="48px" className="w-full h-full object-cover" />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-gray-400 dark:text-gray-600 text-xs">No img</div>
                       )}

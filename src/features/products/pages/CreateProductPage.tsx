@@ -7,13 +7,13 @@ import api from '../../../services/api';
 import { MapPickerModal } from '../../../components/common/MapPickerModal';
 import { LocationPickerModal } from '../../../components/common/LocationPickerModal';
 import { MapView } from '../../../components/common/MapView';
-import { getImageUrl } from '../../../utils/imageUrl';
 import { useAlert } from '../../../context/AlertContext';
 import { useTranslation } from 'react-i18next';
 
 // Toast UI Editor
 import '@toast-ui/editor/dist/toastui-editor.css';
 import { Editor } from '@toast-ui/react-editor';
+import SmartImage from '../../../components/common/SmartImage';
 
 export const CreateProductPage = () => {
   const navigate = useNavigate();
@@ -368,7 +368,7 @@ export const CreateProductPage = () => {
                           className={`w-full group flex gap-4 items-center py-3 px-4 hover:bg-gray-50 dark:hover:bg-gray-800/30 transition-all text-left ${selectedMainCat?.id === cat.id ? 'bg-blue-50 dark:bg-blue-900/10 text-blue-600 dark:text-blue-400' : 'text-gray-700 dark:text-gray-300'}`}
                         >
                           {cat.image_url ? (
-                            <img src={getImageUrl(cat.image_url)} className="w-10 h-10 object-contain" />
+                            <SmartImage src={cat.image_url} alt={cat.name} width={80} height={80} widths={[80, 160]} sizes="40px" className="w-10 h-10 object-contain" />
                           ) : (
                             <div className="w-10 h-10 bg-gray-100 dark:bg-gray-800 rounded flex items-center justify-center"><svg className="w-6 h-6 text-gray-400 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16m-7 6h7"/></svg></div>
                           )}
@@ -405,7 +405,7 @@ export const CreateProductPage = () => {
                             className="w-full group flex gap-4 items-center py-3 px-6 hover:bg-blue-50 dark:hover:bg-blue-900/10 transition-all text-left"
                           >
                             {sub.image_url ? (
-                              <img src={getImageUrl(sub.image_url)} className="w-8 h-8 object-contain" />
+                              <SmartImage src={sub.image_url} alt={sub.name} width={64} height={64} widths={[64, 128]} sizes="32px" className="w-8 h-8 object-contain" />
                             ) : (
                               <div className="w-8 h-8 bg-gray-100 dark:bg-gray-800 rounded flex items-center justify-center"><svg className="w-4 h-4 text-gray-400 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16m-7 6h7"/></svg></div>
                             )}

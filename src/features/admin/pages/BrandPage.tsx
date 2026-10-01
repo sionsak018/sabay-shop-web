@@ -5,6 +5,7 @@ import { type Category } from '../../categories/types/category.types';
 import { getImageUrl } from '../../../utils/imageUrl';
 import { useAlert } from '../../../context/AlertContext';
 import { useTranslation } from 'react-i18next';
+import SmartImage from '../../../components/common/SmartImage';
 
 export const BrandPage = () => {
   const { t } = useTranslation();
@@ -152,7 +153,7 @@ export const BrandPage = () => {
                 <td className="px-6 py-4">
                   <div className="w-10 h-10 rounded bg-gray-100 dark:bg-gray-800 overflow-hidden">
                     {brand.image_url ? (
-                      <img src={getImageUrl(brand.image_url)} className="w-full h-full object-cover" />
+                      <SmartImage src={brand.image_url} alt="" width={80} height={80} widths={[80, 160, 320]} sizes="48px" className="w-full h-full object-cover" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-gray-400 dark:text-gray-600 text-[10px]">No img</div>
                     )}

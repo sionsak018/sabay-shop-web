@@ -3,6 +3,7 @@ import { sliderApi, type Slider } from '../services/sliderApi';
 import { getImageUrl } from '../../../utils/imageUrl';
 import { useAlert } from '../../../context/AlertContext';
 import { useTranslation } from 'react-i18next';
+import SmartImage from '../../../components/common/SmartImage';
 
 export const SliderPage = () => {
   const { t } = useTranslation();
@@ -143,13 +144,15 @@ export const SliderPage = () => {
         ) : sliders.map((slider) => (
           <div key={slider.id} className="bg-white dark:bg-[#16171d] rounded-xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden group transition-colors">
             <div className="relative aspect-[21/9] bg-gray-100 dark:bg-gray-800">
-              <img
-                src={getImageUrl(slider.image_url)}
+              <SmartImage
+                src={slider.image_url}
                 className="w-full h-full object-cover"
                 alt={slider.title || 'Slider'}
-                onError={(e) => {
-                  (e.target as HTMLImageElement).src = 'https://placehold.co/800x400?text=Image+Not+Found';
-                }}
+                aspect={{ width: 21, height: 9 }}
+                widths={[320, 640, 960]}
+                sizes="(max-width: 768px) 100vw, 400px"
+                width={640}
+                height={274}
               />
               <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity hidden sm:flex items-center justify-center gap-2">
                 <button onClick={() => handleOpenModal(slider)} className="p-2 bg-white text-blue-600 rounded-full hover:bg-blue-50 transition">

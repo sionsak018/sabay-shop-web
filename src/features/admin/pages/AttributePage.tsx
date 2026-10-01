@@ -5,6 +5,7 @@ import { getImageUrl } from '../../../utils/imageUrl';
 import { useAlert } from '../../../context/AlertContext';
 import { useTranslation } from 'react-i18next';
 import { useDebounce } from '../../../hooks/useDebounce';
+import SmartImage from '../../../components/common/SmartImage';
 
 interface OptionItem {
   value: string;
@@ -215,7 +216,7 @@ export const AttributePage = () => {
                         <div key={i} className="flex items-center gap-1.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 px-2 py-1 rounded-lg">
                             {o.image_url && (
                                 <div className="size-6 rounded-full overflow-hidden bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 shrink-0">
-                                    <img src={getImageUrl(o.image_url)} className="w-full h-full object-contain" alt={o.value} />
+                                    <SmartImage src={o.image_url} alt={o.value} width={80} height={80} widths={[80, 160, 320]} sizes="40px" className="w-full h-full object-contain" />
                                 </div>
                             )}
                             <span className="text-[10px] font-bold text-gray-600 dark:text-gray-400">{o.value}</span>

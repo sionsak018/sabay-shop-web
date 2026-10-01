@@ -7,13 +7,13 @@ import api from '../../../services/api';
 import { MapPickerModal } from '../../../components/common/MapPickerModal';
 import { LocationPickerModal } from '../../../components/common/LocationPickerModal';
 import { MapView } from '../../../components/common/MapView';
-import { getImageUrl } from '../../../utils/imageUrl';
 import { useAlert } from '../../../context/AlertContext';
 import { useTranslation } from 'react-i18next';
 
 // Toast UI Editor
 import '@toast-ui/editor/dist/toastui-editor.css';
 import { Editor } from '@toast-ui/react-editor';
+import SmartImage from '../../../components/common/SmartImage';
 
 export const EditProductPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -347,7 +347,7 @@ export const EditProductPage = () => {
               <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-4">
                 {existingImages.map((img) => (
                   <div key={`exist-${img.id}`} className="relative aspect-square rounded-xl overflow-hidden border-2 border-gray-100 dark:border-gray-800 group shadow-sm">
-                    <img src={getImageUrl(img.image_url)} className="w-full h-full object-cover" />
+                    <SmartImage src={img.image_url} alt="" width={160} height={160} widths={[160, 320]} sizes="96px" className="w-full h-full object-cover" />
                     <button
                       type="button"
                       onClick={() => removeExistingImage(img.id)}

@@ -5,6 +5,7 @@ import { messageApi } from '../services/messageApi';
 import { type Message } from '../types/message.types';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { getImageUrl } from '../../../utils/imageUrl';
+import SmartImage from '../../../components/common/SmartImage';
 
 export const InboxPage = () => {
   const { user } = useAuth();
@@ -284,7 +285,7 @@ export const InboxPage = () => {
                   <div className="relative shrink-0">
                     <div className={`w-14 h-14 rounded-full flex items-center justify-center text-xl font-bold overflow-hidden ${isActive ? 'ring-0' : ''}`}>
                        {partner.avatar ? (
-                         <img src={getImageUrl(partner.avatar)} className="w-full h-full object-cover" />
+                         <SmartImage src={partner.avatar} alt="" width={160} height={160} widths={[80, 160, 320]} sizes="40px" className="w-full h-full object-cover" />
                        ) : (
                          <div className={`w-full h-full flex items-center justify-center text-white ${isActive ? 'bg-blue-400' : 'bg-gradient-to-br from-blue-400 to-blue-600'}`}>
                             {partner.name.charAt(0).toUpperCase()}
@@ -341,7 +342,7 @@ export const InboxPage = () => {
                   </button>
                   <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white font-bold text-sm shadow-sm overflow-hidden cursor-pointer" onClick={() => navigate(`/u/${selectedConversation.partner.id}`)}>
                      {selectedConversation.partner.avatar ? (
-                       <img src={getImageUrl(selectedConversation.partner.avatar)} className="w-full h-full object-cover" />
+                       <SmartImage src={selectedConversation.partner.avatar} alt="" width={160} height={160} widths={[80, 160, 320]} sizes="40px" className="w-full h-full object-cover" />
                      ) : selectedConversation.partner.name.charAt(0).toUpperCase()}
                   </div>
                   <div className="min-w-0 flex flex-col">
@@ -421,7 +422,7 @@ export const InboxPage = () => {
                               )}
                               {msg.type === 'image' && (
                                   <div className="rounded-lg overflow-hidden mb-1 border border-black/5">
-                                    <img src={getImageUrl(msg.file_path)} className="max-w-full max-h-[400px] object-contain" />
+                                    <SmartImage src={msg.file_path} alt="Attachment" widths={[320, 640, 960]} sizes="(max-width: 768px) 100vw, 400px" width={640} height={480} className="max-w-full max-h-[400px] object-contain" />
                                   </div>
                               )}
                               {msg.type === 'audio' && (

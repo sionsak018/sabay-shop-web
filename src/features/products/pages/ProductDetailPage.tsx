@@ -8,6 +8,7 @@ import { useAuth } from '../../auth/context/AuthContext';
 import { MapView } from '../../../components/common/MapView';
 
 import { getImageUrl } from '../../../utils/imageUrl';
+import SmartImage from '../../../components/common/SmartImage';
 
 // Toast UI Viewer
 import '@toast-ui/editor/dist/toastui-editor-viewer.css';
@@ -189,9 +190,14 @@ export const ProductDetailPage = () => {
             <div className="bg-white dark:bg-[#16171d] border border-gray-200 dark:border-gray-800 rounded-md overflow-hidden shadow-sm transition-colors">
               {/* Image Gallery - Exact ratio */}
               <div className="relative bg-black aspect-video flex items-center justify-center group">
-                <img
+                <SmartImage
                   src={images[activeImageIndex]}
                   alt={product.title}
+                  priority
+                  widths={[640, 960, 1280]}
+                  sizes="(max-width: 1024px) 100vw, 50vw"
+                  width={960}
+                  height={960}
                   className="max-h-full max-w-full object-contain"
                 />
 
@@ -231,7 +237,7 @@ export const ProductDetailPage = () => {
                       onClick={() => setActiveImageIndex(idx)}
                       className={`flex-shrink-0 w-16 h-12 rounded border-2 transition-all ${activeImageIndex === idx ? 'border-blue-600' : 'border-white dark:border-gray-700'}`}
                     >
-                      <img src={img} className="w-full h-full object-cover" />
+                      <SmartImage src={img} alt="" widths={[160, 320]} sizes="72px" width={160} height={160} className="w-full h-full object-cover" />
                     </button>
                   ))}
                 </div>
@@ -335,7 +341,7 @@ export const ProductDetailPage = () => {
                 <div className="flex items-center gap-4 mb-6">
                   <Link to={`/u/${product.seller?.id}`} className="w-16 h-16 rounded-full bg-blue-600 flex items-center justify-center text-white text-2xl font-black border-4 border-[#f1f2f6] dark:border-[#08060d] shadow-inner overflow-hidden flex-shrink-0 transition-colors">
                     {product.seller?.avatar ? (
-                        <img src={getImageUrl(product.seller.avatar)} className="w-full h-full object-cover" />
+                        <SmartImage src={product.seller.avatar} alt={product.seller?.name ?? 'Seller'} width={160} height={160} widths={[80, 160, 320]} sizes="48px" className="w-full h-full object-cover" />
                     ) : (
                         (product.poster_name || product.seller?.name || '?').charAt(0).toUpperCase()
                     )}
@@ -364,14 +370,15 @@ export const ProductDetailPage = () => {
                         <div className="flex items-center gap-3">
                           {provider ? (
                             <div className="bg-white p-0.5 rounded-full shadow-sm flex items-center justify-center overflow-hidden w-7 h-7">
-                                <img
+                                <SmartImage
                                     src={provider.logo}
                                     className="w-full h-full object-contain"
                                     alt={provider.name}
                                     referrerPolicy="no-referrer"
-                                    onError={(e) => {
-                                        (e.target as HTMLImageElement).src = 'https://ui-avatars.com/api/?name=' + provider.name.charAt(0) + '&background=fff&color=' + provider.color.replace('#', '');
-                                    }}
+                                    width={96}
+                                    height={96}
+                                    widths={[96, 192]}
+                                    sizes="48px"
                                 />
                             </div>
                           ) : (

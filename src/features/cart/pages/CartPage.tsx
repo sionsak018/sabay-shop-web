@@ -1,7 +1,7 @@
 import { useCart } from '../hooks/useCart';
 import { Link } from 'react-router-dom';
-import { getImageUrl } from '../../../utils/imageUrl';
 import { CartSkeleton } from '../components/CartSkeleton';
+import SmartImage from '../../../components/common/SmartImage';
 
 export const CartPage = () => {
   const { cart, loading, updateQuantity, removeItem, clearCart } = useCart();
@@ -48,7 +48,7 @@ export const CartPage = () => {
           return (
             <div key={item.id} className="flex flex-col sm:flex-row gap-6 bg-white dark:bg-[#16171d] border border-gray-100 dark:border-gray-800 p-4 sm:p-6 rounded-2xl shadow-sm hover:shadow-md transition-all group">
               <div className="w-full sm:w-32 h-32 rounded-xl overflow-hidden bg-gray-50 dark:bg-[#08060d] flex-shrink-0 border border-gray-100 dark:border-gray-800">
-                <img src={getImageUrl(item.product.images[0]?.image_url, 'https://placehold.co/200x200?text=No+Image')} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                <SmartImage src={item.product.images[0]?.image_url} fallback="https://placehold.co/200x200?text=No+Image" alt={item.product.title} width={320} height={320} widths={[160, 320, 640]} sizes="96px" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
               </div>
               <div className="flex-1 flex flex-col justify-between">
                 <div>

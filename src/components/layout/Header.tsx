@@ -3,7 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../features/auth/hooks/useAuth';
 import { useTheme } from '../../context/ThemeContext';
 import { useTranslation } from 'react-i18next';
-import { getImageUrl } from '../../utils/imageUrl';
+import SmartImage from '../../components/common/SmartImage';
 
 export const Header = () => {
   const { user, logout } = useAuth();
@@ -130,7 +130,7 @@ export const Header = () => {
                 >
                   <div className="h-8 w-8 rounded-full bg-blue-600 flex items-center justify-center text-white text-xs font-black border-2 border-white dark:border-gray-800 shadow-sm overflow-hidden shrink-0">
                     {user.avatar ? (
-                      <img src={getImageUrl(user.avatar)} className="w-full h-full object-cover" />
+                      <SmartImage src={user.avatar} alt="" width={160} height={160} widths={[80, 160, 320]} sizes="40px" className="w-full h-full object-cover" />
                     ) : (
                       user.name?.charAt(0)?.toUpperCase() || '?'
                     )}

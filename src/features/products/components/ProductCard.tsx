@@ -5,6 +5,7 @@ import { profileApi } from '../../profile/services/profileApi';
 import { useAuth } from '../../auth/hooks/useAuth';
 
 import { getImageUrl } from '../../../utils/imageUrl';
+import SmartImage from '../../../components/common/SmartImage';
 
 interface ProductCardProps {
   product: Product;
@@ -12,9 +13,11 @@ interface ProductCardProps {
   isFavorited?: boolean;
   showLocation?: boolean;
   variant?: 'grid' | 'list';
+  /** Set on the first visible row so the LCP image is not lazy. */
+  priority?: boolean;
 }
 
-export const ProductCard = ({ product, onToggleFavorite, isFavorited: initialFavorited, showLocation = true, variant = 'grid' }: ProductCardProps) => {
+export const ProductCard = ({ product, onToggleFavorite, isFavorited: initialFavorited, showLocation = true, variant = 'grid', priority = false }: ProductCardProps) => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [isLiked, setIsLiked] = useState(initialFavorited !== undefined ? initialFavorited : !!product.is_favorited);
@@ -70,13 +73,16 @@ export const ProductCard = ({ product, onToggleFavorite, isFavorited: initialFav
         className="bg-white dark:bg-[#16171d] border border-gray-100 dark:border-gray-800 rounded-lg overflow-hidden hover:shadow-md transition-all duration-200 cursor-pointer flex gap-3 sm:gap-4 p-2 sm:p-3 group"
       >
         <div className="relative w-32 sm:w-48 aspect-[4/3] overflow-hidden rounded-md bg-[#f8f9fa] dark:bg-[#16171d] shrink-0">
-          <img
+          <SmartImage
             src={coverImage}
             alt={product.title}
+            aspect={{ width: 4, height: 3 }}
+            priority={priority}
+            widths={[160, 320, 640]}
+            sizes="(max-width: 640px) 128px, 192px"
+            width={320}
+            height={240}
             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-            onError={(e) => {
-              (e.target as HTMLImageElement).src = 'https://placehold.co/400x300?text=Product+Image+Not+Found';
-            }}
           />
           <div className="absolute top-1 left-1 flex flex-col gap-0.5">
             {product.discount_price && Number(product.discount_price) > 0 && <span className="bg-red-500 text-white text-[7px] px-1 py-0.5 rounded font-black uppercase">SALE</span>}
@@ -124,13 +130,16 @@ export const ProductCard = ({ product, onToggleFavorite, isFavorited: initialFav
       className="bg-white dark:bg-[#16171d] border border-gray-200 dark:border-gray-800 rounded sm:rounded-md overflow-hidden hover:shadow-lg transition-all duration-200 cursor-pointer flex flex-col h-full group"
     >
       <div className="relative aspect-[4/3] overflow-hidden bg-[#f8f9fa] dark:bg-[#16171d]">
-        <img
+        <SmartImage
           src={coverImage}
           alt={product.title}
+          aspect={{ width: 4, height: 3 }}
+          priority={priority}
+          widths={[320, 640, 960]}
+          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+          width={640}
+          height={480}
           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-          onError={(e) => {
-            (e.target as HTMLImageElement).src = 'https://placehold.co/400x300?text=Product+Image+Not+Found';
-          }}
         />
 
         <div className="absolute top-1 left-1 sm:top-1.5 sm:left-1.5 flex flex-col gap-0.5">

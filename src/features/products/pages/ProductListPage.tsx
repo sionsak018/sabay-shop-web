@@ -6,7 +6,7 @@ import { ProductSkeleton } from '../components/ProductSkeleton';
 import { categoryApi } from '../../categories/services/categoryApi';
 import { type Category } from '../../categories/types/category.types';
 import api from '../../../services/api';
-import { getImageUrl } from '../../../utils/imageUrl';
+import SmartImage from '../../../components/common/SmartImage';
 import { LocationPickerModal } from '../../../components/common/LocationPickerModal';
 import { useTranslation } from 'react-i18next';
 
@@ -20,7 +20,7 @@ interface LocalFilters {
 
 const CategoryIcon = ({ cat, className = "" }: { cat: Category, className?: string }) => {
   if (cat.image_url) {
-    return <img src={getImageUrl(cat.image_url)} className={`w-full h-full object-cover ${className}`} alt={cat.name} />;
+    return <SmartImage src={cat.image_url} className={`w-full h-full object-cover ${className}`} alt={cat.name} width={160} height={160} widths={[80, 160, 320]} sizes="64px" />;
   }
   return (
     <div className={className}>
@@ -515,7 +515,7 @@ export const ProductListPage = () => {
                                             {isCircleStyle ? (
                                                 <div className={`size-12 sm:size-14 rounded-full flex items-center justify-center border transition-all overflow-hidden ${isActive ? 'bg-blue-50 dark:bg-blue-900/30 border-blue-500 ring-2 ring-blue-500/20' : 'bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700 group-hover:border-blue-200 dark:group-hover:border-blue-800 group-hover:bg-blue-50/30 dark:group-hover:bg-blue-900/10'}`}>
                                                     {opt.image_url ? (
-                                                        <img src={getImageUrl(opt.image_url)} className="w-full h-full object-cover" alt={opt.value} />
+                                                        <SmartImage src={opt.image_url} className="w-full h-full object-cover" alt={opt.value} width={80} height={80} widths={[80, 160]} sizes="48px" />
                                                     ) : (
                                                         <div className="text-[10px] font-black text-gray-300 dark:text-gray-600 uppercase truncate px-1">{opt.value.substring(0, 3)}</div>
                                                     )}
@@ -649,7 +649,7 @@ export const ProductListPage = () => {
                     ? "grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-3"
                     : "flex flex-col gap-3"
                 }>
-                   {products.map(p => <ProductCard key={p.id} product={p} variant={viewMode} />)}
+                   {products.map((p, i) => <ProductCard key={p.id} product={p} variant={viewMode} priority={i < 4} />)}
                 </div>
              )}
 

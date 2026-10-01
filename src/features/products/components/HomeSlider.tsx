@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { sliderApi, type Slider } from '../../admin/services/sliderApi';
-import { getImageUrl } from '../../../utils/imageUrl';
+import SmartImage from '../../../components/common/SmartImage';
 
 export const HomeSlider = () => {
   const [sliders, setSliders] = useState<Slider[]>([]);
@@ -40,13 +40,15 @@ export const HomeSlider = () => {
           rel="noopener noreferrer"
           className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${index === currentIndex ? 'opacity-100 z-10' : 'opacity-0 z-0'}`}
         >
-          <img
-            src={getImageUrl(slider.image_url)}
+          <SmartImage
+            src={slider.image_url}
             alt={slider.title || 'Promo'}
+            priority
+            widths={[640, 960, 1280]}
+            sizes="100vw"
+            width={1280}
+            height={640}
             className="w-full h-full object-cover"
-            onError={(e) => {
-              (e.target as HTMLImageElement).src = 'https://placehold.co/1200x400?text=Slider+Image+Not+Found';
-            }}
           />
           {slider.title && (
             <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6 pt-12">

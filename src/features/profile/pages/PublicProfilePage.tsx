@@ -4,7 +4,7 @@ import { profileApi } from '../services/profileApi';
 import { type Product } from '../../products/types/product.types';
 import { ProductCard } from '../../products/components/ProductCard';
 import { useAuth } from '../../auth/hooks/useAuth';
-import { getImageUrl } from '../../../utils/imageUrl';
+import SmartImage from '../../../components/common/SmartImage';
 
 export const PublicProfilePage = () => {
   const { id } = useParams<{ id: string }>();
@@ -116,13 +116,16 @@ export const PublicProfilePage = () => {
       {/* Profile Banner */}
       <div className="bg-white dark:bg-[#16171d] border-b border-gray-200 dark:border-gray-800 transition-colors">
         <div className="relative h-48 md:h-64 bg-gray-100 dark:bg-gray-800 group">
-          <img
-            src={getImageUrl(user.cover_photo, 'https://images.unsplash.com/photo-1557683316-973673baf926?q=80&w=2000')}
-            className="w-full h-full object-cover"
+          <SmartImage
+            src={user.cover_photo}
+            fallback="https://images.unsplash.com/photo-1557683316-973673baf926?q=80&w=2000"
             alt="Cover"
-            onError={(e) => {
-              (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1557683316-973673baf926?q=80&w=2000';
-            }}
+            priority
+            widths={[640, 960, 1280]}
+            sizes="100vw"
+            width={1280}
+            height={480}
+            className="w-full h-full object-cover"
           />
         </div>
 
@@ -130,12 +133,15 @@ export const PublicProfilePage = () => {
           <div className="flex flex-col md:flex-row items-center md:items-center gap-5 -mt-10 pb-6">
             <div className="w-32 h-32 md:w-36 md:h-36 rounded-full bg-blue-600 flex items-center justify-center text-white text-5xl font-black border-[6px] border-white dark:border-[#16171d] shadow-xl overflow-hidden relative">
               {user.avatar ? (
-                <img
-                  src={getImageUrl(user.avatar)}
+                <SmartImage
+                  src={user.avatar}
+                  fallback={'https://placehold.co/200x200?text=' + user.name.charAt(0).toUpperCase()}
+                  alt={user.name}
+                  width={288}
+                  height={288}
+                  widths={[160, 320, 640]}
+                  sizes="144px"
                   className="w-full h-full object-cover"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src = 'https://placehold.co/200x200?text=' + user.name.charAt(0).toUpperCase();
-                  }}
                 />
               ) : (
                 user.name.charAt(0).toUpperCase()
@@ -358,12 +364,14 @@ export const PublicProfilePage = () => {
                                     <div className="flex items-center gap-4">
                                         <div className="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center text-white font-black overflow-hidden border border-gray-100 dark:border-gray-800">
                                             {u.avatar ? (
-                                              <img
-                                                src={getImageUrl(u.avatar)}
+                                              <SmartImage
+                                                src={u.avatar}
+                                                alt={u.name ?? 'Avatar'}
+                                                width={160}
+                                                height={160}
+                                                widths={[80, 160, 320]}
+                                                sizes="48px"
                                                 className="w-full h-full object-cover"
-                                                onError={(e) => {
-                                                  (e.target as HTMLImageElement).src = 'https://placehold.co/100x100?text=' + u.name.charAt(0).toUpperCase();
-                                                }}
                                               />
                                             ) : (
                                               u.name.charAt(0).toUpperCase()
