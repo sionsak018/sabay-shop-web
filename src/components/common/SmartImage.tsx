@@ -3,6 +3,7 @@ import {
   getSizedImageUrl,
   getImageSrcSet,
   getCroppedImageUrl,
+  getCroppedImageSrcSet,
 } from '../../utils/imageUrl';
 
 type SmartImageProps = {
@@ -63,9 +64,11 @@ const SmartImage = ({
     ? getCroppedImageUrl(errored ? null : src, largestWidth, cropHeight!, fallback)
     : getSizedImageUrl(errored ? null : src, largestWidth, fallback);
 
-  const srcSet = aspect || errored
+  const srcSet = errored
     ? ''
-    : getImageSrcSet(src, widths, fallback);
+    : aspect
+      ? getCroppedImageSrcSet(src, widths, aspect.width, aspect.height, fallback)
+      : getImageSrcSet(src, widths, fallback);
 
   return (
     <img

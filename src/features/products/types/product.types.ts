@@ -1,10 +1,12 @@
-export interface User {
+export interface PublicSeller {
   id: number;
   name: string;
-  email: string;
-  phone?: string;
   avatar?: string;
-  role: 'user' | 'admin';
+  cover_photo?: string;
+  about_me?: string;
+  role?: 'user' | 'admin';
+  account_type?: 'private' | 'verified' | 'store';
+  created_at?: string;
 }
 
 export interface Category {
@@ -28,7 +30,7 @@ export interface Product {
   condition: 'new' | 'used';
   location: string;
   status: 'active' | 'inactive' | 'sold';
-  seller: User;
+  seller: PublicSeller;
   category: Category;
   images: ProductImage[];
   province?: { id: number; name: string };

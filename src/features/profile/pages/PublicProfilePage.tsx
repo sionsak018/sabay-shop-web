@@ -334,7 +334,7 @@ export const PublicProfilePage = () => {
                         </div>
                         <div>
                             <p className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1 leading-none">Location</p>
-                            <p className="text-sm font-bold text-gray-800 dark:text-gray-200">{user.phone ? "Phnom Penh" : "Cambodia"}</p>
+                            <p className="text-sm font-bold text-gray-800 dark:text-gray-200">{user.province?.name || "Cambodia"}</p>
                         </div>
                     </div>
                 </div>

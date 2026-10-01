@@ -139,3 +139,31 @@ export const getCroppedImageUrl = (
     resolve(path, placeholder),
     `w_${width},h_${height},c_fill,g_auto,q_auto,f_auto`,
   );
+
+/**
+ * srcset for aspect-cropped images. Each candidate keeps the same crop ratio,
+ * so the browser can pick a small file for a small slot instead of always
+ * downloading the largest crop.
+ */
+export const getCroppedImageSrcSet = (
+  path: string | null | undefined,
+  widths: number[],
+  aspectWidth: number,
+  aspectHeight: number,
+  placeholder = PLACEHOLDER,
+): string => {
+  const url = resolve(path, placeholder);
+
+  if (!looksLikeCloudinary(url)) {
+    return '';
+  }
+
+  const ratio = aspectWidth / aspectHeight;
+
+  return widths
+    .map((w) => {
+      const h = Math.round(w / ratio);
+      return `${cloudinaryTransform(url, `w_${w},h_${h},c_fill,g_auto,q_auto,f_auto`)} ${w}w`;
+    })
+    .join(', ');
+};
