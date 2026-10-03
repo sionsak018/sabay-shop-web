@@ -1,0 +1,26 @@
+{
+  "specVersion": "1.0",
+  "host": {
+    "displayName": "Sabay Shop",
+    "documentationUrl": "https://sabay-shop-web.vercel.app/",
+    "logoUrl": "https://sabay-shop-web.vercel.app/favicon-192.png"
+  },
+  "entries": [
+    {
+      "identifier": "urn:air:sabay-shop-web.vercel.app:marketplace:website",
+      "displayName": "Sabay Shop Marketplace",
+      "type": "text/html",
+      "url": "https://sabay-shop-web.vercel.app/",
+      "description": "Cambodia's online marketplace to browse, search and publish new and second-hand product listings.",
+      "tags": ["marketplace", "ecommerce", "cambodia"],
+      "capabilities": ["ProductSearch", "CategoryBrowse", "CreateListing"],
+      "representativeQueries": [
+        "find used motorcycles for sale in Phnom Penh",
+        "search for affordable smartphones in Cambodia",
+        "browse second-hand electronics listings"
+      ],
+      "version": "1.0.0",
+      "updatedAt": "2026-10-03T00:00:00Z"
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+# Sabay Shop
+
+> Cambodia's #1 online marketplace to buy and sell new and second-hand products — electronics, vehicles, fashion, home goods and more.
+
+## Marketplace
+
+- [Home](https://sabay-shop-web.vercel.app/): browse featured listings and categories
+- [All products](https://sabay-shop-web.vercel.app/products): search and filter every listing
+- [Sell an item](https://sabay-shop-web.vercel.app/create-product): publish a new listing
+
+## Company
+
+- [Help & Support](https://sabay-shop-web.vercel.app/)
+- [Privacy Policy](https://sabay-shop-web.vercel.app/)
+- [Terms & Conditions](https://sabay-shop-web.vercel.app/)
+
+## API
+
+- [Public API](https://sabay-shop-api.onrender.com/api): JSON REST API used by the storefront

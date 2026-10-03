@@ -55,7 +55,10 @@ export const Header = () => {
         <div className="flex items-center gap-4">
           {/* Mobile Menu Trigger */}
           <button
+            type="button"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            aria-label={isMobileMenuOpen ? 'Close menu' : 'Open menu'}
+            aria-expanded={isMobileMenuOpen}
             className="mobile-menu-trigger p-2 -ml-2 text-gray-500 dark:text-gray-400 hover:text-blue-600 md:hidden transition-colors"
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
