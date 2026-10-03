@@ -12,7 +12,7 @@ import { useTranslation } from 'react-i18next';
 
 const CategoryIcon = ({ cat, className = "" }: { cat: Category, className?: string }) => {
   if (cat.image_url) {
-    return <SmartImage src={cat.image_url} className={`w-full h-full object-cover ${className}`} alt={cat.name} width={160} height={160} widths={[80, 160, 320]} sizes="64px" />;
+    return <SmartImage src={cat.image_url} className={`w-full h-full object-cover ${className}`} alt="" width={160} height={160} widths={[80, 160, 320]} sizes="64px" />;
   }
   return (
     <div className={className}>
