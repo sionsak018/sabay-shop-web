@@ -64,9 +64,14 @@ export const HomeSlider = () => {
           {sliders.map((_, idx) => (
             <button
               key={idx}
+              type="button"
               onClick={() => setCurrentIndex(idx)}
-              className={`w-2 h-2 rounded-full transition-all ${idx === currentIndex ? 'bg-blue-600 w-5' : 'bg-white/60 dark:bg-white/20 shadow-sm'}`}
-            />
+              aria-label={`Go to slide ${idx + 1}`}
+              aria-current={idx === currentIndex}
+              className="p-2 -m-1 flex items-center"
+            >
+              <span className={`block h-2 rounded-full transition-all ${idx === currentIndex ? 'bg-blue-600 w-5' : 'bg-white/60 dark:bg-white/20 shadow-sm w-2'}`} />
+            </button>
           ))}
         </div>
       )}
@@ -75,6 +80,8 @@ export const HomeSlider = () => {
       {sliders.length > 1 && (
         <>
             <button
+                type="button"
+                aria-label="Previous slide"
                 onClick={(e) => {
                     e.preventDefault();
                     setCurrentIndex(prev => (prev === 0 ? sliders.length - 1 : prev - 1));
@@ -84,6 +91,8 @@ export const HomeSlider = () => {
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M15 19l-7-7 7-7"/></svg>
             </button>
             <button
+                type="button"
+                aria-label="Next slide"
                 onClick={(e) => {
                     e.preventDefault();
                     setCurrentIndex(prev => (prev + 1) % sliders.length);

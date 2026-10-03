@@ -78,10 +78,10 @@ export const Header = () => {
         {/* Action Area */}
         <div className="flex items-center gap-2 sm:gap-5">
           <nav className="hidden md:flex items-center gap-5">
-            <Link to="/" className={`text-xs font-bold ${isActive('/') ? 'text-blue-600' : 'text-gray-600 dark:text-gray-400 hover:text-blue-600'} transition uppercase tracking-widest`}>
+            <Link to="/" className={`text-xs font-bold ${isActive('/') ? 'text-blue-600 dark:text-blue-400' : 'text-gray-600 dark:text-gray-400 hover:text-blue-600'} transition uppercase tracking-widest`}>
               {t('common.home')}
             </Link>
-            <Link to="/products" className={`text-xs font-bold ${isActive('/products') ? 'text-blue-600' : 'text-gray-600 dark:text-gray-400 hover:text-blue-600'} transition uppercase tracking-widest`}>
+            <Link to="/products" className={`text-xs font-bold ${isActive('/products') ? 'text-blue-600 dark:text-blue-400' : 'text-gray-600 dark:text-gray-400 hover:text-blue-600'} transition uppercase tracking-widest`}>
               {t('common.marketplace')}
             </Link>
           </nav>

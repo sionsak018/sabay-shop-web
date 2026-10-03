@@ -85,11 +85,14 @@ export const ProductCard = ({ product, onToggleFavorite, isFavorited: initialFav
             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
           />
           <div className="absolute top-1 left-1 flex flex-col gap-0.5">
-            {product.discount_price && Number(product.discount_price) > 0 && <span className="bg-red-500 text-white text-[7px] px-1 py-0.5 rounded font-black uppercase">SALE</span>}
+            {product.discount_price && Number(product.discount_price) > 0 && <span className="bg-red-600 text-white text-[7px] px-1 py-0.5 rounded font-black uppercase">SALE</span>}
             {product.condition && <span className="bg-black/40 backdrop-blur-sm text-white text-[7px] px-1 py-0.5 rounded font-bold uppercase">{product.condition}</span>}
           </div>
           <button
+            type="button"
             onClick={handleLike}
+            aria-label={isLiked ? 'Remove from favorites' : 'Add to favorites'}
+            aria-pressed={isLiked}
             className={`absolute top-1 right-1 p-1.5 rounded-full backdrop-blur-sm transition-all z-10 ${isLiked ? 'bg-red-500 text-white shadow-lg' : 'bg-black/10 text-white hover:bg-white hover:text-red-500 dark:bg-white/10 dark:text-gray-300 dark:hover:bg-red-500 dark:hover:text-white'}`}
           >
             <svg className="w-3 h-3 sm:w-4 sm:h-4" fill={isLiked ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.01 0 000 6.364L12 20.364l7.682-7.682a4.5 4.01 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.01 0 00-6.364 0z" /></svg>
@@ -102,11 +105,11 @@ export const ProductCard = ({ product, onToggleFavorite, isFavorited: initialFav
           <div className="flex items-baseline gap-2 mb-2">
             <p className="text-lg sm:text-2xl font-black text-blue-600 dark:text-blue-500">${discountPrice || price}</p>
             {discountPrice && (
-              <p className="text-xs sm:text-sm text-gray-400 dark:text-gray-600 line-through font-bold">${price}</p>
+              <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 line-through font-bold">${price}</p>
             )}
           </div>
 
-          <div className="mt-auto pt-2 border-t border-gray-50 dark:border-gray-800 flex items-center justify-between text-[10px] sm:text-xs text-gray-500 dark:text-gray-500">
+          <div className="mt-auto pt-2 border-t border-gray-50 dark:border-gray-800 flex items-center justify-between text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">
             <div className="flex items-center gap-1 truncate max-w-[70%] hover:text-blue-600 dark:hover:text-blue-400 transition-colors" onClick={(e) => { e.stopPropagation(); navigate(`/u/${product.seller?.id}`); }}>
               {showLocation ? (
                 <>
@@ -114,7 +117,7 @@ export const ProductCard = ({ product, onToggleFavorite, isFavorited: initialFav
                   <span className="truncate">{product.province?.name || product.location || 'Cambodia'}</span>
                 </>
               ) : (
-                <span className="font-bold text-gray-400 dark:text-gray-600">{product.seller?.name || 'Seller'}</span>
+                <span className="font-bold text-gray-500 dark:text-gray-400">{product.seller?.name || 'Seller'}</span>
               )}
             </div>
             <span className="shrink-0">{timeAgo(product.created_at || new Date().toISOString())}</span>
@@ -135,8 +138,8 @@ export const ProductCard = ({ product, onToggleFavorite, isFavorited: initialFav
           alt={product.title}
           aspect={{ width: 4, height: 3 }}
           priority={priority}
-          widths={[320, 640, 960]}
-          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+          widths={[160, 240, 320, 480, 640]}
+          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
           width={640}
           height={480}
           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
@@ -144,7 +147,7 @@ export const ProductCard = ({ product, onToggleFavorite, isFavorited: initialFav
 
         <div className="absolute top-1 left-1 sm:top-1.5 sm:left-1.5 flex flex-col gap-0.5">
             {product.discount_price && Number(product.discount_price) > 0 && (
-                <span className="bg-red-500 text-white text-[7px] sm:text-[8px] px-1 py-0.5 rounded uppercase font-black tracking-tighter w-fit">
+                <span className="bg-red-600 text-white text-[7px] sm:text-[8px] px-1 py-0.5 rounded uppercase font-black tracking-tighter w-fit">
                     SALE
                 </span>
             )}
@@ -156,7 +159,10 @@ export const ProductCard = ({ product, onToggleFavorite, isFavorited: initialFav
         </div>
 
         <button
+          type="button"
           onClick={handleLike}
+          aria-label={isLiked ? 'Remove from favorites' : 'Add to favorites'}
+          aria-pressed={isLiked}
           className={`absolute top-1 right-1 sm:top-1.5 sm:right-1.5 p-1 rounded-full backdrop-blur-sm transition-all z-10 ${isLiked ? 'bg-red-500 text-white shadow-lg' : 'bg-black/20 text-white hover:bg-white hover:text-red-500 dark:bg-white/10 dark:text-gray-300 dark:hover:bg-red-500 dark:hover:text-white'}`}
         >
           <svg className="w-3 sm:w-3.5 h-3 sm:h-3.5" fill={isLiked ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
@@ -176,13 +182,13 @@ export const ProductCard = ({ product, onToggleFavorite, isFavorited: initialFav
               ${discountPrice || price}
             </p>
             {discountPrice && (
-              <p className="text-[9px] sm:text-[11px] text-gray-400 dark:text-gray-600 line-through font-bold">
+              <p className="text-[9px] sm:text-[11px] text-gray-500 dark:text-gray-400 line-through font-bold">
                 ${price}
               </p>
             )}
           </div>
 
-          <div className="flex items-center justify-between text-[8px] sm:text-[10px] text-gray-500 dark:text-gray-500 border-t border-gray-100 dark:border-gray-800 pt-1 sm:pt-1.5">
+          <div className="flex items-center justify-between text-[8px] sm:text-[10px] text-gray-500 dark:text-gray-400 border-t border-gray-100 dark:border-gray-800 pt-1 sm:pt-1.5">
             <div className="flex items-center gap-0.5 sm:gap-1 max-w-[65%] hover:text-blue-600 dark:hover:text-blue-400 transition-colors" onClick={(e) => { e.stopPropagation(); navigate(`/u/${product.seller?.id}`); }}>
                 {showLocation ? (
                   <>
@@ -192,7 +198,7 @@ export const ProductCard = ({ product, onToggleFavorite, isFavorited: initialFav
                     </span>
                   </>
                 ) : (
-                  <span className="truncate font-bold text-gray-400 dark:text-gray-600">
+                  <span className="truncate font-bold text-gray-500 dark:text-gray-400">
                     {product.seller?.name || 'Seller'}
                   </span>
                 )}
