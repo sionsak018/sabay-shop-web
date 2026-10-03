@@ -8,7 +8,7 @@ import { type Category } from '../../categories/types/category.types';
 import api from '../../../services/api';
 import SmartImage from '../../../components/common/SmartImage';
 import { LocationPickerModal } from '../../../components/common/LocationPickerModal';
-import { useTranslation } from 'react-i18next';
+import { useSeo } from '../../../utils/seo';
 
 interface LocalFilters {
   min_price: string;
@@ -30,7 +30,6 @@ const CategoryIcon = ({ cat, className = "" }: { cat: Category, className?: stri
 };
 
 export const ProductListPage = () => {
-  const { t } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const categoryId = searchParams.get('category_id') || '';
@@ -43,7 +42,6 @@ export const ProductListPage = () => {
   const [loadingCategories, setLoadingCategories] = useState(true);
   const [provinces, setProvinces] = useState<any[]>([]);
   const [dynamicAttributes, setDynamicAttributes] = useState<any[]>([]);
-  const [loadingAttributes, setLoadingAttributes] = useState(false);
   const [page, setPage] = useState(1);
   const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
   const [districtName, setDistrictName] = useState('');
@@ -62,26 +60,9 @@ export const ProductListPage = () => {
       return initial;
   });
 
-  const [localSearchTerm, setLocalSearchTerm] = useState(keyword);
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  const [expandedAttrs, setExpandedAttrs] = useState<Record<number, boolean>>({});
   const topRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    setLocalSearchTerm(keyword);
-  }, [keyword]);
-
-  const handleSearchButtonClick = () => {
-    const params = new URLSearchParams(searchParams);
-    if (localSearchTerm.trim()) {
-      params.set('keyword', localSearchTerm);
-    } else {
-      params.delete('keyword');
-    }
-    setSearchParams(params);
-    setPage(1);
-  };
 
   // Sync localFilters with searchParams (Crucial for Breadcrumb Back navigation)
   useEffect(() => {
@@ -96,7 +77,6 @@ export const ProductListPage = () => {
         if (key.startsWith('attr_')) updated[key] = val;
     });
     setLocalFilters(updated);
-    setLocalSearchTerm(searchParams.get('keyword') || '');
   }, [searchParams]);
 
   useEffect(() => {
@@ -121,13 +101,10 @@ export const ProductListPage = () => {
 
   useEffect(() => {
     if (categoryId) {
-      setLoadingAttributes(true);
       api.get(`/category-attributes/${categoryId}`)
-        .then(res => setDynamicAttributes(res.data))
-        .finally(() => setLoadingAttributes(false));
+        .then(res => setDynamicAttributes(res.data));
     } else {
       setDynamicAttributes([]);
-      setLoadingAttributes(false);
     }
   }, [categoryId]);
 
@@ -192,41 +169,26 @@ export const ProductListPage = () => {
   const subCategories = mainCategory ? categories.filter(c => c.parent_id === mainCategory.id) : [];
   const isSubCategorySelected = selectedCategory && selectedCategory.parent_id;
 
-  const brandAttr = dynamicAttributes.find(a => a.name === 'Brand');
-
   const provinceName = provinces.find(p => String(p.id) === searchParams.get('province_id'))?.name || 'Cambodia';
   const fullLocationName = districtName ? `${districtName}, ${provinceName}` : provinceName;
 
+  useSeo({
+    title: keyword
+      ? `${keyword} — Search`
+      : selectedCategory
+        ? `${selectedCategory.name} for sale in Cambodia`
+        : 'Browse Ads',
+    description: keyword
+      ? `Search results for "${keyword}" on Sabay Shop, Cambodia's online marketplace.`
+      : selectedCategory
+        ? `Browse ${selectedCategory.name} listings for sale across Cambodia on Sabay Shop.`
+        : 'Browse thousands of new and second-hand listings for sale across Cambodia on Sabay Shop.',
+    canonical: categoryId ? `/products?category_id=${categoryId}` : '/products',
+    noindex: !!keyword,
+  });
+
   return (
     <div ref={topRef} className="min-h-screen bg-[#f1f2f6] dark:bg-[#08060d] text-gray-900 dark:text-gray-100 pb-20 text-left antialiased font-sans relative transition-colors duration-300">
-
-      {/* Search Bar -  Style */}
-      <div className="bg-white dark:bg-[#16171d] border-b border-gray-200 dark:border-gray-800 py-3 shadow-sm transition-colors">
-        <div className="container mx-auto px-4 max-w-7xl flex gap-2">
-             <div className="relative flex-1">
-                <input
-                    type="text"
-                    value={localSearchTerm}
-                    onChange={e => setLocalSearchTerm(e.target.value)}
-                    placeholder={t('product_list.search_placeholder', { defaultValue: 'Search in all categories...' })}
-                    className="w-full bg-[#f8f9fa] dark:bg-[#1f2028] border border-[#dee2e6] dark:border-gray-700 px-4 py-2 rounded focus:bg-white focus:border-blue-500 outline-none text-sm font-medium text-gray-700 dark:text-gray-200 transition-all"
-                    onKeyDown={e => {
-                        if (e.key === 'Enter') {
-                            handleSearchButtonClick();
-                        }
-                    }}
-                />
-                <svg className="w-4 h-4 absolute right-4 top-1/2 -translate-y-1/2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-             </div>
-
-             <button
-                onClick={handleSearchButtonClick}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-4 sm:px-8 py-2 rounded font-bold transition flex items-center justify-center shadow-sm uppercase tracking-wider text-[11px] sm:text-xs shrink-0"
-             >
-                {t('common.search')}
-             </button>
-        </div>
-      </div>
 
       <div className="container mx-auto px-4 max-w-7xl">
         <div className="py-2.5">
@@ -317,7 +279,6 @@ export const ProductListPage = () => {
             <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-800">
                 <h1 className="text-base sm:text-lg font-bold text-gray-800 dark:text-gray-100">
                     {selectedCategory ? `${selectedCategory.name} in ${fullLocationName}` :
-                     keyword ? `Search results for "${keyword}"` :
                      `Latest Classifieds in ${fullLocationName}`}
                 </h1>
             </div>
@@ -418,137 +379,6 @@ export const ProductListPage = () => {
             </div>
         )}
 
-        {/* Khmer24 Step-by-Step Selection UI */}
-        {loadingAttributes ? (
-            <div className="flex flex-col gap-3 mb-3 animate-pulse">
-                {/* Surgical Skeleton: Only show 1 block if brand isn't selected, or 2 if it is */}
-                {[...Array(brandAttr && localFilters[`attr_${brandAttr.id}`] ? 2 : 1)].map((_, i) => (
-                    <div key={i} className="bg-white dark:bg-[#1f2028] border border-gray-200 dark:border-gray-800 rounded shadow-sm">
-                        <div className="px-4 py-3 border-b border-gray-50 dark:border-gray-800">
-                             <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded w-20" />
-                        </div>
-                        <div className="p-4 grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-4">
-                            {[...Array(8)].map((_, j) => (
-                                <div key={j} className="flex flex-col items-center gap-2">
-                                    <div className="size-12 sm:size-14 bg-gray-200 dark:bg-gray-800 rounded-full" />
-                                    <div className="h-2 bg-gray-200 dark:bg-gray-800 rounded w-full" />
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                ))}
-            </div>
-        ) : (() => {
-            if (dynamicAttributes.length === 0) return null;
-
-            // Define Logical Order: Brand -> Model -> Others -> Body Type
-            const sortedAttrs = [...dynamicAttributes].sort((a, b) => {
-                const order = ['Brand', 'Model', 'Year', 'Condition'];
-                if (a.name === 'Body Type') return 1;
-                if (b.name === 'Body Type') return -1;
-                const idxA = order.indexOf(a.name);
-                const idxB = order.indexOf(b.name);
-                if (idxA !== -1 && idxB !== -1) return idxA - idxB;
-                if (idxA !== -1) return -1;
-                if (idxB !== -1) return 1;
-                return 0;
-            });
-
-            // Step 1: Check if Brand is picked
-            const brandAttr = dynamicAttributes.find(a => a.name === 'Brand');
-            const isBrandSelected = brandAttr ? !!localFilters[`attr_${brandAttr.id}`] : true;
-
-            let displayAttrs = [];
-            if (!isBrandSelected) {
-                // Stage 1: Only show Brand
-                if (brandAttr) displayAttrs.push(brandAttr);
-            } else {
-                // Stage 2: Brand hidden, show Model and Body Type
-                const modelAttr = dynamicAttributes.find(a => a.name === 'Model');
-                const bodyTypeAttr = dynamicAttributes.find(a => a.name === 'Body Type');
-
-                if (modelAttr) displayAttrs.push(modelAttr);
-                if (bodyTypeAttr) displayAttrs.push(bodyTypeAttr);
-
-                // Show any other select attributes that aren't picked yet
-                const others = dynamicAttributes.filter(a =>
-                    a.type === 'select' &&
-                    !['Brand', 'Model', 'Body Type'].includes(a.name) &&
-                    !localFilters[`attr_${a.id}`]
-                );
-                displayAttrs.push(...others);
-            }
-
-            // Body Type always at bottom
-            displayAttrs.sort((a, b) => {
-                if (a.name === 'Body Type') return 1;
-                if (b.name === 'Body Type') return -1;
-                return 0;
-            });
-
-            if (displayAttrs.length === 0) return null;
-
-            return displayAttrs.map(attr => {
-                const isExpanded = expandedAttrs[attr.id] || false;
-                const options = attr.options || [];
-                const visibleOptions = isExpanded ? options : options.slice(0, 12);
-                const hasMore = options.length > 12;
-                const isCircleStyle = ['Brand', 'Body Type', 'Make', 'Model'].includes(attr.name);
-
-                return (
-                    <div key={attr.id} className="bg-white dark:bg-[#1f2028] border border-gray-200 dark:border-gray-800 rounded mb-3 shadow-sm animate-in fade-in slide-in-from-top-2 duration-500 transition-colors">
-                        <div className="px-4 py-3 border-b border-gray-50 dark:border-gray-800">
-                            <h2 className="text-sm font-bold text-gray-800 dark:text-gray-100 uppercase tracking-tight">{attr.name}</h2>
-                        </div>
-                        <div className="p-4">
-                            <div className={`grid gap-x-2 gap-y-4 ${isCircleStyle ? 'grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10' : 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6'}`}>
-                                {visibleOptions.map((opt: any) => {
-                                    const isActive = localFilters[`attr_${attr.id}`] === opt.value;
-                                    return (
-                                        <button
-                                            key={opt.id}
-                                            onClick={() => {
-                                                applyFilters({ [`attr_${attr.id}`]: isActive ? '' : opt.value });
-                                            }}
-                                            className="group flex flex-col items-center gap-2 transition-all active:scale-95"
-                                        >
-                                            {isCircleStyle ? (
-                                                <div className={`size-12 sm:size-14 rounded-full flex items-center justify-center border transition-all overflow-hidden ${isActive ? 'bg-blue-50 dark:bg-blue-900/30 border-blue-500 ring-2 ring-blue-500/20' : 'bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700 group-hover:border-blue-200 dark:group-hover:border-blue-800 group-hover:bg-blue-50/30 dark:group-hover:bg-blue-900/10'}`}>
-                                                    {opt.image_url ? (
-                                                        <SmartImage src={opt.image_url} className="w-full h-full object-cover" alt={opt.value} width={80} height={80} widths={[80, 160]} sizes="48px" />
-                                                    ) : (
-                                                        <div className="text-[10px] font-black text-gray-300 dark:text-gray-600 uppercase truncate px-1">{opt.value.substring(0, 3)}</div>
-                                                    )}
-                                                </div>
-                                            ) : (
-                                                <div className={`w-full py-2.5 px-3 rounded border text-center transition-all ${isActive ? 'bg-blue-50 dark:bg-blue-900/30 border-blue-200 dark:border-blue-800 border-blue-500 text-blue-600 dark:text-blue-400 font-bold shadow-sm' : 'bg-gray-50 dark:bg-gray-800 border-gray-100 dark:border-gray-700 group-hover:bg-blue-50 dark:group-hover:bg-gray-700 group-hover:border-blue-200 dark:group-hover:border-blue-800 group-hover:text-blue-600 dark:group-hover:text-blue-400 group-hover:font-bold shadow-sm'}`}>
-                                                    <span className="text-[11px] truncate block">{opt.value}</span>
-                                                </div>
-                                            )}
-                                            {isCircleStyle && (
-                                                <span className={`text-[10px] sm:text-[11px] font-bold text-center leading-tight truncate px-1 ${isActive ? 'text-blue-600 dark:text-blue-400' : 'text-gray-600 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400'}`}>
-                                                    {opt.value}
-                                                </span>
-                                            )}
-                                        </button>
-                                    );
-                                })}
-                            </div>
-
-                            {hasMore && (
-                                <button
-                                    onClick={() => setExpandedAttrs(prev => ({ ...prev, [attr.id]: !isExpanded }))}
-                                    className="w-full mt-6 py-2 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400 text-[11px] font-bold uppercase tracking-widest rounded transition-colors flex items-center justify-center gap-1.5"
-                                >
-                                    {isExpanded ? 'Show Less' : 'Show More'}
-                                    <svg className={`w-3.5 h-3.5 transition-transform ${isExpanded ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M19 9l-7 7-7-7"/></svg>
-                                </button>
-                            )}
-                        </div>
-                    </div>
-                );
-            });
-        })()}
 
         <div className="flex flex-col gap-4 sm:gap-5">
 

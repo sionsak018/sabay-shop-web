@@ -15,7 +15,7 @@ import '@toast-ui/editor/dist/toastui-editor.css';
 import { Editor } from '@toast-ui/react-editor';
 import SmartImage from '../../../components/common/SmartImage';
 
-export const CreateProductPage = () => {
+export const CreateProductPage = ({ adminMode = false }: { adminMode?: boolean }) => {
   const navigate = useNavigate();
   const { showAlert } = useAlert();
   const { t } = useTranslation();
@@ -66,20 +66,22 @@ export const CreateProductPage = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [catRes, provRes, limitRes] = await Promise.all([
+        const [catRes, provRes] = await Promise.all([
           categoryApi.getAll(),
-          api.get('/provinces'),
-          api.get('/my-products/check-limit')
+          api.get('/provinces')
         ]);
         setCategories(Array.isArray(catRes.data) ? catRes.data : catRes.data.data || []);
         setProvinces(Array.isArray(provRes.data) ? provRes.data : provRes.data.data || []);
-        setLimitInfo(limitRes.data);
+        if (!adminMode) {
+          const limitRes = await api.get('/my-products/check-limit');
+          setLimitInfo(limitRes.data);
+        }
       } catch (err) {
         console.error('Failed to load data', err);
       }
     };
     fetchData();
-  }, []);
+  }, [adminMode]);
 
   useEffect(() => {
     if (formData.province_id) {
@@ -257,12 +259,16 @@ export const CreateProductPage = () => {
     }
 
     try {
-      await productApi.create(submitForm);
+      if (adminMode) {
+        await api.post('/admin/products', submitForm);
+      } else {
+        await productApi.create(submitForm);
+      }
       showAlert({
         title: t('create_product.success_title'),
         message: t('create_product.success_message'),
         type: 'success',
-        onClose: () => navigate('/', { replace: true })
+        onClose: () => navigate(adminMode ? '/admin/products' : '/', { replace: true })
       });
     } catch (err: any) {
       setError(err.response?.data?.message || t('create_product.failed_to_post', { defaultValue: 'Failed to post ad. Please try again.' }));
@@ -298,7 +304,7 @@ export const CreateProductPage = () => {
               </div>
             </div>
           </div>
-          {limitInfo && (
+          {!adminMode && limitInfo && (
             <div className="text-right hidden sm:block">
               <div className="text-[10px] font-black text-gray-400 dark:text-gray-600 uppercase tracking-widest mb-1">Ad Usage</div>
               <div className="flex items-center gap-2 justify-end">
@@ -309,7 +315,7 @@ export const CreateProductPage = () => {
           )}
         </div>
 
-        {limitInfo?.limit_reached && (
+        {!adminMode && limitInfo?.limit_reached && (
           <div className="bg-red-50 dark:bg-red-900/10 border border-red-100 dark:border-red-900/30 p-8 rounded-2xl flex flex-col md:flex-row items-start gap-6 mb-8 animate-in slide-in-from-top-4 duration-500">
              <div className="w-16 h-16 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center text-red-600 dark:text-red-500 shrink-0 shadow-inner">
                 <svg className="w-9 h-9" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
@@ -820,10 +826,10 @@ export const CreateProductPage = () => {
               </div>
               <button
                 type="submit"
-                disabled={loading || limitInfo?.limit_reached}
+                disabled={loading || (!adminMode && limitInfo?.limit_reached)}
                 className="w-full sm:w-auto sm:min-w-[300px] bg-blue-600 hover:bg-blue-700 text-white px-10 py-5 rounded-2xl font-black uppercase tracking-[0.2em] transition-all shadow-2xl shadow-blue-600/30 active:scale-95 disabled:opacity-50"
               >
-                {loading ? t('create_product.processing') : limitInfo?.limit_reached ? t('create_product.limit_reached') : t('create_product.post_now')}
+                {loading ? t('create_product.processing') : (!adminMode && limitInfo?.limit_reached) ? t('create_product.limit_reached') : t('create_product.post_now')}
               </button>
             </div>
           </form>

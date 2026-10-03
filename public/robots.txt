@@ -5,3 +5,5 @@ Disallow: /dashboard/
 Disallow: /messages/
 Disallow: /profile/
 Disallow: /create-product/
+
+Sitemap: https://sabay-shop-api.onrender.com/sitemap.xml

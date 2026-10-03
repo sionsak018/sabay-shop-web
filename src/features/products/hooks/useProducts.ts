@@ -15,9 +15,14 @@ export interface ProductFilters {
   page?: number;
 }
 
-export const useProducts = (filters: ProductFilters = {}) => {
+export const useProducts = (
+  filters: ProductFilters = {},
+  options: { mode?: 'replace' | 'append' } = {},
+) => {
+  const append = options.mode === 'append';
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pagination, setPagination] = useState({
     currentPage: 1,
@@ -36,7 +41,9 @@ export const useProducts = (filters: ProductFilters = {}) => {
   const page = filters.page || 1;
 
   const fetchProducts = useCallback(async () => {
-    setLoading(true);
+    const isAppend = append && page > 1;
+    if (isAppend) setLoadingMore(true);
+    else setLoading(true);
     setError(null);
     try {
       const params = new URLSearchParams();
@@ -58,7 +65,8 @@ export const useProducts = (filters: ProductFilters = {}) => {
       });
 
       const response = await productApi.getFiltered(params.toString());
-      setProducts(response.data.data);
+      const rows = response.data.data;
+      setProducts((prev) => (isAppend ? [...prev, ...rows] : rows));
       setPagination({
         currentPage: response.data.current_page,
         lastPage: response.data.last_page,
@@ -67,11 +75,12 @@ export const useProducts = (filters: ProductFilters = {}) => {
       });
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to load products');
-      setProducts([]);
+      if (!isAppend) setProducts([]);
     } finally {
       setLoading(false);
+      setLoadingMore(false);
     }
-  }, [filtersKey, page]); // only re-run when filter criteria OR page changes
+  }, [filtersKey, page, append]); // only re-run when filter criteria OR page changes
 
   useEffect(() => {
     fetchProducts();
@@ -84,5 +93,5 @@ export const useProducts = (filters: ProductFilters = {}) => {
     }
   };
 
-  return { products, loading, error, pagination, goToPage, refetch: fetchProducts };
+  return { products, loading, loadingMore, error, pagination, goToPage, refetch: fetchProducts };
 };

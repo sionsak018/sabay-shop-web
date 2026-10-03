@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../../auth/hooks/useAuth';
+import { isConsoleUser } from '../../auth/utils/roles';
 import { useAlert } from '../../../context/AlertContext';
 import { profileApi } from '../services/profileApi';
 import { productApi } from '../../products/services/productApi';
@@ -12,6 +13,7 @@ import SmartImage from '../../../components/common/SmartImage';
 
 export const ProfilePage = () => {
   const { user, updateUser, logout } = useAuth();
+  const consoleUser = isConsoleUser(user);
   const { showAlert } = useAlert();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -451,6 +453,7 @@ export const ProfilePage = () => {
                 )}
 
                 {/* Promo Card */}
+                {!consoleUser && (
                 <div className="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl p-6 text-white shadow-xl shadow-blue-600/20 flex flex-col md:flex-row items-center justify-between gap-4">
                   <div className="text-center md:text-left">
                     <h2 className="text-xl font-black uppercase tracking-tight mb-1">Boost Your Sales!</h2>
@@ -460,6 +463,7 @@ export const ProfilePage = () => {
                     Create New Listing
                   </Link>
                 </div>
+                )}
 
                 {/* Grid Stats */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -513,7 +517,9 @@ export const ProfilePage = () => {
                                     {userProducts.length === 0 && (
                                         <div className="col-span-2 py-10 text-center flex flex-col items-center">
                                             <p className="text-gray-300 dark:text-gray-600 font-bold text-xs uppercase tracking-widest mb-3">No active listings</p>
-                                            <Link to="/sell" className="text-blue-600 dark:text-blue-400 text-[10px] font-black uppercase border border-blue-100 dark:border-blue-900/30 px-4 py-1.5 rounded-full hover:bg-blue-50 dark:hover:bg-blue-900/10 transition">Post Now</Link>
+                                            {!consoleUser && (
+                                              <Link to="/sell" className="text-blue-600 dark:text-blue-400 text-[10px] font-black uppercase border border-blue-100 dark:border-blue-900/30 px-4 py-1.5 rounded-full hover:bg-blue-50 dark:hover:bg-blue-900/10 transition">Post Now</Link>
+                                            )}
                                         </div>
                                     )}
                                 </>
@@ -632,7 +638,9 @@ export const ProfilePage = () => {
                             <p className="text-gray-900 dark:text-gray-100 font-black uppercase text-sm tracking-tight mb-1">Your store is empty</p>
                             <p className="text-gray-400 dark:text-gray-500 text-xs font-medium max-w-[240px] mx-auto leading-relaxed">List items you no longer need and start making money today.</p>
                         </div>
-                        <Link to="/sell" className="mt-2 bg-blue-600 dark:bg-blue-500 text-white px-8 py-2.5 rounded-xl font-black text-[11px] uppercase tracking-widest shadow-xl shadow-blue-600/20 hover:bg-blue-700 dark:hover:bg-blue-600 transition active:scale-95">Post Your Ad</Link>
+                        {!consoleUser && (
+                          <Link to="/sell" className="mt-2 bg-blue-600 dark:bg-blue-500 text-white px-8 py-2.5 rounded-xl font-black text-[11px] uppercase tracking-widest shadow-xl shadow-blue-600/20 hover:bg-blue-700 dark:hover:bg-blue-600 transition active:scale-95">Post Your Ad</Link>
+                        )}
                     </div>
                   )}
                 </div>

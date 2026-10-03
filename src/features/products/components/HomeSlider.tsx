@@ -43,7 +43,7 @@ export const HomeSlider = () => {
           <SmartImage
             src={slider.image_url}
             alt={slider.title ? '' : 'Promotional banner'}
-            priority
+            priority={index === 0}
             widths={[640, 960, 1280]}
             sizes="100vw"
             width={1280}

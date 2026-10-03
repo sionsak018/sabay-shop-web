@@ -1,64 +1,73 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useProducts } from '../hooks/useProducts';
-import { ProductCard } from '../components/ProductCard';
-import { ProductSkeleton } from '../components/ProductSkeleton';
 import { HomeSlider } from '../components/HomeSlider';
+import { HomeHero } from '../components/home/HomeHero';
+import { HomeTrustBar } from '../components/home/HomeTrustBar';
+import { HomeCategoryTiles } from '../components/home/HomeCategoryTiles';
+import { ProductRail } from '../components/home/ProductRail';
 import { categoryApi } from '../../categories/services/categoryApi';
 import { type Category } from '../../categories/types/category.types';
-import SmartImage from '../../../components/common/SmartImage';
+import { statsApi, type PublicStats } from '../services/statsApi';
 import { LocationPickerModal } from '../../../components/common/LocationPickerModal';
+import { useSeo } from '../../../utils/seo';
 import { useTranslation } from 'react-i18next';
-
-const CategoryIcon = ({ cat, className = "" }: { cat: Category, className?: string }) => {
-  if (cat.image_url) {
-    return <SmartImage src={cat.image_url} className={`w-full h-full object-cover ${className}`} alt="" width={160} height={160} widths={[80, 160, 320]} sizes="64px" />;
-  }
-  return (
-    <div className={className}>
-        <svg className="w-full h-full" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16m-7 6h7"/></svg>
-    </div>
-  );
-};
 
 export const HomePage = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const [categories, setCategories] = useState<Category[]>([]);
   const [loadingCategories, setLoadingCategories] = useState(true);
+  const [stats, setStats] = useState<PublicStats | null>(null);
 
-  // New Filter States
+  // Filter states
   const [activeCategoryId, setActiveCategoryId] = useState<number | undefined>();
   const [activeProvinceId, setActiveProvinceId] = useState<string>('');
   const [activeDistrictId, setActiveDistrictId] = useState<string>('');
   const [locationName, setLocationName] = useState('');
   const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
+  const [page, setPage] = useState(1);
 
   useEffect(() => {
-    // Optimization: Check if we already have categories in session storage to show them instantly
+    // Optimization: show cached categories instantly
     const cachedCats = sessionStorage.getItem('cached_categories');
     if (cachedCats) {
-        setCategories(JSON.parse(cachedCats));
-        setLoadingCategories(false);
+      setCategories(JSON.parse(cachedCats));
+      setLoadingCategories(false);
     }
 
     categoryApi.getAll()
       .then(res => {
-          const data = Array.isArray(res.data) ? res.data : res.data.data || [];
-          setCategories(data);
-          sessionStorage.setItem('cached_categories', JSON.stringify(data));
+        const data = Array.isArray(res.data) ? res.data : res.data.data || [];
+        setCategories(data);
+        sessionStorage.setItem('cached_categories', JSON.stringify(data));
       })
       .finally(() => setLoadingCategories(false));
   }, []);
 
+  useEffect(() => {
+    let active = true;
+    statsApi.getPublic()
+      .then(res => { if (active) setStats(res.data); })
+      .catch(() => {});
+    return () => { active = false; };
+  }, []);
+
+  useSeo({
+    title: t('seo.home_title'),
+    description: t('seo.home_desc'),
+    canonical: '/',
+  });
+
   const productFilters = {
-    page: 1,
+    page,
     category_id: activeCategoryId?.toString(),
     province_id: activeProvinceId || undefined,
     district_id: activeDistrictId || undefined,
   };
 
-  const { products, loading, error } = useProducts(productFilters);
+  const { products, loading, loadingMore, error, pagination, refetch } = useProducts(productFilters, { mode: 'append' });
+  const hasMore = pagination.currentPage < pagination.lastPage;
 
   const getResultsTitle = () => {
     if (activeRoot) return t('home.results_in_cat', { name: activeRoot.name });
@@ -71,6 +80,7 @@ export const HomePage = () => {
     setActiveProvinceId('');
     setActiveDistrictId('');
     setLocationName('');
+    setPage(1);
   };
 
   const browseCategory = (id: number) => {
@@ -78,8 +88,7 @@ export const HomePage = () => {
   };
 
   // Guarantee a 2-level browse view: root categories (no parent, or an
-  // orphaned parent) plus their direct children only. Anything deeper is
-  // never treated as a root or as a root's subcategory.
+  // orphaned parent) plus their direct children only.
   const categoryIdSet = new Set(categories.map((c) => c.id));
   const rootCategories = categories.filter(
     (c) => !c.parent_id || !categoryIdSet.has(c.parent_id)
@@ -106,115 +115,73 @@ export const HomePage = () => {
     : undefined;
 
   const displayCategories = activeRoot ? childrenOf(activeRoot.id) : rootCategories;
+  const hasChildren = (id: number) => childrenOf(id).length > 0;
 
   return (
     <div className="min-h-screen bg-[#f1f2f6] dark:bg-[#08060d] text-gray-900 dark:text-gray-100 antialiased pb-20 font-sans transition-colors duration-300">
-      
       <div className="container mx-auto px-4 max-w-7xl mt-2 sm:mt-3">
 
-        {/* Auto Slider */}
-        <HomeSlider />
+        <HomeHero stats={stats} />
+
+        <HomeTrustBar />
 
         {/* Breadcrumb if category selected */}
         {activeRoot && (
-            <div className="mb-3 flex items-center gap-2 overflow-x-auto whitespace-nowrap scrollbar-hide py-2 px-1">
-                <button
-                  onClick={() => setActiveCategoryId(undefined)}
-                  className="text-sm sm:text-base font-bold text-blue-600 dark:text-blue-400 hover:underline transition-colors"
-                >
-                  {t('common.all_categories')}
-                </button>
-                <svg className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 5l7 7-7 7"/></svg>
-                <span className="text-sm sm:text-base font-bold text-gray-500 dark:text-gray-400">
-                  {activeRoot.name}
-                </span>
-            </div>
+          <div className="mb-3 flex items-center gap-2 overflow-x-auto whitespace-nowrap scrollbar-hide py-2 px-1">
+            <button
+              onClick={() => { setActiveCategoryId(undefined); setPage(1); }}
+              className="text-sm sm:text-base font-bold text-blue-600 dark:text-blue-400 hover:underline transition-colors"
+            >
+              {t('common.all_categories')}
+            </button>
+            <svg className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 5l7 7-7 7"/></svg>
+            <span className="text-sm sm:text-base font-bold text-gray-500 dark:text-gray-400">
+              {activeRoot.name}
+            </span>
+          </div>
         )}
 
-        {/* Browse By Category Section */}
-        {loadingCategories ? (
-            <div className="bg-white dark:bg-[#16171d] border border-gray-200 dark:border-gray-800 rounded-md p-3 sm:p-4 shadow-sm transition-colors mb-3 animate-pulse">
-                <div className="h-5 bg-gray-200 dark:bg-gray-800 rounded w-1/4 mb-4" />
-                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-4 lg:grid-cols-6 gap-2">
-                    {[...Array(6)].map((_, i) => (
-                        <div key={i} className="flex flex-col items-center p-2 gap-2">
-                            <div className="size-10 sm:size-14 bg-gray-200 dark:bg-gray-800 rounded-full" />
-                            <div className="h-3 bg-gray-200 dark:bg-gray-800 rounded w-full" />
-                        </div>
-                    ))}
-                </div>
-            </div>
-        ) : (
-            <div className="bg-white dark:bg-[#16171d] border border-gray-200 dark:border-gray-800 rounded-md p-3 sm:p-4 shadow-sm transition-colors mb-3">
-                <h2 className="text-[13px] sm:text-base font-bold mb-3 sm:mb-4 text-gray-800 dark:text-gray-100">
-                    {activeRoot ? t('home.browse_in', { name: activeRoot.name }) : t('home.browse_by_category')}
-                </h2>
+        <HomeCategoryTiles
+          loading={loadingCategories}
+          title={activeRoot ? t('home.browse_in', { name: activeRoot.name }) : t('home.browse_by_category')}
+          categories={displayCategories}
+          hasChildren={hasChildren}
+          activeCategoryId={activeCategoryId}
+          onSelect={(cat, child) => {
+            setPage(1);
+            if (!activeRoot && child) {
+              setActiveCategoryId(cat.id);
+            } else {
+              browseCategory(cat.id);
+            }
+          }}
+        />
 
-                <ul className="text-center grid grid-cols-3 sm:grid-cols-4 md:grid-cols-4 lg:grid-cols-6 gap-1 sm:gap-2">
-                    {displayCategories.map((cat) => {
-                        const hasChildren = childrenOf(cat.id).length > 0;
-                        return (
-                            <li key={cat.id}>
-                                <button
-                                    onClick={() => {
-                                        if (!activeRoot && hasChildren) {
-                                            setActiveCategoryId(cat.id);
-                                        } else {
-                                            browseCategory(cat.id);
-                                        }
-                                    }}
-                                    className={`block w-full h-full group bg-white dark:bg-[#16171d] rounded cursor-pointer active:opacity-50 p-1.5 sm:p-2.5 transition-all hover:bg-[#f8f9fa] dark:hover:bg-[#1f2028] ${activeCategoryId === cat.id ? 'ring-2 ring-blue-500 bg-blue-50 dark:bg-blue-900/10' : ''}`}
-                                >
-                                    <div className="mx-auto bg-[#e9ecef] dark:bg-gray-700 group-hover:bg-[#dee2e6] dark:group-hover:bg-gray-600 transition-all size-10 sm:size-14 flex items-center justify-center overflow-hidden rounded-full">
-                                        <CategoryIcon cat={cat} className="w-full h-full group-hover:scale-110 transition-transform duration-300" />
-                                    </div>
-                                    <p className="overflow-hidden text-ellipsis mt-1.5 sm:mt-2.5 text-[10px] sm:text-[13px] font-bold text-gray-700 dark:text-gray-300 group-hover:text-blue-600 leading-tight">
-                                        {cat.name}
-                                    </p>
-                                </button>
-                            </li>
-                        );
-                    })}
-                </ul>
-            </div>
-        )}
+        {/* Promotional slider (secondary to hero) */}
+        <HomeSlider />
 
         {/* Latest Listings */}
         <div className="mt-5">
-            <div className="flex items-center justify-between mb-3 px-1 border-b border-gray-200 dark:border-gray-800 pb-1.5 gap-2">
-                <h2 className="text-sm font-bold text-gray-800 dark:text-gray-100 uppercase tracking-tight truncate flex-1">
-                    {getResultsTitle()}
-                </h2>
-                {(activeCategoryId || activeProvinceId) ? (
-                    <button onClick={clearSearch} className="text-xs font-bold text-red-600 hover:underline">{t('common.clear_filters')}</button>
-                ) : (
-                    <Link to="/products" className="text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline">{t('common.view_all')}</Link>
-                )}
-            </div>
-
-            {error ? (
-                <div className="bg-white dark:bg-[#16171d] border border-red-100 dark:border-red-900/30 rounded-md p-6 text-center shadow-sm">
-                    <p className="text-red-500 font-bold mb-2">Failed to load products</p>
-                    <button onClick={() => navigate(0)} className="text-xs text-blue-600 dark:text-blue-400 font-bold hover:underline">Try Again</button>
-                </div>
-            ) : loading ? (
-                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3">
-                    {[...Array(10)].map((_, i) => (
-                        <ProductSkeleton key={i} />
-                    ))}
-                </div>
-            ) : products.length === 0 ? (
-                <div className="bg-white dark:bg-[#16171d] border border-gray-200 dark:border-gray-800 rounded-md p-10 sm:p-20 text-center shadow-sm transition-colors">
-                    <h3 className="text-base sm:text-lg font-bold text-gray-900 dark:text-gray-100 mb-2 uppercase">{t('home.no_results')}</h3>
-                    <p className="text-gray-500 dark:text-gray-400 text-xs sm:text-sm mb-6 sm:mb-8 font-medium">{t('home.try_browsing')}</p>
-                </div>
+          <div className="flex items-center justify-between mb-3 px-1 border-b border-gray-200 dark:border-gray-800 pb-1.5 gap-2">
+            <h2 className="text-sm font-bold text-gray-800 dark:text-gray-100 uppercase tracking-tight truncate flex-1">
+              {getResultsTitle()}
+            </h2>
+            {(activeCategoryId || activeProvinceId) ? (
+              <button onClick={clearSearch} className="text-xs font-bold text-red-600 hover:underline">{t('common.clear_filters')}</button>
             ) : (
-                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3">
-                    {products.slice(0, 20).map((product) => (
-                        <ProductCard key={product.id} product={product} priority={products.indexOf(product) < 4} />
-                    ))}
-                </div>
+              <Link to="/products" className="text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline">{t('common.view_all')}</Link>
             )}
+          </div>
+
+          <ProductRail
+            products={products}
+            loading={loading}
+            loadingMore={loadingMore}
+            error={error}
+            hasMore={hasMore}
+            onLoadMore={() => setPage((prev) => prev + 1)}
+            onRetry={refetch}
+          />
         </div>
 
       </div>
@@ -223,9 +190,10 @@ export const HomePage = () => {
         isOpen={isLocationModalOpen}
         onClose={() => setIsLocationModalOpen(false)}
         onSelect={(data) => {
-            setActiveProvinceId(data.province_id);
-            setActiveDistrictId(data.district_id);
-            setLocationName(data.locationName || '');
+          setActiveProvinceId(data.province_id);
+          setActiveDistrictId(data.district_id);
+          setLocationName(data.locationName || '');
+          setPage(1);
         }}
       />
     </div>

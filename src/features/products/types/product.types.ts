@@ -6,6 +6,8 @@ export interface PublicSeller {
   about_me?: string;
   role?: 'user' | 'admin';
   account_type?: 'private' | 'verified' | 'store';
+  rating_avg?: number;
+  rating_count?: number;
   created_at?: string;
 }
 

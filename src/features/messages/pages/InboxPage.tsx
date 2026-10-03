@@ -1,24 +1,109 @@
-import React, { useState, useEffect, useRef, Fragment } from 'react';
-import { format, isToday, isYesterday, formatDistanceToNow } from 'date-fns';
+import { useState, useEffect, useRef, type TouchEvent, type ChangeEvent, type DragEvent } from 'react';
+import { format, isToday, isYesterday } from 'date-fns';
 import { useAuth } from '../../auth/hooks/useAuth';
 import { messageApi } from '../services/messageApi';
 import { type Message } from '../types/message.types';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { getImageUrl } from '../../../utils/imageUrl';
 import SmartImage from '../../../components/common/SmartImage';
+import { useMessageNotifications } from '../../../context/MessageNotificationContext';
+
+const AVATAR_COLORS = ['#e17076', '#7bc862', '#e5ca77', '#6ec9cb', '#65aadd', '#a695e7', '#ee7aae', '#faa774'];
+const avatarColor = (id: number) => AVATAR_COLORS[Math.abs(id) % AVATAR_COLORS.length];
+
+const mediaLabel = (msg: Message) => {
+  if (msg.type === 'image') return 'Photo';
+  if (msg.type === 'audio') return 'Voice message';
+  if (msg.type === 'file') return 'Document';
+  return '';
+};
+
+const Avatar = ({ name, avatar, id, size }: { name: string; avatar?: string; id: number; size: number }) => (
+  <div
+    className="shrink-0 overflow-hidden rounded-full"
+    style={{ width: size, height: size, backgroundColor: avatar ? undefined : avatarColor(id) }}
+  >
+    {avatar ? (
+      <SmartImage
+        src={avatar}
+        alt=""
+        width={size * 2}
+        height={size * 2}
+        widths={[size, size * 2, size * 4]}
+        sizes={`${size}px`}
+        className="h-full w-full object-cover"
+      />
+    ) : (
+      <div className="flex h-full w-full items-center justify-center font-bold text-white" style={{ fontSize: size * 0.4 }}>
+        {name.charAt(0).toUpperCase()}
+      </div>
+    )}
+  </div>
+);
+
+const Ticks = ({ read }: { read: boolean }) => (
+  <svg
+    width="17"
+    height="11"
+    viewBox="0 0 17 11"
+    fill="none"
+    className={`shrink-0 ${read ? 'text-[#4fae4e]' : 'text-[#a0acb6] dark:text-[#6c7883]'}`}
+  >
+    {read ? (
+      <>
+        <path d="M1 5.6 4.4 9 10.2 1.6" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M7.2 5.6 10.6 9 16.4 1.6" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+      </>
+    ) : (
+      <path d="M1 5.6 4.4 9 10.2 1.6" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+    )}
+  </svg>
+);
+
+const BubbleTail = ({ own }: { own: boolean }) => (
+  <svg
+    className={`tg-tail ${own ? 'right-[-7px] text-[#effdde] dark:text-[#2b5278]' : 'left-[-7px] text-white dark:text-[#182533]'}`}
+    width="9"
+    height="18"
+    viewBox="0 0 9 18"
+    fill="currentColor"
+    aria-hidden="true"
+  >
+    {own ? (
+      <path d="M0 0c0 9 4 16 9 18-4-1-9-6-9-9V0Z" />
+    ) : (
+      <path d="M9 0c0 9-4 16-9 18 4-1 9-6 9-9V0Z" />
+    )}
+  </svg>
+);
+
+const MenuItem = ({ label, danger, onClick, children }: { label: string; danger?: boolean; onClick: () => void; children: React.ReactNode }) => (
+  <button
+    onClick={onClick}
+    className={`flex w-full items-center gap-3 px-3.5 py-2.5 text-left text-[14px] font-medium transition-colors ${
+      danger
+        ? 'text-[#e53935] hover:bg-red-50 dark:hover:bg-red-500/10'
+        : 'text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-white/5'
+    }`}
+  >
+    <span className="flex h-5 w-5 shrink-0 items-center justify-center">{children}</span>
+    {label}
+  </button>
+);
 
 export const InboxPage = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
+  const { latestMessage, updatesVersion, clearUnread, realtimeEnabled } = useMessageNotifications();
 
   const [messages, setMessages] = useState<Message[]>([]);
   const selectedPartnerId = searchParams.get('id') ? Number(searchParams.get('id')) : null;
   const setSelectedPartnerId = (id: number | null) => {
     if (id) {
-        setSearchParams({ id: String(id) });
+      setSearchParams({ id: String(id) });
     } else {
-        setSearchParams({});
+      setSearchParams({});
     }
   };
 
@@ -29,32 +114,26 @@ export const InboxPage = () => {
   const [loading, setLoading] = useState(true);
   const [isRecording, setIsRecording] = useState(false);
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
-  const [audioChunks, setAudioChunks] = useState<Blob[]>([]);
   const [isDragOver, setIsDragOver] = useState(false);
   const [msgToDelete, setMsgToDelete] = useState<Message | null>(null);
-  const [deleteForBoth, setDeleteForBoth] = useState(true);
+  const [replyTo, setReplyTo] = useState<Message | null>(null);
+  const [contextMenu, setContextMenu] = useState<{ msg: Message; x: number; y: number } | null>(null);
+  const [forwardMsg, setForwardMsg] = useState<Message | null>(null);
+  const [showScrollDown, setShowScrollDown] = useState(false);
+  const [swipe, setSwipe] = useState<{ id: number; dx: number } | null>(null);
 
-  const messagesEndRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const atBottomRef = useRef(true);
+  const longPressTimer = useRef<number | null>(null);
+  const touchStartRef = useRef<{ x: number; y: number; msg: Message } | null>(null);
 
   const fetchMessages = async (isQuiet = false) => {
     if (!user) return;
     if (!isQuiet) setLoading(true);
     try {
       const res = await messageApi.getConversations();
-      const newMessages = res.data;
-
-      // Notification check
-      if (messages.length > 0) {
-        const latestNew = newMessages[0];
-        const latestOld = messages[0];
-        if (latestNew && latestNew.id !== latestOld?.id && latestNew.to_user_id === user.id) {
-           showNotification(latestNew);
-        }
-      }
-
-      setMessages(newMessages);
+      setMessages(res.data);
     } catch (error) {
       console.error('Failed to load messages', error);
     } finally {
@@ -62,34 +141,51 @@ export const InboxPage = () => {
     }
   };
 
-  const showNotification = (msg: Message) => {
-    if (Notification.permission === 'granted') {
-      new Notification(`New message from ${msg.from_user.name}`, {
-        body: msg.message,
-        icon: getImageUrl(msg.from_user.avatar, '/favicon.ico')
-      });
-    }
-  };
-
   useEffect(() => {
-    if (Notification.permission === 'default') {
-      Notification.requestPermission();
-    }
     fetchMessages();
+
+    if (realtimeEnabled) return;
+
     const interval = setInterval(() => fetchMessages(true), 10000);
     return () => clearInterval(interval);
-  }, [user]);
+  }, [user, realtimeEnabled]);
 
   useEffect(() => {
-    if (selectedPartnerId && scrollContainerRef.current) {
-      const container = scrollContainerRef.current;
-      container.scrollTop = container.scrollHeight;
-      const timer = setTimeout(() => {
-        container.scrollTop = container.scrollHeight;
-      }, 50);
-      return () => clearTimeout(timer);
+    if (!latestMessage) return;
+    setMessages((prev) => (prev.some((m) => m.id === latestMessage.id) ? prev : [latestMessage, ...prev]));
+    clearUnread();
+  }, [latestMessage, clearUnread]);
+
+  useEffect(() => {
+    if (updatesVersion > 0) fetchMessages(true);
+  }, [updatesVersion]);
+
+  useEffect(() => {
+    clearUnread();
+  }, [clearUnread, selectedPartnerId]);
+
+  useEffect(() => {
+    atBottomRef.current = true;
+    setShowScrollDown(false);
+    const el = scrollContainerRef.current;
+    if (el) el.scrollTop = el.scrollHeight;
+  }, [selectedPartnerId]);
+
+  useEffect(() => {
+    if (atBottomRef.current && scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTop = scrollContainerRef.current.scrollHeight;
     }
-  }, [selectedPartnerId, messages]);
+  }, [messages]);
+
+  // Mark incoming messages as read while the conversation is open.
+  useEffect(() => {
+    if (!selectedPartnerId || !user) return;
+    messages
+      .filter((m) => m.to_user_id === user.id && m.from_user_id === selectedPartnerId && !m.is_read)
+      .forEach((m) => {
+        messageApi.markAsRead(m.id).catch(() => undefined);
+      });
+  }, [selectedPartnerId, messages, user]);
 
   if (!user) return null;
 
@@ -97,24 +193,24 @@ export const InboxPage = () => {
 
   messages.forEach((msg) => {
     const partnerId = msg.from_user_id === user.id ? msg.to_user_id : msg.from_user_id;
-    const partner = msg.from_user_id === user.id ? msg.to_user : msg.from_user;
-    if (!partner) return; // Skip if partner info is missing
+    const partner = (msg.from_user_id === user.id ? msg.to_user : msg.from_user) as { id: number; name: string; avatar?: string };
+    if (!partner) return;
 
     if (!conversations[partnerId]) {
       conversations[partnerId] = {
-        partner: { id: partnerId, name: partner.name, avatar: (partner as any).avatar },
+        partner: { id: partnerId, name: partner.name, avatar: partner.avatar },
         messages: [],
       };
     }
     conversations[partnerId].messages.push(msg);
   });
 
-  Object.values(conversations).forEach(conv => {
+  Object.values(conversations).forEach((conv) => {
     conv.messages.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
   });
 
   const sortedConversations = Object.entries(conversations)
-    .filter(([_, data]) => data.partner.name.toLowerCase().includes(searchQuery.toLowerCase()))
+    .filter(([, data]) => data.partner.name.toLowerCase().includes(searchQuery.toLowerCase()))
     .sort((a, b) => {
       const aLatest = a[1].messages[a[1].messages.length - 1]?.created_at || '';
       const bLatest = b[1].messages[b[1].messages.length - 1]?.created_at || '';
@@ -133,30 +229,33 @@ export const InboxPage = () => {
       formData.append('file', file);
       formData.append('message', file.name);
     }
+    if (replyTo) formData.append('reply_to_id', String(replyTo.id));
 
     try {
       await messageApi.sendMessage(formData);
       setNewMessage('');
+      setReplyTo(null);
       fetchMessages(true);
     } catch (error) {
       console.error('Failed to send message', error);
     }
   };
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     const type = file.type.startsWith('image/') ? 'image' : 'file';
     handleSend(type, file);
+    e.target.value = '';
   };
 
-  const onDrop = (e: React.DragEvent) => {
+  const onDrop = (e: DragEvent) => {
     e.preventDefault();
     setIsDragOver(false);
     const file = e.dataTransfer.files?.[0];
     if (file) {
-        const type = file.type.startsWith('image/') ? 'image' : 'file';
-        handleSend(type, file);
+      const type = file.type.startsWith('image/') ? 'image' : 'file';
+      handleSend(type, file);
     }
   };
 
@@ -170,12 +269,11 @@ export const InboxPage = () => {
         const blob = new Blob(chunks, { type: 'audio/webm' });
         const file = new File([blob], 'voice_message.webm', { type: 'audio/webm' });
         handleSend('audio', file);
-        setAudioChunks([]);
       };
       recorder.start();
       setMediaRecorder(recorder);
       setIsRecording(true);
-    } catch (err) {
+    } catch {
       alert('Could not start recording. Check permissions.');
     }
   };
@@ -187,30 +285,127 @@ export const InboxPage = () => {
 
   const handleReact = async (msgId: number, emoji: string) => {
     try {
-        await messageApi.react(msgId, emoji);
-        fetchMessages(true);
-    } catch (error) {}
+      await messageApi.react(msgId, emoji);
+      fetchMessages(true);
+    } catch {
+      // ignore
+    }
   };
 
-  const handleDeleteMessage = (msg: Message) => {
-    setMsgToDelete(msg);
-  };
+  const handleDeleteMessage = (msg: Message) => setMsgToDelete(msg);
 
   const confirmDelete = async () => {
     if (!msgToDelete) return;
     try {
-        await messageApi.deleteMessage(msgToDelete.id);
-        setMsgToDelete(null);
-        fetchMessages(true);
-    } catch (error) {
-        alert('Failed to delete message');
+      await messageApi.deleteMessage(msgToDelete.id);
+      setMsgToDelete(null);
+      fetchMessages(true);
+    } catch {
+      alert('Failed to delete message');
     }
   };
 
+  const openContextMenu = (msg: Message, x: number, y: number) => {
+    const menuW = 224;
+    const menuH = msg.from_user_id === user.id ? 232 : 280;
+    setContextMenu({
+      msg,
+      x: Math.max(8, Math.min(x, window.innerWidth - menuW - 8)),
+      y: Math.max(8, Math.min(y, window.innerHeight - menuH - 8)),
+    });
+  };
+
+  const closeContextMenu = () => setContextMenu(null);
+
+  const handleCopy = (msg: Message) => {
+    const text = msg.type === 'text' ? msg.message : mediaLabel(msg);
+    navigator.clipboard?.writeText(text).catch(() => undefined);
+    closeContextMenu();
+  };
+
+  const handleReply = (msg: Message) => {
+    setReplyTo(msg);
+    closeContextMenu();
+  };
+
+  const handleForward = (msg: Message) => {
+    setForwardMsg(msg);
+    closeContextMenu();
+  };
+
+  const forwardTo = async (partnerId: number) => {
+    const source = forwardMsg;
+    setForwardMsg(null);
+    if (!source) return;
+    const formData = new FormData();
+    formData.append('to_user_id', String(partnerId));
+    formData.append('type', 'text');
+    formData.append('message', source.type === 'text' ? source.message : `[${mediaLabel(source)}]`);
+    try {
+      await messageApi.sendMessage(formData);
+      fetchMessages(true);
+    } catch (error) {
+      console.error('Failed to forward message', error);
+    }
+  };
+
+  const handleTouchStart = (msg: Message, e: TouchEvent<HTMLDivElement>) => {
+    const touch = e.touches[0];
+    touchStartRef.current = { x: touch.clientX, y: touch.clientY, msg };
+    longPressTimer.current = window.setTimeout(() => {
+      openContextMenu(msg, touch.clientX, touch.clientY);
+      longPressTimer.current = null;
+    }, 450);
+  };
+
+  const handleTouchMove = (e: TouchEvent<HTMLDivElement>) => {
+    const start = touchStartRef.current;
+    if (!start) return;
+    const touch = e.touches[0];
+    const dx = touch.clientX - start.x;
+    const dy = touch.clientY - start.y;
+
+    if (Math.abs(dx) > 8 || Math.abs(dy) > 8) {
+      if (longPressTimer.current) {
+        clearTimeout(longPressTimer.current);
+        longPressTimer.current = null;
+      }
+    }
+    if (dx > 8 && Math.abs(dx) > Math.abs(dy)) {
+      setSwipe({ id: start.msg.id, dx: Math.min(dx, 72) });
+    }
+  };
+
+  const handleTouchEnd = () => {
+    if (longPressTimer.current) {
+      clearTimeout(longPressTimer.current);
+      longPressTimer.current = null;
+    }
+    if (swipe && swipe.dx > 48 && touchStartRef.current) {
+      setReplyTo(touchStartRef.current.msg);
+    }
+    setSwipe(null);
+    touchStartRef.current = null;
+  };
+
+  const handleScroll = () => {
+    const el = scrollContainerRef.current;
+    if (!el) return;
+    const atBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 120;
+    atBottomRef.current = atBottom;
+    setShowScrollDown(!atBottom);
+  };
+
+  const scrollToBottom = () => {
+    const el = scrollContainerRef.current;
+    if (el) el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' });
+  };
+
   const selectedConversation = selectedPartnerId ? conversations[selectedPartnerId] : null;
-  const filteredChatMessages = selectedConversation?.messages.filter(m =>
+  const filteredChatMessages = selectedConversation?.messages.filter((m) =>
     (m.message || '').toLowerCase().includes(historySearch.toLowerCase())
   ) || [];
+  const displayMessages = historySearch ? filteredChatMessages : selectedConversation?.messages || [];
 
   const formatMessageTime = (date: string) => {
     const d = new Date(date);
@@ -219,109 +414,100 @@ export const InboxPage = () => {
     return format(d, 'dd/MM/yy');
   };
 
+  const replyName = (msg: Message) => (msg.from_user_id === user.id ? 'You' : msg.from_user?.name || 'Unknown');
+
   return (
-    <div className={`bg-[#e7ebf0] dark:bg-[#08060d] ${selectedPartnerId ? 'h-[100dvh]' : 'h-[calc(100dvh-64px)]'} md:h-[calc(100vh-64px)] flex items-start justify-center p-0 md:p-4 antialiased transition-colors duration-300`}>
+    <div className={`${selectedPartnerId ? 'h-[100dvh]' : 'h-[calc(100dvh-64px)]'} md:h-[calc(100vh-64px)] flex items-start justify-center p-0 md:p-4 antialiased`}>
       <div
         onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }}
         onDragLeave={() => setIsDragOver(false)}
         onDrop={onDrop}
-        className={`w-full max-w-6xl h-full md:h-[calc(100vh-100px)] bg-white dark:bg-[#16171d] md:rounded-lg shadow-xl flex overflow-hidden border border-gray-200 dark:border-gray-800 relative transition-colors ${isDragOver ? 'ring-4 ring-blue-500 ring-inset' : ''}`}
+        className={`w-full max-w-6xl h-full md:h-[calc(100vh-100px)] bg-white dark:bg-[#17212b] md:rounded-lg shadow-xl flex overflow-hidden border border-gray-200 dark:border-black/30 relative ${isDragOver ? 'ring-4 ring-blue-500 ring-inset' : ''}`}
       >
         {isDragOver && (
-            <div className="absolute inset-0 z-50 bg-blue-600/20 backdrop-blur-sm flex items-center justify-center pointer-events-none">
-                <div className="bg-white dark:bg-gray-800 p-8 rounded-3xl shadow-2xl flex flex-col items-center gap-4 animate-bounce">
-                    <svg className="w-16 h-16 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
-                    <p className="text-xl font-black text-blue-600 uppercase tracking-widest">Drop to upload</p>
-                </div>
+          <div className="absolute inset-0 z-50 bg-blue-600/20 backdrop-blur-sm flex items-center justify-center pointer-events-none">
+            <div className="bg-white dark:bg-gray-800 p-8 rounded-3xl shadow-2xl flex flex-col items-center gap-4 animate-bounce">
+              <svg className="w-16 h-16 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+              <p className="text-xl font-black text-blue-600 uppercase tracking-widest">Drop to upload</p>
             </div>
+          </div>
         )}
 
         {/* Sidebar */}
-        <div className={`w-full md:w-80 lg:w-[320px] border-r border-gray-100 dark:border-gray-800 flex flex-col bg-white dark:bg-[#16171d] ${selectedPartnerId ? 'hidden md:flex' : 'flex'}`}>
-          <div className="p-3.5">
-            <div className="flex items-center gap-3 w-full">
-              <button className="p-2 text-gray-400 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors md:hidden">
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
-              </button>
-              <div className="relative flex-1">
-                <input
-                  type="text"
-                  placeholder="Search"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full bg-[#f1f1f1] dark:bg-[#08060d] border-none rounded-full px-10 py-2 text-[14px] focus:ring-2 focus:ring-blue-400 dark:focus:ring-blue-500/30 transition-all placeholder:text-gray-400 dark:placeholder:text-gray-600 text-gray-800 dark:text-gray-200"
-                />
-                <svg className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-              </div>
+        <div className={`w-full md:w-80 lg:w-[330px] border-r border-gray-100 dark:border-black/20 flex flex-col bg-white dark:bg-[#17212b] ${selectedPartnerId ? 'hidden md:flex' : 'flex'}`}>
+          <div className="p-2.5">
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Search"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full bg-[#f1f1f1] dark:bg-[#242f3d] border-none rounded-full pl-10 pr-3 py-2 text-[14px] focus:ring-2 focus:ring-[#3390ec]/40 transition-all placeholder:text-gray-400 dark:placeholder:text-gray-500 text-gray-800 dark:text-gray-200"
+              />
+              <svg className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
             </div>
           </div>
 
-          <div className="flex-1 overflow-y-auto custom-scrollbar">
+          <div className="flex-1 overflow-y-auto custom-scrollbar pb-2">
             {loading && messages.length === 0 ? (
-               <div className="p-4 space-y-4">
-                  {[...Array(8)].map((_, i) => (
-                    <div key={i} className="flex gap-3 animate-pulse">
-                      <div className="w-12 h-12 bg-gray-100 dark:bg-gray-800 rounded-full shrink-0" />
-                      <div className="flex-1 space-y-2 py-1">
-                        <div className="h-3.5 bg-gray-100 dark:bg-gray-800 rounded w-1/2" />
-                        <div className="h-2.5 bg-gray-100 dark:bg-gray-800 rounded w-full" />
-                      </div>
+              <div className="p-3 space-y-2">
+                {[...Array(9)].map((_, i) => (
+                  <div key={i} className="flex gap-3 animate-pulse px-1 py-1">
+                    <div className="w-[54px] h-[54px] bg-gray-100 dark:bg-[#242f3d] rounded-full shrink-0" />
+                    <div className="flex-1 space-y-2 py-2">
+                      <div className="h-3.5 bg-gray-100 dark:bg-[#242f3d] rounded w-1/2" />
+                      <div className="h-2.5 bg-gray-100 dark:bg-[#242f3d] rounded w-full" />
                     </div>
-                  ))}
-               </div>
+                  </div>
+                ))}
+              </div>
+            ) : sortedConversations.length === 0 ? (
+              <div className="px-6 py-10 text-center text-sm text-gray-400 dark:text-gray-500">
+                No chats yet
+              </div>
             ) : sortedConversations.map(([partnerId, { partner, messages: convMsgs }]) => {
               const lastMsg = convMsgs[convMsgs.length - 1];
               const isActive = selectedPartnerId === Number(partnerId);
-              const unreadCount = convMsgs.filter(m => !m.is_read && m.to_user_id === user.id).length;
+              const unreadCount = convMsgs.filter((m) => !m.is_read && m.to_user_id === user.id).length;
 
               return (
                 <button
                   key={partnerId}
                   onClick={() => setSelectedPartnerId(Number(partnerId))}
-                  className={`w-full flex items-center gap-3 px-3 py-2.5 transition-all ${
-                    isActive ? 'bg-[#3390ec] dark:bg-blue-600' : 'hover:bg-[#f4f4f5] dark:hover:bg-[#1f2028]'
+                  className={`w-full flex items-center gap-2.5 px-2.5 py-2 transition-colors ${
+                    isActive ? 'bg-[#3390ec] dark:bg-[#2b5278]' : 'hover:bg-[#f4f4f5] dark:hover:bg-[#202b36]'
                   }`}
                 >
-                  <div className="relative shrink-0">
-                    <div className={`w-14 h-14 rounded-full flex items-center justify-center text-xl font-bold overflow-hidden ${isActive ? 'ring-0' : ''}`}>
-                       {partner.avatar ? (
-                         <SmartImage src={partner.avatar} alt="" width={160} height={160} widths={[80, 160, 320]} sizes="40px" className="w-full h-full object-cover" />
-                       ) : (
-                         <div className={`w-full h-full flex items-center justify-center text-white ${isActive ? 'bg-blue-400' : 'bg-gradient-to-br from-blue-400 to-blue-600'}`}>
-                            {partner.name.charAt(0).toUpperCase()}
-                         </div>
-                       )}
-                    </div>
-                  </div>
+                  <Avatar name={partner.name} avatar={partner.avatar} id={partner.id} size={54} />
 
-                  <div className="flex-1 min-w-0 pr-1">
+                  <div className="flex-1 min-w-0 pr-0.5">
                     <div className="flex justify-between items-baseline mb-0.5">
-                      <span className={`text-[15px] font-bold truncate ${isActive ? 'text-white' : 'text-gray-900 dark:text-gray-100'}`}>
+                      <span className={`text-[15px] font-semibold truncate ${isActive ? 'text-white' : 'text-gray-900 dark:text-gray-100'}`}>
                         {partner.name}
                       </span>
-                      <span className={`text-[12px] whitespace-nowrap ml-2 ${isActive ? 'text-blue-50' : 'text-gray-400 dark:text-gray-500'}`}>
+                      <span className={`text-[12px] whitespace-nowrap ml-2 ${isActive ? 'text-white/80' : 'text-gray-400 dark:text-gray-500'}`}>
                         {formatMessageTime(lastMsg.created_at)}
                       </span>
                     </div>
-                    <div className="flex justify-between items-start gap-2">
-                       <p className={`text-[14px] truncate flex-1 leading-tight ${isActive ? 'text-white/90' : 'text-gray-500 dark:text-gray-400'}`}>
-                          {lastMsg.from_user_id === user.id && (
-                            <svg className={`inline-block w-4 h-4 mr-0.5 -mt-0.5 ${isActive ? 'text-blue-100' : 'text-blue-500 dark:text-blue-400'}`} viewBox="0 0 24 24" fill="currentColor">
-                                <path d={lastMsg.is_read ? "M18 7l-1.41-1.41-6.34 6.34 1.41 1.41L18 7zm4.24-1.41L11.66 16.17 7.48 12l-1.41 1.41L11.66 19l12-12-1.42-1.41zM.41 13.41L6 19l1.41-1.41L1.83 12 .41 13.41z" : "M9 16.17L4.83 12l-1.42 1.41L9 17.58l12-12-1.41-1.41z"}/>
-                            </svg>
-                          )}
+                    <div className="flex justify-between items-center gap-2">
+                      <p className={`text-[14px] truncate flex-1 leading-tight ${isActive ? 'text-white/90' : 'text-gray-500 dark:text-gray-400'}`}>
+                        {lastMsg.from_user_id === user.id && (
+                          <Ticks read={lastMsg.is_read} />
+                        )}
+                        <span className="ml-0.5">
                           {lastMsg.type === 'text' ? lastMsg.message : (
-                            <span className="italic flex items-center gap-1">
-                                {lastMsg.type === 'image' && <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>}
-                                {lastMsg.type.charAt(0).toUpperCase() + lastMsg.type.slice(1)}
+                            <span className="italic">
+                              {lastMsg.type === 'image' && <svg className="inline-block w-3.5 h-3.5 mr-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>}
+                              {mediaLabel(lastMsg)}
                             </span>
                           )}
-                       </p>
-                       {unreadCount > 0 && !isActive && (
-                         <span className="bg-[#4caf50] text-white text-[11px] font-bold min-w-[20px] h-5 px-1.5 rounded-full flex items-center justify-center shadow-sm">
-                            {unreadCount}
-                         </span>
-                       )}
+                        </span>
+                      </p>
+                      {unreadCount > 0 && !isActive && (
+                        <span className="bg-[#3390ec] text-white text-[11px] font-bold min-w-[20px] h-5 px-1.5 rounded-full flex items-center justify-center shadow-sm">
+                          {unreadCount}
+                        </span>
+                      )}
                     </div>
                   </div>
                 </button>
@@ -331,48 +517,46 @@ export const InboxPage = () => {
         </div>
 
         {/* Chat Window */}
-        <div className={`flex-1 flex flex-col bg-[#e7ebf0] dark:bg-[#08060d] relative ${!selectedPartnerId ? 'hidden md:flex' : 'flex'}`}>
+        <div className={`flex-1 flex flex-col relative ${!selectedPartnerId ? 'hidden md:flex' : 'flex'}`}>
           {selectedConversation ? (
             <>
               {/* Header */}
-              <div className="h-[56px] px-4 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between bg-white dark:bg-[#16171d] sticky top-0 z-20 transition-colors">
-                <div className="flex items-center gap-3">
-                  <button onClick={() => setSelectedPartnerId(null)} className="md:hidden p-2 -ml-2 text-gray-400 dark:text-gray-500 hover:text-blue-600">
+              <div className="h-14 px-2.5 md:px-4 flex items-center justify-between bg-white dark:bg-[#17212b] border-b border-gray-100 dark:border-black/20 z-20">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <button onClick={() => setSelectedPartnerId(null)} className="md:hidden p-2 -ml-2 text-gray-400 dark:text-gray-400 hover:text-[#3390ec]">
                     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M15 19l-7-7 7-7"/></svg>
                   </button>
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white font-bold text-sm shadow-sm overflow-hidden cursor-pointer" onClick={() => navigate(`/u/${selectedConversation.partner.id}`)}>
-                     {selectedConversation.partner.avatar ? (
-                       <SmartImage src={selectedConversation.partner.avatar} alt="" width={160} height={160} widths={[80, 160, 320]} sizes="40px" className="w-full h-full object-cover" />
-                     ) : selectedConversation.partner.name.charAt(0).toUpperCase()}
-                  </div>
+                  <button className="shrink-0" onClick={() => navigate(`/u/${selectedConversation.partner.id}`)}>
+                    <Avatar name={selectedConversation.partner.name} avatar={selectedConversation.partner.avatar} id={selectedConversation.partner.id} size={42} />
+                  </button>
                   <div className="min-w-0 flex flex-col">
-                    <h2 className="text-[15px] font-bold text-gray-900 dark:text-gray-100 leading-tight truncate hover:text-blue-600 dark:hover:text-blue-400 transition-colors cursor-pointer" onClick={() => navigate(`/u/${selectedConversation.partner.id}`)}>
+                    <h2 className="text-[15px] font-semibold text-gray-900 dark:text-gray-100 leading-tight truncate hover:text-[#3390ec] transition-colors cursor-pointer" onClick={() => navigate(`/u/${selectedConversation.partner.id}`)}>
                       {selectedConversation.partner.name}
                     </h2>
-                    <span className="text-[12px] text-[#3390ec] dark:text-blue-400 font-medium">last seen recently</span>
+                    <span className="text-[12px] text-[#3390ec] dark:text-[#6ab2f2] font-medium">last seen recently</span>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-1">
                   {isSearchingHistory ? (
-                      <div className="flex items-center bg-[#f1f1f1] dark:bg-[#16171d] rounded-full px-3 py-1 border border-gray-200 dark:border-gray-700 absolute right-4 left-4 md:static md:w-auto z-30">
-                        <input
-                            autoFocus
-                            placeholder="Search"
-                            className="bg-transparent border-none text-sm outline-none w-full md:w-48 font-medium text-gray-800 dark:text-gray-100"
-                            value={historySearch}
-                            onChange={(e) => setHistorySearch(e.target.value)}
-                        />
-                        <button onClick={() => { setIsSearchingHistory(false); setHistorySearch(''); }} className="text-gray-400 dark:text-gray-500 shrink-0"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12"/></svg></button>
-                      </div>
+                    <div className="flex items-center bg-[#f1f1f1] dark:bg-[#242f3d] rounded-full px-3 py-1 border border-gray-200 dark:border-white/5 absolute right-3 left-3 md:static md:w-auto z-30">
+                      <input
+                        autoFocus
+                        placeholder="Search"
+                        className="bg-transparent border-none text-sm outline-none w-full md:w-44 font-medium text-gray-800 dark:text-gray-100"
+                        value={historySearch}
+                        onChange={(e) => setHistorySearch(e.target.value)}
+                      />
+                      <button onClick={() => { setIsSearchingHistory(false); setHistorySearch(''); }} className="text-gray-400 dark:text-gray-500 shrink-0"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12"/></svg></button>
+                    </div>
                   ) : (
-                    <button onClick={() => setIsSearchingHistory(true)} className="p-2 text-gray-400 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-all">
-                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                    <button onClick={() => setIsSearchingHistory(true)} className="p-2 text-gray-400 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5 rounded-full transition-all">
+                      <svg className="w-5.5 h-5.5" width="22" height="22" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                     </button>
                   )}
                   {!isSearchingHistory && (
-                    <button className="p-2 text-gray-400 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-all">
-                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"/></svg>
+                    <button className="p-2 text-gray-400 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5 rounded-full transition-all">
+                      <svg width="22" height="22" fill="currentColor" viewBox="0 0 24 24"><path d="M12 5v.01M12 12v.01M12 19v.01" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"/></svg>
                     </button>
                   )}
                 </div>
@@ -381,121 +565,170 @@ export const InboxPage = () => {
               {/* Messages Area */}
               <div
                 ref={scrollContainerRef}
-                className="flex-1 overflow-y-auto p-2 md:p-6 space-y-1 bg-[#e7ebf0] dark:bg-[#08060d] bg-repeat bg-center custom-scrollbar"
-                style={{
-                  backgroundImage: "url('https://i.pinimg.com/originals/85/ec/da/85ecda1af25fa0a9bc29853909148db3.jpg')",
-                  backgroundSize: '400px'
-                }}
+                onScroll={handleScroll}
+                className="chat-doodle flex-1 overflow-y-auto px-2 md:px-4 py-2 custom-scrollbar"
               >
-                <div className="flex flex-col gap-1">
-                  {(historySearch ? filteredChatMessages : selectedConversation.messages).map((msg, idx) => {
-                    const isOwn = msg.from_user_id === user.id;
-                    const prevMsg = selectedConversation.messages[idx - 1];
-                    const nextMsg = selectedConversation.messages[idx + 1];
+                {displayMessages.map((msg, idx) => {
+                  const isOwn = msg.from_user_id === user.id;
+                  const prevMsg = displayMessages[idx - 1];
+                  const nextMsg = displayMessages[idx + 1];
 
-                    const isFirstInGroup = !prevMsg || prevMsg.from_user_id !== msg.from_user_id;
-                    const isLastInGroup = !nextMsg || nextMsg.from_user_id !== msg.from_user_id;
+                  const isFirstInGroup = !prevMsg || prevMsg.from_user_id !== msg.from_user_id;
+                  const isLastInGroup = !nextMsg || nextMsg.from_user_id !== msg.from_user_id;
+                  const showDate = !prevMsg || format(new Date(msg.created_at), 'yyyy-MM-dd') !== format(new Date(prevMsg.created_at), 'yyyy-MM-dd');
 
-                    const showDate = !prevMsg || format(new Date(msg.created_at), 'yyyy-MM-dd') !== format(new Date(prevMsg.created_at), 'yyyy-MM-dd');
+                  const bg = isOwn ? 'bg-[#effdde] dark:bg-[#2b5278]' : 'bg-white dark:bg-[#182533]';
+                  const metaColor = isOwn ? 'text-[#5a9a63] dark:text-[#8fb8d8]' : 'text-[#a0acb6] dark:text-[#6c7883]';
+                  const bottomLeft = isOwn ? 13 : isLastInGroup ? 4 : 13;
+                  const bottomRight = isOwn ? (isLastInGroup ? 4 : 13) : 13;
+                  const isSwiping = swipe?.id === msg.id;
 
-                    return (
-                      <React.Fragment key={msg.id}>
-                        {showDate && (
-                           <div className="flex justify-center my-4">
-                              <span className="bg-black/10 dark:bg-[#16171d]/60 backdrop-blur text-white dark:text-gray-300 text-[13px] font-bold px-3 py-0.5 rounded-full shadow-sm">
-                                 {isToday(new Date(msg.created_at)) ? 'Today' : format(new Date(msg.created_at), 'MMMM dd')}
-                              </span>
-                           </div>
+                  return (
+                    <div key={msg.id}>
+                      {showDate && (
+                        <div className="flex justify-center my-3">
+                          <span className="bg-black/20 dark:bg-black/30 backdrop-blur text-white text-[12.5px] font-medium px-3 py-1 rounded-full">
+                            {isToday(new Date(msg.created_at)) ? 'Today' : isYesterday(new Date(msg.created_at)) ? 'Yesterday' : format(new Date(msg.created_at), 'MMMM dd')}
+                          </span>
+                        </div>
+                      )}
+
+                      <div className={`relative group flex ${isOwn ? 'justify-end' : 'justify-start'} ${isFirstInGroup ? 'mt-2.5' : 'mt-[3px]'} ${msg.reactions && msg.reactions.length > 0 ? 'mb-3' : ''}`}>
+                        {isSwiping && (
+                          <span className="absolute top-1/2 -translate-y-1/2 text-[#3390ec]/70" style={{ [isOwn ? 'right' : 'left']: -26 }}>
+                            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 10h10a4 4 0 010 8h-3m3-14L7 10l6 6"/></svg>
+                          </span>
                         )}
 
-                        <div className={`flex ${isOwn ? 'justify-end' : 'justify-start'} ${isFirstInGroup ? 'mt-3' : 'mt-0.5'}`}>
-                          <div className={`relative max-w-[90%] md:max-w-[80%] group flex items-end gap-1 ${isOwn ? 'flex-row-reverse' : 'flex-row'}`}>
+                        <div
+                          className="relative flex max-w-[88%] items-end md:max-w-[75%]"
+                          style={{ transform: isSwiping ? `translateX(${swipe.dx}px)` : undefined, transition: 'transform 0.12s ease-out' }}
+                          onContextMenu={(e) => { e.preventDefault(); openContextMenu(msg, e.clientX, e.clientY); }}
+                          onTouchStart={(e) => handleTouchStart(msg, e)}
+                          onTouchMove={handleTouchMove}
+                          onTouchEnd={handleTouchEnd}
+                        >
+                          <div
+                            className={`relative rounded-[13px] shadow-[0_1px_2px_rgba(16,24,40,0.13)] ${bg} ${msg.type === 'image' ? 'p-1' : 'px-2.5 py-1.5'}`}
+                            style={{ borderBottomLeftRadius: bottomLeft, borderBottomRightRadius: bottomRight }}
+                          >
+                            {isLastInGroup && <BubbleTail own={isOwn} />}
 
-                            <div className={`relative px-3 py-1.5 shadow-sm min-w-[60px] animate-in fade-in slide-in-from-bottom-1 duration-200 ${
-                              isOwn
-                                ? 'bg-[#effdde] dark:bg-[#2b5278] text-gray-900 dark:text-gray-100 rounded-[15px] rounded-br-[4px]'
-                                : 'bg-white dark:bg-[#16171d] text-gray-900 dark:text-gray-100 rounded-[15px] rounded-bl-[4px]'
-                            } ${!isLastInGroup && (isOwn ? 'rounded-br-[15px]' : 'rounded-bl-[15px]')}`}>
-
-                              {msg.type === 'text' && (
-                                <p className="text-[15px] leading-[1.4] whitespace-pre-wrap break-words">{msg.message}</p>
-                              )}
-                              {msg.type === 'image' && (
-                                  <div className="rounded-lg overflow-hidden mb-1 border border-black/5">
-                                    <SmartImage src={msg.file_path} alt="Attachment" widths={[320, 640, 960]} sizes="(max-width: 768px) 100vw, 400px" width={640} height={480} className="max-w-full max-h-[400px] object-contain" />
-                                  </div>
-                              )}
-                              {msg.type === 'audio' && (
-                                  <audio controls src={getImageUrl(msg.file_path)} className="max-w-full mb-1 h-10 accent-blue-500" />
-                              )}
-                              {msg.type === 'file' && (
-                                  <a href={getImageUrl(msg.file_path)} target="_blank" className="flex items-center gap-3 bg-black/5 dark:bg-white/5 p-2 rounded-lg hover:bg-black/10 dark:hover:bg-white/10 transition-colors">
-                                      <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white shrink-0">
-                                          <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6zM6 20V4h7v5h7v11H6z"/></svg>
-                                      </div>
-                                      <div className="min-w-0">
-                                          <p className="truncate text-sm font-bold">{msg.message}</p>
-                                          <p className="text-[10px] opacity-60 font-bold uppercase tracking-widest">Document</p>
-                                      </div>
-                                  </a>
-                              )}
-
-                              <div className={`flex items-center justify-end gap-1 mt-0.5 -mr-1 text-right select-none float-right ml-4 relative top-1`}>
-                                 <span className={`text-[11px] font-medium leading-none ${isOwn ? 'text-[#619a64] dark:text-blue-300' : 'text-[#a0acb6] dark:text-gray-500'}`}>
-                                    {format(new Date(msg.created_at), 'HH:mm')}
-                                 </span>
-                                 {isOwn && (
-                                   <svg className={`w-4 h-4 -mr-0.5 ${msg.is_read ? 'text-[#619a64] dark:text-blue-300' : 'text-[#619a64] dark:text-blue-300'}`} viewBox="0 0 24 24" fill="currentColor">
-                                      <path d={msg.is_read ? "M18 7l-1.41-1.41-6.34 6.34 1.41 1.41L18 7zm4.24-1.41L11.66 16.17 7.48 12l-1.41 1.41L11.66 19l12-12-1.42-1.41zM.41 13.41L6 19l1.41-1.41L1.83 12 .41 13.41z" : "M9 16.17L4.83 12l-1.42 1.41L9 17.58l12-12-1.41-1.41z"}/>
-                                   </svg>
-                                 )}
+                            {msg.reply_to && (
+                              <div className={`mb-1 flex flex-col overflow-hidden rounded-md border-l-[3px] px-2 py-1 ${isOwn ? 'border-[#6fcf7c] bg-[#c9eab4]/60 dark:bg-black/20' : 'border-[#3390ec] bg-[#dceaff]/70 dark:bg-black/20'}`}>
+                                <span className={`text-[12.5px] font-bold leading-tight ${isOwn ? 'text-[#3f8f4a] dark:text-[#8fd59a]' : 'text-[#3390ec] dark:text-[#6ab2f2]'}`}>
+                                  {replyName(msg.reply_to)}
+                                </span>
+                                <span className="truncate text-[13px] leading-tight text-gray-600 dark:text-gray-300">
+                                  {msg.reply_to.type === 'text' ? msg.reply_to.message : mediaLabel(msg.reply_to)}
+                                </span>
                               </div>
+                            )}
 
-                              {/* Reactions View */}
-                              {msg.reactions && msg.reactions.length > 0 && (
-                                  <div className={`absolute -bottom-3 ${isOwn ? 'right-2' : 'left-2'} flex gap-1 z-10`}>
-                                      {msg.reactions.map(r => (
-                                          <button
-                                              key={r.id}
-                                              onClick={() => r.user_id === user.id && handleReact(msg.id, r.emoji)}
-                                              className={`bg-white dark:bg-[#16171d] rounded-full px-1.5 py-0.5 text-xs shadow-md border border-gray-100 dark:border-gray-800 animate-in zoom-in-50 transition-transform active:scale-125 ${r.user_id === user.id ? 'hover:scale-110' : 'cursor-default'}`}
-                                          >
-                                              {r.emoji}
-                                          </button>
-                                      ))}
-                                  </div>
-                              )}
-                            </div>
+                            {msg.type === 'text' && (
+                              <p className="whitespace-pre-wrap break-words px-0.5 text-[15px] leading-[1.35] text-[#0f1418] dark:text-[#f5f7f9]">
+                                <span className={`float-right ml-2 mt-1 inline-flex translate-y-[2px] select-none items-center gap-1 ${metaColor}`}>
+                                  <span className="text-[11px] font-medium">{format(new Date(msg.created_at), 'HH:mm')}</span>
+                                  {isOwn && <Ticks read={msg.is_read} />}
+                                </span>
+                                {msg.message}
+                              </p>
+                            )}
 
-                            {/* Context Menu / Actions Shortcut */}
-                            <div className={`opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-0.5 bg-black/10 dark:bg-white/5 rounded-full px-1 py-0.5 backdrop-blur-sm`}>
-                                {isOwn && (
-                                    <button onClick={() => handleDeleteMessage(msg)} className="p-1 text-gray-600 dark:text-gray-400 hover:text-red-500 transition-colors">
-                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                                    </button>
-                                )}
-                                {['❤️', '👍', '🔥'].map(emoji => (
-                                    <button key={emoji} onClick={() => handleReact(msg.id, emoji)} className="p-1 hover:scale-150 transition-transform text-[15px] leading-none">{emoji}</button>
+                            {msg.type === 'image' && (
+                              <div className="overflow-hidden rounded-[10px]">
+                                <SmartImage src={msg.file_path} alt="Attachment" widths={[320, 640, 960]} sizes="(max-width: 768px) 100vw, 400px" width={640} height={480} className="max-w-full max-h-[400px] object-contain" />
+                              </div>
+                            )}
+                            {msg.type === 'audio' && (
+                              <audio controls src={getImageUrl(msg.file_path)} className="max-w-full h-10 accent-[#3390ec]" />
+                            )}
+                            {msg.type === 'file' && (
+                              <a href={getImageUrl(msg.file_path)} target="_blank" rel="noreferrer" className="flex items-center gap-3 p-1">
+                                <div className="w-10 h-10 bg-[#3390ec] rounded-full flex items-center justify-center text-white shrink-0">
+                                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6zM6 20V4h7v5h7v11H6z"/></svg>
+                                </div>
+                                <div className="min-w-0">
+                                  <p className="truncate text-sm font-semibold text-[#0f1418] dark:text-[#f5f7f9]">{msg.message}</p>
+                                  <p className="text-[10px] uppercase tracking-widest opacity-60">Document</p>
+                                </div>
+                              </a>
+                            )}
+
+                            {msg.type !== 'text' && (
+                              <span className="absolute bottom-1 right-1.5 inline-flex items-center gap-1 rounded-full bg-black/40 px-1.5 py-[1px] text-[11px] font-medium text-white backdrop-blur-sm">
+                                {format(new Date(msg.created_at), 'HH:mm')}
+                                {isOwn && <Ticks read={msg.is_read} />}
+                              </span>
+                            )}
+
+                            {msg.reactions && msg.reactions.length > 0 && (
+                              <div className={`absolute -bottom-3 ${isOwn ? 'right-2' : 'left-2'} flex gap-1 z-10`}>
+                                {msg.reactions.map((r) => (
+                                  <button
+                                    key={r.id}
+                                    onClick={() => r.user_id === user.id && handleReact(msg.id, r.emoji)}
+                                    className={`rounded-full border px-1.5 py-0.5 text-xs shadow-sm transition-transform ${
+                                      r.user_id === user.id
+                                        ? 'border-[#3390ec]/40 bg-white hover:scale-110 dark:border-[#2b5278] dark:bg-[#0e1621]'
+                                        : 'cursor-default border-black/5 bg-white dark:border-white/5 dark:bg-[#0e1621]'
+                                    }`}
+                                  >
+                                    {r.emoji}
+                                  </button>
                                 ))}
-                            </div>
-
+                              </div>
+                            )}
                           </div>
+
+                          {/* Hover reply affordance */}
+                          <button
+                            onClick={() => handleReply(msg)}
+                            className={`mb-1 rounded-full p-1 text-gray-400 opacity-0 transition-opacity hover:text-[#3390ec] group-hover:opacity-100 ${isOwn ? 'mr-1 order-first' : 'ml-1'}`}
+                            aria-label="Reply"
+                          >
+                            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 14l-4-4 4-4M5 10h9a5 5 0 015 5v3"/></svg>
+                          </button>
                         </div>
-                      </React.Fragment>
-                    );
-                  })}
-                </div>
-                <div ref={messagesEndRef} />
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
 
-              {/* Input Area */}
-              <div className="p-3 bg-white dark:bg-[#16171d] flex items-end gap-2 max-w-4xl mx-auto w-full mb-2 md:mb-4 md:rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 transition-colors">
-                 <button onClick={() => fileInputRef.current?.click()} className="p-2.5 text-gray-400 dark:text-gray-500 hover:text-[#3390ec] transition-colors rounded-full hover:bg-blue-50 dark:hover:bg-blue-900/10">
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.414a4 4 0 00-5.656-5.656l-6.415 6.415a6 6 0 108.486 8.486L20.5 13"/></svg>
-                 </button>
-                 <input type="file" ref={fileInputRef} className="hidden" onChange={handleFileUpload} />
+              {showScrollDown && (
+                <button
+                  onClick={scrollToBottom}
+                  className="absolute bottom-24 right-4 z-30 flex h-11 w-11 items-center justify-center rounded-full bg-white text-gray-500 shadow-lg transition-transform hover:scale-105 dark:bg-[#17212b] dark:text-gray-300"
+                  aria-label="Scroll to bottom"
+                >
+                  <svg width="22" height="22" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.2" d="M19 14l-7 7-7-7M12 21V3"/></svg>
+                </button>
+              )}
 
-                 <div className="flex-1 min-h-[44px] flex items-center">
+              {/* Composer */}
+              <div className="px-2 md:px-4 pb-2.5 pt-1.5 bg-transparent">
+                {replyTo && (
+                  <div className="mx-auto mb-1.5 flex w-full max-w-3xl items-center gap-2 rounded-xl bg-white/95 px-2 py-1.5 shadow-sm backdrop-blur dark:bg-[#17212b]/95">
+                    <div className="min-w-0 flex-1 border-l-[3px] border-[#3390ec] pl-2">
+                      <p className="text-[13px] font-bold text-[#3390ec] dark:text-[#6ab2f2]">{replyName(replyTo)}</p>
+                      <p className="truncate text-[13px] text-gray-500 dark:text-gray-400">
+                        {replyTo.type === 'text' ? replyTo.message : mediaLabel(replyTo)}
+                      </p>
+                    </div>
+                    <button onClick={() => setReplyTo(null)} className="shrink-0 rounded-full p-1.5 text-gray-400 hover:bg-black/5 hover:text-gray-600 dark:hover:bg-white/5">
+                      <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                  </div>
+                )}
+
+                <div className="mx-auto flex w-full max-w-3xl items-end gap-1 rounded-2xl bg-white px-1.5 py-1 shadow-[0_1px_3px_rgba(16,24,40,0.16)] dark:bg-[#17212b]">
+                  <button onClick={() => fileInputRef.current?.click()} className="p-2 text-gray-400 dark:text-gray-400 hover:text-[#3390ec] transition-colors rounded-full hover:bg-gray-100 dark:hover:bg-white/5" aria-label="Attach">
+                    <svg width="22" height="22" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.414a4 4 0 00-5.656-5.656l-6.415 6.415a6 6 0 108.486 8.486L20.5 13"/></svg>
+                  </button>
+                  <input type="file" ref={fileInputRef} className="hidden" onChange={handleFileUpload} />
+
+                  <div className="flex-1 min-h-[42px] flex items-center">
                     <textarea
                       rows={1}
                       value={newMessage}
@@ -507,81 +740,133 @@ export const InboxPage = () => {
                         }
                       }}
                       placeholder="Message"
-                      className="w-full bg-transparent py-2.5 text-[15px] focus:outline-none placeholder:text-gray-400 dark:placeholder:text-gray-600 text-gray-800 dark:text-gray-200 resize-none max-h-48 overflow-y-auto"
+                      className="w-full bg-transparent py-2.5 px-1 text-[15px] focus:outline-none placeholder:text-gray-400 dark:placeholder:text-gray-500 text-gray-800 dark:text-gray-100 resize-none max-h-40 overflow-y-auto custom-scrollbar"
                     />
-                 </div>
+                  </div>
 
-                 {newMessage.trim() ? (
+                  {newMessage.trim() ? (
                     <button
-                        onClick={() => handleSend('text')}
-                        className="p-2.5 text-[#3390ec] dark:text-blue-400 hover:scale-110 transition-transform active:scale-95"
+                      onClick={() => handleSend('text')}
+                      className="mb-0.5 flex h-10 w-10 items-center justify-center rounded-full bg-[#3390ec] text-white transition-transform hover:scale-105 active:scale-95"
+                      aria-label="Send"
                     >
-                        <svg className="w-7 h-7 fill-current" viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+                      <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
                     </button>
-                 ) : (
+                  ) : (
                     <button
-                        onMouseDown={startRecording}
-                        onMouseUp={stopRecording}
-                        className={`p-2.5 rounded-full transition-all ${isRecording ? 'bg-red-500 text-white animate-pulse' : 'text-gray-400 dark:text-gray-500 hover:text-blue-500'}`}
+                      onMouseDown={startRecording}
+                      onMouseUp={stopRecording}
+                      onTouchStart={startRecording}
+                      onTouchEnd={stopRecording}
+                      className={`mb-0.5 flex h-10 w-10 items-center justify-center rounded-full transition-all ${isRecording ? 'bg-red-500 text-white animate-pulse' : 'text-gray-400 dark:text-gray-400 hover:text-[#3390ec]'}`}
+                      aria-label="Record voice message"
                     >
-                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/></svg>
+                      <svg width="22" height="22" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/></svg>
                     </button>
-                 )}
+                  )}
+                </div>
               </div>
             </>
           ) : (
-            <div
-              className="flex-1 flex flex-col items-center justify-center p-12 text-center bg-[#e7ebf0] dark:bg-[#08060d]"
-              style={{
-                backgroundImage: "url('https://www.transparenttextures.com/patterns/pinstriped-suit.png')",
-                backgroundSize: '100px'
-              }}
-            >
-               <div className="bg-black/10 dark:bg-[#16171d]/60 backdrop-blur-md rounded-2xl px-6 py-2 shadow-sm border border-white/10">
-                    <p className="text-white dark:text-gray-300 text-sm font-bold">Select a chat to start messaging</p>
-               </div>
+            <div className="chat-doodle flex-1 flex flex-col items-center justify-center p-6 text-center">
+              <div className="rounded-full bg-black/20 px-4 py-1.5 text-[13px] font-medium text-white backdrop-blur-sm dark:bg-black/30">
+                Select a chat to start messaging
+              </div>
             </div>
           )}
         </div>
       </div>
 
-      {/* Telegram Style Delete Modal */}
-      {msgToDelete && (
-        <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4 bg-black/40 backdrop-blur-[2px] animate-in fade-in duration-200">
-          <div className="bg-white dark:bg-[#1c1c1d] w-full max-w-[320px] rounded-[28px] p-6 shadow-2xl animate-in zoom-in-95 duration-200">
-            <h3 className="text-gray-900 dark:text-white text-[17px] font-bold text-center mb-6">
-              Delete selected message?
-            </h3>
-
-            <button
-              onClick={() => setDeleteForBoth(!deleteForBoth)}
-              className="w-full flex items-center gap-3 px-1 mb-8 group"
-            >
-              <div className={`w-6 h-6 rounded-full flex items-center justify-center transition-colors ${deleteForBoth ? 'bg-[#619a64]' : 'border-2 border-gray-300 dark:border-gray-600'}`}>
-                {deleteForBoth && (
-                  <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
-                  </svg>
-                )}
+      {/* Context menu */}
+      {contextMenu && (
+        <>
+          <div
+            className="fixed inset-0 z-[900]"
+            onClick={closeContextMenu}
+            onContextMenu={(e) => { e.preventDefault(); closeContextMenu(); }}
+          />
+          <div
+            className="fixed z-[901] w-56 overflow-hidden rounded-2xl bg-white py-1 shadow-2xl ring-1 ring-black/5 animate-in fade-in zoom-in-95 duration-100 dark:bg-[#1c242f] dark:ring-white/10"
+            style={{ top: contextMenu.y, left: contextMenu.x }}
+          >
+            {contextMenu.msg.from_user_id !== user.id && (
+              <div className="flex items-center justify-between px-2.5 py-2 border-b border-gray-100 dark:border-white/5">
+                {['❤️', '👍', '🔥', '😂', '😮'].map((emoji) => (
+                  <button
+                    key={emoji}
+                    onClick={() => { handleReact(contextMenu.msg.id, emoji); closeContextMenu(); }}
+                    className="rounded-full p-1 text-[20px] leading-none transition-transform hover:scale-125"
+                  >
+                    {emoji}
+                  </button>
+                ))}
               </div>
-              <span className="text-[15px] font-medium text-gray-800 dark:text-gray-200">
-                Delete for Me and {selectedConversation?.partner.name}
-              </span>
-            </button>
+            )}
+            <MenuItem label="Reply" onClick={() => handleReply(contextMenu.msg)}>
+              <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 14l-4-4 4-4M5 10h9a5 5 0 015 5v3"/></svg>
+            </MenuItem>
+            {contextMenu.msg.type === 'text' && (
+              <MenuItem label="Copy" onClick={() => handleCopy(contextMenu.msg)}>
+                <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+              </MenuItem>
+            )}
+            <MenuItem label="Forward" onClick={() => handleForward(contextMenu.msg)}>
+              <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 14l5-5-5-5M20 9H9a5 5 0 00-5 5v3"/></svg>
+            </MenuItem>
+            {contextMenu.msg.from_user_id === user.id && (
+              <MenuItem label="Delete" danger onClick={() => { const m = contextMenu.msg; closeContextMenu(); handleDeleteMessage(m); }}>
+                <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+              </MenuItem>
+            )}
+          </div>
+        </>
+      )}
 
-            <div className="flex gap-3">
-              <button
-                onClick={() => setMsgToDelete(null)}
-                className="flex-1 py-3 bg-[#f1f1f2] dark:bg-[#2c2c2e] text-gray-900 dark:text-white rounded-[18px] text-[15px] font-bold hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={confirmDelete}
-                className="flex-1 py-3 bg-[#619a64] text-white rounded-[18px] text-[15px] font-bold hover:bg-[#528a55] transition-colors shadow-lg shadow-[#619a64]/20"
-              >
-                Delete
-              </button>
+      {/* Forward picker */}
+      {forwardMsg && (
+        <div
+          className="fixed inset-0 z-[1000] flex items-end justify-center bg-black/40 backdrop-blur-[2px] animate-in fade-in duration-150 sm:items-center sm:p-4"
+          onClick={() => setForwardMsg(null)}
+        >
+          <div
+            className="w-full max-w-md rounded-t-2xl bg-white p-4 shadow-2xl animate-in slide-in-from-bottom-4 duration-200 sm:rounded-2xl sm:zoom-in-95 dark:bg-[#1c242f]"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="mb-3 text-[16px] font-bold text-gray-900 dark:text-white">Forward to…</h3>
+            <div className="max-h-[55vh] overflow-y-auto custom-scrollbar">
+              {sortedConversations.length === 0 && (
+                <p className="py-6 text-center text-sm text-gray-400">No chats yet</p>
+              )}
+              {sortedConversations.map(([pid, { partner }]) => (
+                <button
+                  key={pid}
+                  onClick={() => forwardTo(Number(pid))}
+                  className="flex w-full items-center gap-3 rounded-xl px-2 py-2 text-left hover:bg-gray-100 dark:hover:bg-white/5"
+                >
+                  <Avatar name={partner.name} avatar={partner.avatar} id={partner.id} size={44} />
+                  <span className="truncate text-[15px] font-medium text-gray-800 dark:text-gray-100">{partner.name}</span>
+                </button>
+              ))}
+            </div>
+            <button
+              onClick={() => setForwardMsg(null)}
+              className="mt-3 w-full rounded-xl bg-gray-100 py-2.5 text-[15px] font-bold text-gray-700 hover:bg-gray-200 dark:bg-white/5 dark:text-gray-200 dark:hover:bg-white/10"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Delete modal */}
+      {msgToDelete && (
+        <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4 bg-black/40 backdrop-blur-[2px] animate-in fade-in duration-150">
+          <div className="w-full max-w-[320px] overflow-hidden rounded-[22px] bg-white shadow-2xl animate-in zoom-in-95 duration-150 dark:bg-[#1c242f]">
+            <div className="px-5 pt-5 pb-1.5 text-center text-[16px] font-bold text-gray-900 dark:text-white">Delete message?</div>
+            <div className="px-5 pb-4 text-center text-[13px] text-gray-500 dark:text-gray-400">This will remove it for everyone in the chat.</div>
+            <div className="flex border-t border-gray-100 dark:border-white/5">
+              <button onClick={() => setMsgToDelete(null)} className="flex-1 py-3 text-[15px] font-semibold text-gray-600 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-white/5">Cancel</button>
+              <button onClick={confirmDelete} className="flex-1 border-l border-gray-100 py-3 text-[15px] font-bold text-[#e53935] hover:bg-red-50 dark:border-white/5 dark:hover:bg-red-500/10">Delete</button>
             </div>
           </div>
         </div>

@@ -1,11 +1,15 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import api from '../../../services/api';
 import { AdminPagination } from '../components/AdminPagination';
 import { useAlert } from '../../../context/AlertContext';
+import { useAuth } from '../../auth/hooks/useAuth';
 import { useDebounce } from '../../../hooks/useDebounce';
 
 export const ProductPage = () => {
   const { showAlert } = useAlert();
+  const { user } = useAuth();
+  const canCreate = user?.role === 'admin' || !!user?.permissions?.includes('create_products');
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [pagination, setPagination] = useState({ currentPage: 1, lastPage: 1, total: 0 });
@@ -77,6 +81,14 @@ export const ProductPage = () => {
             <p className="text-sm text-gray-500 dark:text-gray-400 font-bold uppercase tracking-widest mt-1">Found {pagination.total} Products</p>
         </div>
         <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
+            {canCreate && (
+                <Link
+                    to="/admin/products/create"
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-bold transition-all shadow-lg shadow-blue-600/20 uppercase whitespace-nowrap"
+                >
+                    Add Product
+                </Link>
+            )}
             <form onSubmit={handleSearch} className="relative group w-full sm:w-64">
                 <input
                     type="text"

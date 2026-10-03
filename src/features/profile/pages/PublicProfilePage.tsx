@@ -5,6 +5,10 @@ import { type Product } from '../../products/types/product.types';
 import { ProductCard } from '../../products/components/ProductCard';
 import { useAuth } from '../../auth/hooks/useAuth';
 import SmartImage from '../../../components/common/SmartImage';
+import { VerifiedBadge } from '../../../components/common/VerifiedBadge';
+import { StarRating } from '../../../components/common/StarRating';
+import { SellerReviews } from '../../reviews/components/SellerReviews';
+import { useSeo } from '../../../utils/seo';
 
 export const PublicProfilePage = () => {
   const { id } = useParams<{ id: string }>();
@@ -15,7 +19,7 @@ export const PublicProfilePage = () => {
   const [loading, setLoading] = useState(true);
   const [isFollowing, setIsFollowing] = useState(false);
   const [followLoading, setFollowLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState<'home' | 'about' | 'followers' | 'following'>('home');
+  const [activeTab, setActiveTab] = useState<'home' | 'about' | 'reviews' | 'followers' | 'following'>('home');
 
   // Filters for store home
   const [selectedCategory, setSelectedCategory] = useState<string>('');
@@ -92,6 +96,16 @@ export const PublicProfilePage = () => {
     }
   };
 
+  useSeo({
+    title: profileData?.user?.name ? `${profileData.user.name}'s Shop` : undefined,
+    description: profileData?.user?.name
+      ? `Browse listings from ${profileData.user.name} on Sabay Shop, Cambodia's online marketplace.`
+      : undefined,
+    canonical: id ? `/u/${id}` : undefined,
+    image: profileData?.user?.avatar ?? null,
+    type: 'profile',
+  });
+
   if (loading) return <div className="p-20 text-center text-gray-400 font-bold uppercase animate-pulse">Loading Profile...</div>;
   if (!profileData) return <div className="p-20 text-center text-gray-500">Profile not found.</div>;
 
@@ -151,10 +165,15 @@ export const PublicProfilePage = () => {
             <div className="flex-1 text-center md:text-left pt-6 md:pt-10">
               <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-3 mb-2">
                 <h1 className="text-2xl font-black text-gray-900 dark:text-gray-100 uppercase tracking-tight">{user.name}</h1>
-                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 text-[9px] font-black uppercase rounded border border-blue-100 dark:border-blue-900/30 self-center md:self-auto">
-                  <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"/></svg>
-                  Verified Ad Poster
-                </span>
+                <VerifiedBadge accountType={user.account_type} className="self-center md:self-auto" />
+                {(user.rating_count ?? 0) > 0 && (
+                  <div className="flex items-center gap-1.5 self-center md:self-auto">
+                    <StarRating value={user.rating_avg ?? 0} />
+                    <span className="text-[11px] font-bold text-gray-500 dark:text-gray-400">
+                      {(user.rating_avg ?? 0).toFixed(1)} ({user.rating_count})
+                    </span>
+                  </div>
+                )}
               </div>
               <div className="flex flex-wrap justify-center md:justify-start items-center gap-4 text-[11px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-3">
                 <p className="flex items-center gap-1">
@@ -222,6 +241,7 @@ export const PublicProfilePage = () => {
                     {[
                         { id: 'home', label: 'STORE HOME' },
                         { id: 'about', label: 'ABOUT' },
+                        { id: 'reviews', label: 'REVIEWS' },
                         { id: 'followers', label: 'FOLLOWERS' },
                         { id: 'following', label: 'FOLLOWING' },
                     ].map(tab => (
@@ -338,6 +358,16 @@ export const PublicProfilePage = () => {
                         </div>
                     </div>
                 </div>
+            </div>
+        )}
+
+        {activeTab === 'reviews' && (
+            <div className="max-w-3xl mx-auto animate-in fade-in duration-300">
+                <SellerReviews
+                    sellerId={user.id}
+                    initialRatingAvg={stats.rating_avg || 0}
+                    initialRatingCount={stats.rating_count || 0}
+                />
             </div>
         )}
 

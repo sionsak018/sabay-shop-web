@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, Outlet, useLocation, useNavigate, Navigate } from 'react-router-dom';
 import { useAuth } from '../../auth/hooks/useAuth';
+import { isConsoleUser } from '../../auth/utils/roles';
 import { useTheme } from '../../../context/ThemeContext';
 import { useTranslation } from 'react-i18next';
 
@@ -107,11 +108,11 @@ export const AdminLayout = () => {
 
   const handleLogout = async () => {
     await logout();
-    navigate('/login');
+    navigate('/admin/login');
   };
 
-  if (!user || (user.role !== 'admin' && !user.permissions?.length)) {
-    return <Navigate to="/" replace />;
+  if (!user || !isConsoleUser(user)) {
+    return <Navigate to="/admin/login" replace />;
   }
 
   const filteredMenuItems = menuItems
@@ -145,7 +146,7 @@ export const AdminLayout = () => {
         ${isMobileSidebarOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full'}
       `}>
         <div className="h-14 flex items-center justify-between px-5 border-b border-gray-100 dark:border-gray-800">
-          <Link to="/" className="flex items-center gap-2 group">
+          <Link to="/admin" className="flex items-center gap-2 group">
             <div className="bg-blue-600 text-white font-black px-1.5 py-0.5 rounded text-base italic group-hover:bg-blue-700 transition leading-tight">
               SABAY
             </div>
@@ -313,7 +314,7 @@ export const AdminLayout = () => {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16m-7 6h7"/>
               </svg>
             </button>
-            <Link to="/" className="flex items-center gap-2">
+            <Link to="/admin" className="flex items-center gap-2">
               <div className="bg-blue-600 text-white font-black px-2 py-0.5 rounded text-lg italic leading-tight shadow-sm">SABAY</div>
               <span className="text-sm font-black text-gray-800 dark:text-gray-200 uppercase tracking-tighter hidden xs:block">{t('common.admin')}</span>
             </Link>

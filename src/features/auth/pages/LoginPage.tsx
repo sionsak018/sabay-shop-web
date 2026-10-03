@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { isConsoleUser } from '../utils/roles';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAlert } from '../../../context/AlertContext';
 import { useTranslation } from 'react-i18next';
@@ -11,7 +12,7 @@ export const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
+  const { login, logout } = useAuth();
   const { showAlert } = useAlert();
   const navigate = useNavigate();
 
@@ -31,18 +32,25 @@ export const LoginPage = () => {
     setErrors({});
     setLoading(true);
     try {
-      const user = await login(email, password);
+      const account = await login(email, password);
+
+      // Admin/console accounts must use the isolated admin login, not the storefront.
+      if (isConsoleUser(account)) {
+        await logout();
+        showAlert({
+          title: t('admin.restricted', { defaultValue: 'Restricted Access' }),
+          message: t('admin.use_admin_login', { defaultValue: 'Administrators must sign in from the admin console.' }),
+          type: 'error',
+          onClose: () => navigate('/admin/login', { replace: true })
+        });
+        return;
+      }
+
       showAlert({
         title: 'ជោគជ័យ!',
         message: 'អ្នកបានចូលប្រើប្រាស់ដោយជោគជ័យ។',
         type: 'success',
-        onClose: () => {
-          if (user.role === 'admin') {
-            navigate('/admin', { replace: true });
-          } else {
-            navigate('/', { replace: true });
-          }
-        }
+        onClose: () => navigate('/', { replace: true })
       });
     } catch (err: any) {
       showAlert({

@@ -1,18 +1,22 @@
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { Header } from './Header';
 import { useAuth } from '../../features/auth/hooks/useAuth';
+import { isConsoleUser } from '../../features/auth/utils/roles';
+import { useMessageNotifications } from '../../context/MessageNotificationContext';
 import { useTranslation } from 'react-i18next';
 
 export const Layout = () => {
   const location = useLocation();
   const { user } = useAuth();
+  const { unreadCount } = useMessageNotifications();
   const { t } = useTranslation();
+  const consoleUser = isConsoleUser(user);
 
   const isActive = (path: string) => location.pathname === path;
   const isChatOpen = location.pathname === '/inbox' && new URLSearchParams(location.search).has('id');
 
   return (
-    <div className={`flex flex-col min-h-screen bg-[#f1f2f6] dark:bg-[#08060d] text-gray-900 dark:text-gray-100 antialiased font-sans ${isChatOpen ? 'pb-0' : 'pb-16'} md:pb-0 transition-colors duration-300 overflow-x-hidden`}>
+    <div className={`flex flex-col min-h-screen bg-[#f1f2f6] dark:bg-[#08060d] text-gray-900 dark:text-gray-100 antialiased font-sans ${isChatOpen ? 'pb-0' : 'pb-16'} md:pb-0 transition-colors duration-300 overflow-x-clip`}>
       
       {/* Khmer24 Style Global Header */}
       <div className={`sticky top-0 z-50 ${location.pathname === '/inbox' ? 'hidden md:block' : ''}`}>
@@ -36,17 +40,24 @@ export const Layout = () => {
           <span className="text-[9px] font-black uppercase tracking-tighter">{t('common.view_all')}</span>
         </Link>
 
-        {/* Center Post Button - Prominent */}
-        <Link to="/sell" className="flex flex-col items-center -mt-8">
-          <div className="w-14 h-14 bg-blue-600 rounded-full flex items-center justify-center text-white shadow-xl shadow-blue-600/40 border-4 border-gray-100 dark:border-gray-900 active:scale-90 transition-transform">
-            <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M12 4v16m8-8H4"/></svg>
-          </div>
-          <span className="text-[9px] font-black uppercase tracking-tighter text-blue-600 dark:text-blue-400 mt-1">{t('common.post_ad')}</span>
-        </Link>
+        {/* Center Post Button - Prominent (hidden for admin/console accounts) */}
+        {!consoleUser && (
+          <Link to="/sell" className="flex flex-col items-center -mt-8">
+            <div className="w-14 h-14 bg-blue-600 rounded-full flex items-center justify-center text-white shadow-xl shadow-blue-600/40 border-4 border-gray-100 dark:border-gray-900 active:scale-90 transition-transform">
+              <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M12 4v16m8-8H4"/></svg>
+            </div>
+            <span className="text-[9px] font-black uppercase tracking-tighter text-blue-600 dark:text-blue-400 mt-1">{t('common.post_ad')}</span>
+          </Link>
+        )}
 
         <Link to="/inbox" className={`flex flex-col items-center gap-1 transition-colors ${isActive('/inbox') ? 'text-blue-600 dark:text-blue-400' : 'text-gray-500 dark:text-gray-400'}`}>
           <div className="relative">
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>
+            {unreadCount > 0 && (
+              <span className="absolute -right-2 -top-1.5 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-red-500 px-1 text-[9px] font-black text-white">
+                {unreadCount > 99 ? '99+' : unreadCount}
+              </span>
+            )}
           </div>
           <span className="text-[9px] font-black uppercase tracking-tighter">{t('common.messages')}</span>
         </Link>

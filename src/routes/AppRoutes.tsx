@@ -1,6 +1,7 @@
 import { lazy, Suspense } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from '../features/auth/hooks/useAuth';
+import { isConsoleUser } from '../features/auth/utils/roles';
 import { Layout } from '../components/layout/Layout';
 
 // Route-level code splitting. The editor/prosemirror bundle (~1.6 MB raw) and
@@ -20,6 +21,7 @@ const InboxPage = lazy(() => import('../features/messages/pages/InboxPage').then
 const ProfilePage = lazy(() => import('../features/profile/pages/ProfilePage').then(m => ({ default: m.ProfilePage })));
 const PublicProfilePage = lazy(() => import('../features/profile/pages/PublicProfilePage').then(m => ({ default: m.PublicProfilePage })));
 
+const AdminLoginPage = lazy(() => import('../features/admin/pages/AdminLoginPage').then(m => ({ default: m.AdminLoginPage })));
 const AdminLayout = lazy(() => import('../features/admin/components/AdminLayout').then(m => ({ default: m.AdminLayout })));
 const AdminDashboard = lazy(() => import('../features/admin/pages/AdminDashboard').then(m => ({ default: m.AdminDashboard })));
 const AdminPlaceholder = lazy(() => import('../features/admin/pages/AdminPlaceholder').then(m => ({ default: m.AdminPlaceholder })));
@@ -36,6 +38,7 @@ const CommunePage = lazy(() => import('../features/admin/pages/CommunePage').the
 const VillagePage = lazy(() => import('../features/admin/pages/VillagePage').then(m => ({ default: m.VillagePage })));
 const UserPage = lazy(() => import('../features/admin/pages/UserPage').then(m => ({ default: m.UserPage })));
 const ProductPage = lazy(() => import('../features/admin/pages/ProductPage').then(m => ({ default: m.ProductPage })));
+const AdminProductCreatePage = lazy(() => import('../features/admin/pages/AdminProductCreatePage').then(m => ({ default: m.AdminProductCreatePage })));
 const SliderPage = lazy(() => import('../features/admin/pages/SliderPage').then(m => ({ default: m.SliderPage })));
 const RolePage = lazy(() => import('../features/admin/pages/RolePage').then(m => ({ default: m.RolePage })));
 const PermissionPage = lazy(() => import('../features/admin/pages/PermissionPage').then(m => ({ default: m.PermissionPage })));
@@ -49,6 +52,7 @@ const RouteFallback = () => (
 
 const AppRoutes = () => {
   const { user } = useAuth();
+  const consoleUser = isConsoleUser(user);
 
   return (
     <Suspense fallback={<RouteFallback />}>
@@ -66,7 +70,18 @@ const AppRoutes = () => {
           <Route path="/u/:id" element={<PublicProfilePage />} />
 
           {/* Protected routes - redirected to /login if not authenticated */}
-          <Route path="/sell" element={user ? <CreateProductPage /> : <Navigate to="/login" replace />} />
+          <Route
+            path="/sell"
+            element={
+              !user ? (
+                <Navigate to="/login" replace />
+              ) : consoleUser ? (
+                <Navigate to="/admin/products/create" replace />
+              ) : (
+                <CreateProductPage />
+              )
+            }
+          />
           <Route path="/edit-product/:id" element={user ? <EditProductPage /> : <Navigate to="/login" replace />} />
           <Route path="/cart" element={user ? <CartPage /> : <Navigate to="/login" replace />} />
           <Route path="/checkout" element={user ? <CheckoutPage /> : <Navigate to="/login" replace />} />
@@ -74,6 +89,9 @@ const AppRoutes = () => {
           <Route path="/inbox" element={user ? <InboxPage /> : <Navigate to="/login" replace />} />
           <Route path="/profile" element={user ? <ProfilePage /> : <Navigate to="/login" replace />} />
         </Route>
+
+        {/* Isolated admin login - outside the public Layout */}
+        <Route path="/admin/login" element={consoleUser ? <Navigate to="/admin" replace /> : <AdminLoginPage />} />
 
         {/* Admin Routes */}
         <Route path="/admin" element={<AdminLayout />}>
@@ -86,6 +104,7 @@ const AppRoutes = () => {
           <Route path="body-types" element={<BodyTypePage />} />
           <Route path="attributes" element={<AttributePage />} />
           <Route path="products" element={<ProductPage />} />
+          <Route path="products/create" element={<AdminProductCreatePage />} />
           <Route path="sliders" element={<SliderPage />} />
           <Route path="users" element={<UserPage />} />
           <Route path="roles" element={<RolePage />} />
