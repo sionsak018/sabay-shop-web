@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { isConsoleUser } from '../utils/roles';
+import { GoogleSignInButton } from '../components/GoogleSignInButton';
+import { isGoogleSignInEnabled } from '../utils/google';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAlert } from '../../../context/AlertContext';
 import { useTranslation } from 'react-i18next';
@@ -12,7 +14,7 @@ export const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
-  const { login, logout } = useAuth();
+  const { login, loginWithGoogle, logout } = useAuth();
   const { showAlert } = useAlert();
   const navigate = useNavigate();
 
@@ -56,6 +58,39 @@ export const LoginPage = () => {
       showAlert({
         title: 'បរាជ័យ!',
         message: err.response?.data?.message || 'អ៊ីមែល ឬលេខសម្ងាត់មិនត្រឹមត្រូវឡើយ។',
+        type: 'error'
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogle = async (credential: string) => {
+    setLoading(true);
+    try {
+      const account = await loginWithGoogle(credential);
+
+      if (isConsoleUser(account)) {
+        await logout();
+        showAlert({
+          title: t('admin.restricted', { defaultValue: 'Restricted Access' }),
+          message: t('admin.use_admin_login', { defaultValue: 'Administrators must sign in from the admin console.' }),
+          type: 'error',
+          onClose: () => navigate('/admin/login', { replace: true })
+        });
+        return;
+      }
+
+      showAlert({
+        title: 'ជោគជ័យ!',
+        message: 'អ្នកបានចូលប្រើប្រាស់ដោយជោគជ័យ។',
+        type: 'success',
+        onClose: () => navigate('/', { replace: true })
+      });
+    } catch (err: any) {
+      showAlert({
+        title: 'បរាជ័យ!',
+        message: err.response?.data?.message || 'ការចូលដោយប្រើ Google មិនជោគជ័យឡើយ។',
         type: 'error'
       });
     } finally {
@@ -146,6 +181,19 @@ export const LoginPage = () => {
               {loading ? 'Logging in...' : 'Login'}
             </button>
           </form>
+
+          {isGoogleSignInEnabled && (
+            <div className="mt-6">
+              <div className="relative flex items-center">
+                <div className="flex-grow border-t border-gray-200 dark:border-gray-800"></div>
+                <span className="px-3 text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500">or</span>
+                <div className="flex-grow border-t border-gray-200 dark:border-gray-800"></div>
+              </div>
+              <div className="mt-5">
+                <GoogleSignInButton onCredential={handleGoogle} text="continue_with" />
+              </div>
+            </div>
+          )}
 
           <div className="mt-8 pt-6 border-t border-gray-100 dark:border-gray-800 text-center transition-colors">
             <p className="text-sm text-gray-500 dark:text-gray-400">

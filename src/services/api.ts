@@ -26,9 +26,20 @@ const api = axios.create({
   },
 });
 
-// Attach token to every request if it exists
+// The admin console and the customer storefront keep independent sessions, so
+// each section reads its own token. Admin pages (`/admin/*`) use the admin
+// token; everything else uses the customer token.
+export const getActiveToken = (): string | null =>
+  window.location.pathname.startsWith('/admin')
+    ? localStorage.getItem('admin_token')
+    : localStorage.getItem('token');
+
+// Attach the section's token to every request. An explicit Authorization
+// header (e.g. one-off profile bootstrap) is never overridden.
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
+  if (config.headers.Authorization) return config;
+
+  const token = getActiveToken();
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }

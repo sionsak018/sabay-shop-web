@@ -109,12 +109,12 @@ export const SellerCard = ({ product, isOwn = false }: SellerCardProps) => {
             {seller?.avatar ? (
               <SmartImage src={seller.avatar} alt={seller?.name ?? 'Seller'} width={160} height={160} widths={[80, 160, 320]} sizes="48px" className="h-full w-full object-cover" />
             ) : (
-              (product.poster_name || seller?.name || '?').charAt(0).toUpperCase()
+              (seller?.name || product.poster_name || '?').charAt(0).toUpperCase()
             )}
           </Link>
           <div className="min-w-0">
             <Link to={`/u/${seller?.id}`} className="mb-1 block truncate text-lg font-bold leading-tight text-gray-900 transition-colors hover:text-blue-600 dark:text-gray-100 dark:hover:text-blue-400">
-              {product.poster_name || seller?.name}
+              {seller?.name || product.poster_name}
             </Link>
             {product.company_name && (
               <p className="truncate text-[11px] font-bold uppercase tracking-tight text-blue-600 dark:text-blue-400">{product.company_name}</p>

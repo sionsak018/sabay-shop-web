@@ -1,3 +1,5 @@
+import { type Review } from '../../reviews/types/review.types';
+
 export interface PublicSeller {
   id: number;
   name: string;
@@ -39,6 +41,8 @@ export interface Product {
   commune?: { id: number; name: string };
   created_at: string;
   is_favorited?: boolean;
+  can_review?: boolean;
+  my_review?: Review | null;
 }
 export interface PaginatedResponse<T> {
   current_page: number;

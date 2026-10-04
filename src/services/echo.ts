@@ -1,6 +1,7 @@
 import Echo from 'laravel-echo';
 import Pusher from 'pusher-js';
 import axios from 'axios';
+import { getActiveToken } from './api';
 
 type ChannelAuthData = { auth: string; channel_data?: string };
 type ChannelAuthCallback = (error: Error | null, data: ChannelAuthData | null) => void;
@@ -33,7 +34,7 @@ if (pusherKey && apiBaseUrl) {
     // cookie Echo's default authorizer would send.
     authorizer: (channel: { name: string }) => ({
       authorize: (socketId: string, callback: ChannelAuthCallback) => {
-        const token = localStorage.getItem('token');
+        const token = getActiveToken();
         axios
           .post(
             authEndpoint,

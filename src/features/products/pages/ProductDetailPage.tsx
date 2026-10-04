@@ -90,19 +90,36 @@ export const ProductDetailPage = () => {
   });
 
   useEffect(() => {
-    if (id) {
-      productApi.getOne(parseInt(id))
-        .then(res => {
-          setProduct(res.data);
-          setIsLiked(!!res.data.is_favorited);
-          addRecentlyViewed(res.data);
-        })
-        .catch(err => {
-          console.error('Failed to load product', err);
-          setError(err.response?.data?.message || 'Product not found');
-        })
-        .finally(() => setLoading(false));
-    }
+    if (!id) return;
+    let cancelled = false;
+
+    // Reset so we never render the previously viewed product's data while
+    // navigating between /product/:id routes (the component is reused).
+    setLoading(true);
+    setError(null);
+    setProduct(null);
+    setActiveImageIndex(0);
+    setIsLiked(false);
+
+    productApi.getOne(parseInt(id))
+      .then(res => {
+        if (cancelled) return;
+        setProduct(res.data);
+        setIsLiked(!!res.data.is_favorited);
+        addRecentlyViewed(res.data);
+      })
+      .catch(err => {
+        if (cancelled) return;
+        console.error('Failed to load product', err);
+        setError(err.response?.data?.message || 'Product not found');
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, [id]);
 
   const handleToggleLike = async () => {
@@ -368,6 +385,8 @@ export const ProductDetailPage = () => {
           <div className="mt-10">
             <SellerReviews
               sellerId={product.seller.id}
+              productId={product.id}
+              canReview={product.can_review === true}
               initialRatingAvg={product.seller.rating_avg ?? 0}
               initialRatingCount={product.seller.rating_count ?? 0}
               compact

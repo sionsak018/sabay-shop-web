@@ -112,6 +112,7 @@
     "submitted": "Thanks for your review!",
     "failed": "Failed to submit review",
     "select_rating": "Please choose a rating",
+    "comment_required": "Please write at least 10 characters describing your experience.",
     "none": "No reviews yet. Be the first to review this seller.",
     "load_more": "Load more reviews",
     "anonymous": "User"
@@ -120,6 +121,15 @@
     "title": "Post an Ad",
     "step_1": "Choose a category",
     "step_2": "Fill Information",
+    "step_3": "Location & Contact",
+    "step_4": "Review & Post",
+    "back": "Back",
+    "next": "Next",
+    "review": "Review Your Ad",
+    "draft_restored": "We restored your unsaved draft.",
+    "discard_draft": "Discard",
+    "draft_photos_note": "Photos are not saved in drafts — please add them again.",
+    "max_photos": "You can upload up to 10 photos.",
     "change_category": "Change Category",
     "ad_photos": "Ad Photos",
     "add_photo": "Add Photo",
@@ -153,7 +163,11 @@
     "limit_reached": "Limit Reached",
     "required": "This field is required",
     "success_title": "Success!",
-    "success_message": "Your ad has been submitted successfully."
+    "success_message": "Your ad has been submitted successfully.",
+    "edit_title": "Edit Your Ad",
+    "updated_title": "Ad Updated",
+    "updated_message": "Your changes have been saved.",
+    "failed_to_load": "Failed to load this ad."
   },
   "admin": {
     "dashboard": "Dashboard",

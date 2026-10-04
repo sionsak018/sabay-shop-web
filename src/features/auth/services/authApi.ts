@@ -8,8 +8,12 @@ export const authApi = {
   
   login: (data: LoginCredentials) => 
     api.post<{ user: User; token: string }>(ENDPOINTS.LOGIN, data),
-  
+
+  googleLogin: (credential: string) =>
+    api.post<{ user: User; token: string }>(ENDPOINTS.GOOGLE_LOGIN, { credential }),
+
   logout: () => api.post(ENDPOINTS.LOGOUT),
   
-  getProfile: () => api.get<User>(ENDPOINTS.PROFILE),
+  getProfile: (token?: string | null) =>
+    api.get<User>(ENDPOINTS.PROFILE, token ? { headers: { Authorization: `Bearer ${token}` } } : undefined),
 };

@@ -12,6 +12,8 @@ import { formatDate } from '../../../utils/format';
 
 interface SellerReviewsProps {
   sellerId: number;
+  productId?: number;
+  canReview?: boolean;
   initialReviews?: Review[];
   initialRatingAvg?: number;
   initialRatingCount?: number;
@@ -20,6 +22,8 @@ interface SellerReviewsProps {
 
 export const SellerReviews = ({
   sellerId,
+  productId,
+  canReview,
   initialReviews,
   initialRatingAvg = 0,
   initialRatingCount = 0,
@@ -40,6 +44,7 @@ export const SellerReviews = ({
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [hasReviewed, setHasReviewed] = useState(false);
 
   useEffect(() => {
     if (initialReviews) return;
@@ -89,6 +94,7 @@ export const SellerReviews = ({
       navigate('/login');
       return;
     }
+    if (!productId) return;
     if (rating < 1) {
       showAlert({
         title: t('common.error'),
@@ -97,18 +103,31 @@ export const SellerReviews = ({
       });
       return;
     }
+    const trimmedComment = comment.trim();
+    if (trimmedComment.length < 10) {
+      showAlert({
+        title: t('common.error'),
+        message: t('review.comment_required', {
+          defaultValue: 'Please write at least 10 characters describing your experience.',
+        }),
+        type: 'error',
+      });
+      return;
+    }
     setSubmitting(true);
     try {
       const res = await reviewApi.submit({
         seller_id: sellerId,
+        product_id: productId,
         rating,
-        comment: comment.trim() || undefined,
+        comment: trimmedComment,
       });
       setRatingAvg(res.data.rating_avg);
       setRatingCount(res.data.rating_count);
       await refreshFirstPage();
       setRating(0);
       setComment('');
+      setHasReviewed(true);
       showAlert({
         title: t('common.success'),
         message: t('review.submitted', { defaultValue: 'Thanks for your review!' }),
@@ -127,6 +146,7 @@ export const SellerReviews = ({
   };
 
   const isOwnProfile = user?.id === sellerId;
+  const showReviewForm = !isOwnProfile && !!productId && canReview !== false && !hasReviewed;
   const visibleReviews = compact ? reviews.slice(0, 3) : reviews;
 
   return (
@@ -143,7 +163,7 @@ export const SellerReviews = ({
         </div>
       </div>
 
-      {!isOwnProfile && (
+      {showReviewForm && (
         <div className="mb-5 rounded-control bg-[#f8f9fa] p-3 transition-colors sm:p-4 dark:bg-[#1f2028]">
           <p className="mb-2 text-[11px] font-black uppercase tracking-widest text-gray-500 dark:text-gray-400">
             {t('review.write', { defaultValue: 'Write a review' })}

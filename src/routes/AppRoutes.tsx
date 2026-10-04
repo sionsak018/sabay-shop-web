@@ -51,18 +51,23 @@ const RouteFallback = () => (
 );
 
 const AppRoutes = () => {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const consoleUser = isConsoleUser(user);
+
+  if (loading) {
+    return <RouteFallback />;
+  }
 
   return (
     <Suspense fallback={<RouteFallback />}>
       <Routes>
         {/* Auth routes without Layout */}
-        <Route path="/login" element={!user ? <LoginPage /> : <Navigate to="/" />} />
-        <Route path="/register" element={!user ? <RegisterPage /> : <Navigate to="/" />} />
+        <Route path="/login" element={!user ? <LoginPage /> : <Navigate to={consoleUser ? '/admin' : '/'} replace />} />
+        <Route path="/register" element={!user ? <RegisterPage /> : <Navigate to={consoleUser ? '/admin' : '/'} replace />} />
 
-        {/* Routes using the Layout (Header/Footer) */}
-        <Route element={<Layout />}>
+        {/* Routes using the Layout (Header/Footer). Console accounts are kept
+            out of the storefront entirely. */}
+        <Route element={consoleUser ? <Navigate to="/admin" replace /> : <Layout />}>
           {/* Public routes */}
           <Route path="/" element={<HomePage />} />
           <Route path="/products" element={<ProductListPage />} />
@@ -117,7 +122,7 @@ const AppRoutes = () => {
         </Route>
 
         {/* Catch-all */}
-        <Route path="*" element={<Navigate to="/" />} />
+        <Route path="*" element={<Navigate to={consoleUser ? '/admin' : '/'} replace />} />
       </Routes>
     </Suspense>
   );
