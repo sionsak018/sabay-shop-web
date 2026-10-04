@@ -161,7 +161,7 @@ export const Header = () => {
                   <div className="absolute right-0 mt-2 w-64 bg-white dark:bg-[#1f2028] border border-gray-100 dark:border-gray-800 rounded-xl shadow-2xl py-2 z-50 animate-in fade-in zoom-in-95 duration-150 origin-top-right">
                     <div className="px-4 py-3 border-b border-gray-50 dark:border-gray-800 mb-1">
                       <p className="text-sm font-black text-gray-800 dark:text-gray-100 uppercase tracking-tight">{user.name}</p>
-                      <p className="text-xs text-gray-400 font-medium truncate">{user.email}</p>
+                      <p className="text-xs text-gray-400 font-medium truncate">{user.email || user.phone}</p>
                     </div>
 
                     <Link to="/profile" onClick={() => setIsProfileOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm font-bold text-gray-600 dark:text-gray-400 hover:bg-blue-50 dark:hover:bg-gray-800 hover:text-blue-600 transition-colors">

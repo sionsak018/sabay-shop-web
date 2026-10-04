@@ -30,6 +30,20 @@ export const ProfilePage = () => {
   const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  // State for the Security tab
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [passwordLoading, setPasswordLoading] = useState(false);
+  const [telegram, setTelegram] = useState<{ configured: boolean; linked: boolean; username?: string | null }>({
+    configured: false,
+    linked: false,
+    username: null,
+  });
+  const [telegramLink, setTelegramLink] = useState('');
+  const [telegramLoading, setTelegramLoading] = useState(false);
+
   // State for navigation
   const [activeTab, setActiveTab] = useState<'dashboard' | 'ads' | 'saved' | 'settings' | 'password' | 'followers' | 'following'>((searchParams.get('tab') as any) || 'dashboard');
 
@@ -59,6 +73,84 @@ export const ProfilePage = () => {
   // File refs
   const avatarInputRef = useRef<HTMLInputElement>(null);
   const coverInputRef = useRef<HTMLInputElement>(null);
+
+  // Telegram link status for password recovery codes.
+  useEffect(() => {
+    if (!user) return;
+    profileApi.getTelegramStatus()
+      .then(res => setTelegram(res.data))
+      .catch(() => setTelegram({ configured: false, linked: false, username: null }));
+  }, [user?.id, telegram.linked]);
+
+  /** The password is set from scratch, so no current-password field. */
+  const handleUpdatePassword = async () => {
+    if (newPassword.length < 8) {
+      showAlert({ title: 'បរាជ័យ!', message: 'លេខសម្ងាត់ត្រូវមានយ៉ាងតិច ៨ ខ្ទង់។', type: 'error' });
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      showAlert({ title: 'បរាជ័យ!', message: 'លេខសម្ងាត់បញ្ជាក់មិនត្រឹមត្រូវ។', type: 'error' });
+      return;
+    }
+
+    setPasswordLoading(true);
+    try {
+      await profileApi.updatePassword({
+        password: newPassword,
+        password_confirmation: confirmPassword,
+      });
+      setNewPassword('');
+      setConfirmPassword('');
+      showAlert({ title: 'ជោគជ័យ!', message: 'លេខសម្ងាត់ត្រូវបានប្ដូរដោយជោគជ័យ។', type: 'success' });
+    } catch (err: any) {
+      showAlert({
+        title: 'បរាជ័យ!',
+        message: err.response?.data?.message || 'ការប្ដូរលេខសម្ងាត់មិនជោគជ័យឡើយ។',
+        type: 'error',
+      });
+    } finally {
+      setPasswordLoading(false);
+    }
+  };
+
+  const handleLinkTelegram = async () => {
+    setTelegramLoading(true);
+    try {
+      const res = await profileApi.linkTelegram();
+      if (!res.data.configured || !res.data.link) {
+        showAlert({ title: 'បរាជ័យ!', message: 'Telegram bot មិនទាន់កំណត់ច។', type: 'error' });
+        return;
+      }
+      setTelegramLink(res.data.link);
+      window.open(res.data.link, '_blank', 'noopener');
+    } catch (err: any) {
+      showAlert({
+        title: 'បរាជ័យ!',
+        message: err.response?.data?.message || 'មិនអាចភ្ជាស់ Telegram បានទេ។',
+        type: 'error',
+      });
+    } finally {
+      setTelegramLoading(false);
+    }
+  };
+
+  const handleUnlinkTelegram = async () => {
+    setTelegramLoading(true);
+    try {
+      await profileApi.unlinkTelegram();
+      setTelegram({ configured: telegram.configured, linked: false, username: null });
+      setTelegramLink('');
+      showAlert({ title: 'ជោគជ័យ!', message: 'បានដកចេញ Telegram ហើយ។', type: 'success' });
+    } catch (err: any) {
+      showAlert({
+        title: 'បរាជ័យ!',
+        message: err.response?.data?.message || 'មិនអាចដកចេញ Telegram បានទេ។',
+        type: 'error',
+      });
+    } finally {
+      setTelegramLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (user) {
@@ -527,7 +619,7 @@ export const ProfilePage = () => {
                         </div>
                     </div>
                 </div>
-              </div>
+                </div>
             )}
 
             {activeTab === 'ads' && (
@@ -797,25 +889,120 @@ export const ProfilePage = () => {
             )}
 
             {activeTab === 'password' && (
-              <div className="bg-white dark:bg-[#16171d] border border-gray-200 dark:border-gray-800 rounded-2xl shadow-sm overflow-hidden animate-in fade-in slide-in-from-right-4 duration-400">
-                <div className="bg-gray-50/80 dark:bg-gray-800/80 px-4 sm:px-8 py-4 sm:py-5 border-b border-gray-100 dark:border-gray-800 transition-colors">
-                    <h2 className="text-[11px] font-black text-gray-800 dark:text-gray-200 uppercase tracking-widest">Update Account Security</h2>
-                </div>
-                <div className="p-4 sm:p-8 space-y-6 max-w-md">
-                    <div className="space-y-2">
-                        <label className="block text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest ml-1">Current Password</label>
-                        <input type="password" placeholder="••••••••" className="w-full px-4 py-3 bg-gray-50 dark:bg-[#08060d] border border-gray-200 dark:border-gray-800 rounded-xl outline-none focus:bg-white dark:focus:bg-[#1f2028] focus:border-blue-500 dark:focus:border-blue-400 font-bold transition-all text-gray-800 dark:text-gray-100" />
+              <div className="space-y-6">
+                {/* Google-only customers are passwordless: no password form and no
+                    Telegram codes, because they never sign in with a password. */}
+                {user?.has_password === false ? (
+                  <div className="bg-white dark:bg-[#16171d] border border-gray-200 dark:border-gray-800 rounded-2xl shadow-sm overflow-hidden animate-in fade-in slide-in-from-right-4 duration-400">
+                    <div className="bg-gray-50/80 dark:bg-gray-800/80 px-4 sm:px-8 py-4 sm:py-5 border-b border-gray-100 dark:border-gray-800 transition-colors">
+                      <h2 className="text-[11px] font-black text-gray-800 dark:text-gray-200 uppercase tracking-widest">Account Security</h2>
                     </div>
-                    <div className="space-y-2">
+                    <div className="p-4 sm:p-8 space-y-3 max-w-md">
+                      <p className="text-sm font-bold text-gray-700 dark:text-gray-200">You sign in with Google.</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                        This account does not use a password, so there is nothing to update or reset. Google is your security check.
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="bg-white dark:bg-[#16171d] border border-gray-200 dark:border-gray-800 rounded-2xl shadow-sm overflow-hidden animate-in fade-in slide-in-from-right-4 duration-400">
+                    <div className="bg-gray-50/80 dark:bg-gray-800/80 px-4 sm:px-8 py-4 sm:py-5 border-b border-gray-100 dark:border-gray-800 transition-colors">
+                      <h2 className="text-[11px] font-black text-gray-800 dark:text-gray-200 uppercase tracking-widest">Update Account Security</h2>
+                    </div>
+                    <div className="p-4 sm:p-8 space-y-6 max-w-md">
+                      <p className="text-xs text-gray-500 dark:text-gray-400">Set or change your password. For your security we no longer ask for the old one.</p>
+                      <div className="space-y-2">
                         <label className="block text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest ml-1">New Password</label>
-                        <input type="password" placeholder="••••••••" className="w-full px-4 py-3 bg-gray-50 dark:bg-[#08060d] border border-gray-200 dark:border-gray-800 rounded-xl outline-none focus:bg-white dark:focus:bg-[#1f2028] focus:border-blue-500 dark:focus:border-blue-400 font-bold transition-all text-gray-800 dark:text-gray-100" />
-                    </div>
-                    <div className="space-y-2">
+                        <div className="relative">
+                          <input
+                            type={showPassword ? 'text' : 'password'}
+                            placeholder="••••••••"
+                            value={newPassword}
+                            onChange={(e) => setNewPassword(e.target.value)}
+                            className="w-full px-4 py-3 pr-10 bg-gray-50 dark:bg-[#08060d] border border-gray-200 dark:border-gray-800 rounded-xl outline-none focus:bg-white dark:focus:bg-[#1f2028] focus:border-blue-500 dark:focus:border-blue-400 font-bold transition-all text-gray-800 dark:text-gray-100"
+                          />
+                          <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors">
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                          </button>
+                        </div>
+                      </div>
+                      <div className="space-y-2">
                         <label className="block text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest ml-1">Confirm New Password</label>
-                        <input type="password" placeholder="••••••••" className="w-full px-4 py-3 bg-gray-50 dark:bg-[#08060d] border border-gray-200 dark:border-gray-800 rounded-xl outline-none focus:bg-white dark:focus:bg-[#1f2028] focus:border-blue-500 dark:focus:border-blue-400 font-bold transition-all text-gray-800 dark:text-gray-100" />
+                        <div className="relative">
+                          <input
+                            type={showConfirmPassword ? 'text' : 'password'}
+                            placeholder="••••••••"
+                            value={confirmPassword}
+                            onChange={(e) => setConfirmPassword(e.target.value)}
+                            className="w-full px-4 py-3 pr-10 bg-gray-50 dark:bg-[#08060d] border border-gray-200 dark:border-gray-800 rounded-xl outline-none focus:bg-white dark:focus:bg-[#1f2028] focus:border-blue-500 dark:focus:border-blue-400 font-bold transition-all text-gray-800 dark:text-gray-100"
+                          />
+                          <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors">
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                          </button>
+                        </div>
+                      </div>
+                      <button
+                        onClick={handleUpdatePassword}
+                        disabled={passwordLoading}
+                        className="w-full bg-blue-600 dark:bg-blue-500 text-white py-3 rounded-xl font-black text-[11px] uppercase tracking-widest shadow-lg shadow-blue-600/20 hover:bg-blue-700 dark:hover:bg-blue-600 transition active:scale-95 disabled:opacity-50"
+                      >
+                        {passwordLoading ? 'Updating...' : 'Update Security'}
+                      </button>
                     </div>
-                    <button className="w-full bg-blue-600 dark:bg-blue-500 text-white py-3 rounded-xl font-black text-[11px] uppercase tracking-widest shadow-lg shadow-blue-600/20 hover:bg-blue-700 dark:hover:bg-blue-600 transition active:scale-95">Update Security</button>
-                </div>
+                  </div>
+                )}
+
+                {/* Telegram is how password customers receive reset codes. */}
+                {user?.has_password !== false && (
+                  <div className="bg-white dark:bg-[#16171d] border border-gray-200 dark:border-gray-800 rounded-2xl shadow-sm overflow-hidden animate-in fade-in slide-in-from-right-4 duration-400">
+                    <div className="bg-gray-50/80 dark:bg-gray-800/80 px-4 sm:px-8 py-4 sm:py-5 border-b border-gray-100 dark:border-gray-800 transition-colors flex items-center justify-between">
+                      <h2 className="text-[11px] font-black text-gray-800 dark:text-gray-200 uppercase tracking-widest">Telegram</h2>
+                      <span className={`text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full ${telegram.linked ? 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400' : 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400'}`}>
+                        {telegram.linked ? 'Connected' : 'Not connected'}
+                      </span>
+                    </div>
+                    <div className="p-4 sm:p-8 space-y-4 max-w-md">
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                        {telegram.linked
+                          ? `Linked to ${telegram.username ? `@${telegram.username}` : 'your Telegram account'}. Password reset codes are sent here.`
+                          : 'Connect Telegram so we can send you a 6-digit code when you forget your password.'}
+                      </p>
+
+                      {!telegram.configured && (
+                        <p className="text-xs text-amber-600 dark:text-amber-400 font-bold">Telegram bot is not configured yet. Please contact support.</p>
+                      )}
+
+                      {telegram.linked ? (
+                        <button
+                          onClick={handleUnlinkTelegram}
+                          disabled={telegramLoading || !telegram.configured}
+                          className="w-full border border-gray-200 dark:border-gray-800 text-gray-700 dark:text-gray-300 py-3 rounded-xl font-black text-[11px] uppercase tracking-widest hover:bg-gray-50 dark:hover:bg-gray-800 transition active:scale-95 disabled:opacity-50"
+                        >
+                          {telegramLoading ? 'Disconnecting...' : 'Disconnect'}
+                        </button>
+                      ) : (
+                        <button
+                          onClick={handleLinkTelegram}
+                          disabled={telegramLoading || !telegram.configured}
+                          className="w-full bg-[#229ED9] hover:bg-[#1e8cc0] text-white py-3 rounded-xl font-black text-[11px] uppercase tracking-widest transition active:scale-95 disabled:opacity-50"
+                        >
+                          {telegramLoading ? 'Opening Telegram...' : 'Connect Telegram'}
+                        </button>
+                      )}
+
+                      {telegramLink && (
+                        <a
+                          href={telegramLink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="block text-center text-xs font-bold text-blue-600 hover:underline"
+                        >
+                          Reopen the bot link
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>

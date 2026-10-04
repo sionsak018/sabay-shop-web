@@ -9,6 +9,7 @@ import { Layout } from '../components/layout/Layout';
 // entry chunk that every visitor downloads.
 const LoginPage = lazy(() => import('../features/auth/pages/LoginPage').then(m => ({ default: m.LoginPage })));
 const RegisterPage = lazy(() => import('../features/auth/pages/RegisterPage').then(m => ({ default: m.RegisterPage })));
+const ForgotPasswordPage = lazy(() => import('../features/auth/pages/ForgotPasswordPage').then(m => ({ default: m.ForgotPasswordPage })));
 const HomePage = lazy(() => import('../features/products/pages/HomePage').then(m => ({ default: m.HomePage })));
 const ProductListPage = lazy(() => import('../features/products/pages/ProductListPage').then(m => ({ default: m.ProductListPage })));
 const ProductDetailPage = lazy(() => import('../features/products/pages/ProductDetailPage').then(m => ({ default: m.ProductDetailPage })));
@@ -64,6 +65,7 @@ const AppRoutes = () => {
         {/* Auth routes without Layout */}
         <Route path="/login" element={!user ? <LoginPage /> : <Navigate to={consoleUser ? '/admin' : '/'} replace />} />
         <Route path="/register" element={!user ? <RegisterPage /> : <Navigate to={consoleUser ? '/admin' : '/'} replace />} />
+        <Route path="/forgot-password" element={!user ? <ForgotPasswordPage /> : <Navigate to={consoleUser ? '/admin' : '/'} replace />} />
 
         {/* Routes using the Layout (Header/Footer). Console accounts are kept
             out of the storefront entirely. */}

@@ -128,10 +128,10 @@ export const LoginPage = () => {
         <div className="p-5 sm:p-8">
           <form onSubmit={handleSubmit} noValidate className="space-y-5">
             <div>
-              <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase mb-2 tracking-wider">Email Address</label>
+              <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase mb-2 tracking-wider">Email or Phone</label>
               <input
-                type="email"
-                placeholder="your@email.com"
+                type="text"
+                placeholder="your@email.com or 012 345 678"
                 value={email}
                 onChange={(e) => {
                   setEmail(e.target.value);
@@ -145,7 +145,7 @@ export const LoginPage = () => {
             <div>
               <div className="flex justify-between items-center mb-2">
                 <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Password</label>
-                <Link to="#" className="text-[11px] font-bold text-blue-600 hover:underline">Forgot?</Link>
+                <Link to="/forgot-password" className="text-[11px] font-bold text-blue-600 hover:underline">Forgot?</Link>
               </div>
               <div className="relative">
                 <input

@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 import { authApi } from '../services/authApi';
-import { type User, type RegisterData } from '../types/auth.types';
+import { type StartRegistrationResponse, type User, type RegisterData } from '../types/auth.types';
 
 const CUSTOMER_TOKEN_KEY = 'token';
 const ADMIN_TOKEN_KEY = 'admin_token';
@@ -10,8 +10,9 @@ interface AuthContextType {
   user: User | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<User>;
-  loginWithGoogle: (credential: string) => Promise<User>;
-  register: (data: RegisterData) => Promise<User>;
+  loginWithGoogle: (credential: string, login?: string) => Promise<User>;
+  startRegistration: (data: RegisterData) => Promise<StartRegistrationResponse>;
+  completeRegistration: (data: { phone: string; otp: string }) => Promise<User>;
   logout: () => Promise<void>;
   updateUser: (user: User) => void;
 }
@@ -99,16 +100,23 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   // Google sign-in is only offered on the customer storefront, so it always
   // writes to the customer token regardless of the current route section.
-  const loginWithGoogle = useCallback(async (credential: string) => {
-    const res = await authApi.googleLogin(credential);
+  const loginWithGoogle = useCallback(async (credential: string, login?: string) => {
+    const res = await authApi.googleLogin(credential, login);
     const { user, token } = res.data;
     localStorage.setItem(CUSTOMER_TOKEN_KEY, token);
     setCustomerUser(user);
     return user;
   }, []);
 
-  const register = useCallback(async (data: RegisterData) => {
-    const res = await authApi.register(data);
+  // Phone sign-up is a two-step handshake with the Telegram bot: park the
+  // details, then confirm the 6-digit code it sends to the customer's chat.
+  const startRegistration = useCallback(async (data: RegisterData) => {
+    const res = await authApi.startRegistration(data);
+    return res.data;
+  }, []);
+
+  const completeRegistration = useCallback(async (data: { phone: string; otp: string }) => {
+    const res = await authApi.verifyRegistration(data);
     const { user, token } = res.data;
     localStorage.setItem(CUSTOMER_TOKEN_KEY, token);
     setCustomerUser(user);
@@ -150,8 +158,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const logout = isAdminSection ? adminLogout : customerLogout;
 
   const value = useMemo(
-    () => ({ user, loading, login, loginWithGoogle, register, logout, updateUser }),
-    [user, loading, login, loginWithGoogle, register, logout, updateUser],
+    () => ({ user, loading, login, loginWithGoogle, startRegistration, completeRegistration, logout, updateUser }),
+    [user, loading, login, loginWithGoogle, startRegistration, completeRegistration, logout, updateUser],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
