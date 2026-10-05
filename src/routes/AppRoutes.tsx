@@ -3,6 +3,10 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from '../features/auth/hooks/useAuth';
 import { isConsoleUser } from '../features/auth/utils/roles';
 import { Layout } from '../components/layout/Layout';
+// The landing page is eager on purpose. Lazy-loading it cost an extra round
+// trip (~0.5s) because the browser only discovered the chunk after parsing the
+// entry bundle, and nothing preloaded it. It is small enough to fold in.
+import { HomePage } from '../features/products/pages/HomePage';
 
 // Route-level code splitting. The editor/prosemirror bundle (~1.6 MB raw) and
 // leaflet (~240 kB) are only needed on a few routes, so they must not be in the
@@ -10,7 +14,6 @@ import { Layout } from '../components/layout/Layout';
 const LoginPage = lazy(() => import('../features/auth/pages/LoginPage').then(m => ({ default: m.LoginPage })));
 const RegisterPage = lazy(() => import('../features/auth/pages/RegisterPage').then(m => ({ default: m.RegisterPage })));
 const ForgotPasswordPage = lazy(() => import('../features/auth/pages/ForgotPasswordPage').then(m => ({ default: m.ForgotPasswordPage })));
-const HomePage = lazy(() => import('../features/products/pages/HomePage').then(m => ({ default: m.HomePage })));
 const ProductListPage = lazy(() => import('../features/products/pages/ProductListPage').then(m => ({ default: m.ProductListPage })));
 const ProductDetailPage = lazy(() => import('../features/products/pages/ProductDetailPage').then(m => ({ default: m.ProductDetailPage })));
 const CreateProductPage = lazy(() => import('../features/products/pages/CreateProductPage').then(m => ({ default: m.CreateProductPage })));
