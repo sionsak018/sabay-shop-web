@@ -14,7 +14,7 @@ export const authApi = {
     api.post<StartRegistrationResponse>(ENDPOINTS.REGISTER_START, data),
 
   /** Step 2: confirm the 6-digit Telegram code and receive the session. */
-  verifyRegistration: (data: { phone: string; otp: string }) =>
+  verifyRegistration: (data: { phone: string; otp: string; verify_token: string }) =>
     api.post<{ user: User; token: string }>(ENDPOINTS.REGISTER_VERIFY, data),
 
   login: (data: LoginCredentials) =>
@@ -31,6 +31,7 @@ export const authApi = {
   resetPassword: (data: {
     login: string;
     otp: string;
+    reset_token: string;
     password: string;
     password_confirmation: string;
   }) => api.post<{ message: string }>(ENDPOINTS.RESET_PASSWORD, data),

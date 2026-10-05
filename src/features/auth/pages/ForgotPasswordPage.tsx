@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react';
+import { useOtpCountdown } from '../hooks/useOtpCountdown';
 import { Link, useNavigate } from 'react-router-dom';
 import { authApi } from '../services/authApi';
 import { GoogleSignInButton } from '../components/GoogleSignInButton';
@@ -20,6 +21,11 @@ export const ForgotPasswordPage = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [telegramLink, setTelegramLink] = useState('');
   const [botUsername, setBotUsername] = useState('');
+  // Held from /password/forgot so only this browser can finish the reset.
+  const [resetToken, setResetToken] = useState('');
+  const [otpSeconds, setOtpSeconds] = useState<number | null>(null);
+  const { remaining, expired, label: countdownLabel } = useOtpCountdown(otpSeconds);
+  const [notLinked, setNotLinked] = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
   const { loginWithGoogle } = useAuth();
@@ -46,7 +52,18 @@ export const ForgotPasswordPage = () => {
         return;
       }
 
+      // No Telegram is linked, so the API refuses to issue a code. Show the
+      // message instead of dropping the customer on a dead end.
+      if (res.data.method === 'telegram_not_linked') {
+        setNotLinked(res.data.message || '');
+        setStep('lookup');
+        setErrors({ login: res.data.message || '' });
+        return;
+      }
+
       setBotUsername(res.data.bot_username || '');
+      setResetToken(res.data.reset_token || '');
+      setOtpSeconds(res.data.expires_in ?? null);
 
       if (res.data.method === 'telegram_link') {
         setTelegramLink(res.data.link || '');
@@ -58,11 +75,18 @@ export const ForgotPasswordPage = () => {
       // The Telegram account is already linked, so the bot has sent the code.
       setStep('code');
     } catch (err: any) {
-      showAlert({
-        title: 'បរាជ័យ!',
-        message: err.response?.data?.message || 'មិនរកឃើញគណនីនេះឡើយ។',
-        type: 'error'
-      });
+      const message = err.response?.data?.message || 'មិនរកឃើញគណនីនេះឡើយ។';
+
+      if (err.response?.status === 422 && err.response?.data?.method === 'telegram_not_linked') {
+        setNotLinked(message);
+        setErrors({ login: message });
+      } else {
+        showAlert({
+          title: 'បរាជ័យ!',
+          message,
+          type: 'error'
+        });
+      }
     } finally {
       setLoading(false);
     }
@@ -99,6 +123,8 @@ export const ForgotPasswordPage = () => {
 
     if (!/^\d{6}$/.test(otp.trim())) {
       newErrors.otp = 'សូមបញ្ចូលលេខកូដ ៦ ខ្ទង់';
+    } else if (expired) {
+      newErrors.otp = 'លេខកូដបានផុតកំបន់ សូមស្នើសុំលេខកូដថ្មី។';
     }
     if (!password.trim()) {
       newErrors.password = Msg;
@@ -121,6 +147,7 @@ export const ForgotPasswordPage = () => {
       await authApi.resetPassword({
         login: login.trim(),
         otp: otp.trim(),
+        reset_token: resetToken,
         password,
         password_confirmation: passwordConfirmation,
       });
@@ -189,6 +216,11 @@ export const ForgotPasswordPage = () => {
                   className={`w-full px-4 py-3 border rounded focus:border-blue-500 outline-none transition text-sm bg-white dark:bg-[#08060d] text-gray-800 dark:text-gray-200 ${errors.login ? 'border-red-300' : 'border-gray-300 dark:border-gray-700'}`}
                 />
                 {errors.login && <p className="text-red-500 text-[10px] font-bold mt-1.5 ml-1">{errors.login}</p>}
+                {notLinked && (
+                  <p className="text-[10px] font-bold mt-1.5 ml-1 text-gray-500 dark:text-gray-400">
+                    If you can still sign in, open your profile and connect Telegram under Security, then try again.
+                  </p>
+                )}
               </div>
 
               <button
@@ -244,6 +276,16 @@ export const ForgotPasswordPage = () => {
                   : 'Enter your verification code and choose a new password.'}
               </p>
 
+              {countdownLabel && (
+                <p
+                  className={`text-center text-[11px] font-bold ${expired ? 'text-red-500' : 'text-gray-500 dark:text-gray-400'}`}
+                >
+                  {expired
+                    ? 'លេខកូដបានផុតកំបន់ សូមស្នើសុំលេខកូដថ្មី។'
+                    : `លេខកូដនៅសល់ ${countdownLabel} នាទី`}
+                </p>
+              )}
+
               {step === 'code' ? (
                 <>
                   <input
@@ -257,11 +299,24 @@ export const ForgotPasswordPage = () => {
                   />
                   <button
                     type="submit"
-                    disabled={loading || otp.length !== 6}
+                    disabled={loading || otp.length !== 6 || expired}
                     className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3.5 rounded font-black text-sm uppercase tracking-widest transition-all shadow-lg shadow-blue-600/10 active:scale-95 disabled:opacity-50"
                   >
                     Continue
                   </button>
+                  {expired && (
+                    <button
+type="button"
+                    onClick={() => {
+                      setOtp('');
+                      setErrors({});
+                      handleLookup({ preventDefault: () => {} } as FormEvent);
+                    }}
+                      className="w-full text-center text-xs font-bold text-blue-600 hover:text-blue-700 transition"
+                    >
+                      Request a new code
+                    </button>
+                  )}
                 </>
               ) : (
                 <>
@@ -329,11 +384,25 @@ export const ForgotPasswordPage = () => {
 
                   <button
                     type="submit"
-                    disabled={loading}
+                    disabled={loading || expired}
                     className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3.5 rounded font-black text-sm uppercase tracking-widest transition-all shadow-lg shadow-blue-600/10 active:scale-95 disabled:opacity-50"
                   >
                     {loading ? 'Saving...' : 'Reset Password'}
                   </button>
+
+                  {expired && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setStep('lookup');
+                        setOtp('');
+                        setErrors({});
+                      }}
+                      className="w-full text-center text-xs font-bold text-blue-600 hover:text-blue-700 transition"
+                    >
+                      Request a new code
+                    </button>
+                  )}
                 </>
               )}
             </form>

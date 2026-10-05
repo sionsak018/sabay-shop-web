@@ -12,7 +12,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<User>;
   loginWithGoogle: (credential: string, login?: string) => Promise<User>;
   startRegistration: (data: RegisterData) => Promise<StartRegistrationResponse>;
-  completeRegistration: (data: { phone: string; otp: string }) => Promise<User>;
+  completeRegistration: (data: { phone: string; otp: string; verify_token: string }) => Promise<User>;
   logout: () => Promise<void>;
   updateUser: (user: User) => void;
 }
@@ -115,7 +115,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     return res.data;
   }, []);
 
-  const completeRegistration = useCallback(async (data: { phone: string; otp: string }) => {
+  const completeRegistration = useCallback(async (data: { phone: string; otp: string; verify_token: string }) => {
     const res = await authApi.verifyRegistration(data);
     const { user, token } = res.data;
     localStorage.setItem(CUSTOMER_TOKEN_KEY, token);

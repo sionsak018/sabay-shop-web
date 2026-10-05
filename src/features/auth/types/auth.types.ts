@@ -40,6 +40,8 @@ export interface LoginCredentials {
 export interface StartRegistrationResponse {
   method: 'telegram_link';
   link: string;
+  /** Only the browser that started this sign-up can finish it. */
+  verify_token: string;
   bot_username?: string;
   phone?: string;
   expires_in?: number;
@@ -47,9 +49,11 @@ export interface StartRegistrationResponse {
 }
 
 export interface ForgotPasswordResponse {
-  method: 'otp' | 'google' | 'telegram_link' | 'none';
+  method: 'otp' | 'google' | 'telegram_link' | 'telegram_not_linked' | 'none';
   channel?: 'telegram';
   link?: string;
+  /** Only the browser that started this reset can finish it. */
+  reset_token?: string;
   bot_username?: string;
   expires_in?: number;
   message?: string;

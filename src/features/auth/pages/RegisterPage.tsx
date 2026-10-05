@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
+import { useOtpCountdown } from '../hooks/useOtpCountdown';
 import { isConsoleUser } from '../utils/roles';
 import { GoogleSignInButton } from '../components/GoogleSignInButton';
 import { isGoogleSignInEnabled } from '../utils/google';
@@ -26,6 +27,10 @@ export const RegisterPage = () => {
   const [botUsername, setBotUsername] = useState('');
   const [maskedPhone, setMaskedPhone] = useState('');
   const [otp, setOtp] = useState('');
+  // Held from /register/start so only this browser can finish the sign-up.
+  const [verifyToken, setVerifyToken] = useState('');
+  const [otpSeconds, setOtpSeconds] = useState<number | null>(null);
+  const { remaining, expired, label: countdownLabel } = useOtpCountdown(otpSeconds);
   const { startRegistration, completeRegistration, loginWithGoogle, logout } = useAuth();
   const { showAlert } = useAlert();
   const navigate = useNavigate();
@@ -85,6 +90,8 @@ export const RegisterPage = () => {
       setTelegramLink(res.link || '');
       setBotUsername(res.bot_username || '');
       setMaskedPhone(res.phone || '');
+      setVerifyToken(res.verify_token || '');
+      setOtpSeconds(res.expires_in ?? null);
       setStep('verify');
       window.open(res.link, '_blank', 'noopener');
     } catch (err: any) {
@@ -112,11 +119,20 @@ export const RegisterPage = () => {
       return;
     }
 
+    if (expired) {
+      setErrors({ otp: 'លេខកូដបានផុតកំបន់ សូមស្នើសុំលេខកូដថ្មី។' });
+      return;
+    }
+
     setErrors({});
     setLoading(true);
 
     try {
-      const account = await completeRegistration({ phone: formData.phone, otp: otp.trim() });
+      const account = await completeRegistration({
+        phone: formData.phone,
+        otp: otp.trim(),
+        verify_token: verifyToken
+      });
 
       if (isConsoleUser(account)) {
         await logout();
@@ -311,6 +327,16 @@ export const RegisterPage = () => {
                 </div>
               )}
 
+              {countdownLabel && (
+                <p
+                  className={`text-center text-[11px] font-bold ${expired ? 'text-red-500' : 'text-gray-500 dark:text-gray-400'}`}
+                >
+                  {expired
+                    ? 'លេខកូដបានផុតកំបន់ សូមស្នើសុំលេខកូដថ្មី។'
+                    : `លេខកូដនៅសល់ ${countdownLabel} នាទី`}
+                </p>
+              )}
+
               <div>
                 <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase mb-2 tracking-wider">Verification Code</label>
                 <input
@@ -331,11 +357,25 @@ export const RegisterPage = () => {
 
               <button
                 type="submit"
-                disabled={loading}
+                disabled={loading || expired}
                 className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3.5 rounded font-black text-sm uppercase tracking-widest transition-all shadow-lg shadow-blue-600/10 active:scale-95 disabled:opacity-50"
               >
                 {loading ? 'Verifying...' : 'Verify & Create Account'}
               </button>
+
+              {expired && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setOtp('');
+                    setErrors({});
+                    setStep('details');
+                  }}
+                  className="w-full text-center text-xs font-bold text-blue-600 hover:text-blue-700 transition"
+                >
+                  Request a new code
+                </button>
+              )}
 
               <button
                 type="button"
